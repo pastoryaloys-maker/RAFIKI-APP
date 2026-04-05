@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAFIKI PRO - Continuous Connect</title>
+    <title>RAFIKI PRO - Offline Ready</title>
     
     <!-- PeerJS for P2P -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -23,7 +23,7 @@
             --text-light: #546e7a;
             --success: #00c853;
             --danger: #d50000;
-            --muted: #9e9e9e; /* Color for stopped mic */
+            --muted: #9e9e9e;
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
             --radius: 20px;
         }
@@ -236,6 +236,49 @@
             background-size: 10px auto;
         }
 
+        /* --- OFFLINE TOGGLE --- */
+        .offline-row {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .offline-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         /* --- CONTROLS --- */
         .controls-area {
             background: var(--surface);
@@ -418,6 +461,15 @@
                     <select id="langGuest"></select>
                 </div>
             </div>
+            
+            <!-- OFFLINE MODE TOGGLE -->
+            <div class="offline-row">
+                <span class="offline-label">Offline Dictionary (Basic)</span>
+                <label class="switch">
+                    <input type="checkbox" id="offlineToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
 
         <div class="chat-log" id="chatLog">
@@ -466,16 +518,31 @@
         { code: "cs-CZ", name: "Czech (Čeština)" }
     ];
 
-    // --- 2. STATE ---
+    // --- 2. OFFLINE DICTIONARY ---
+    const offlineDictionary = {
+        "hello": { "en": "Hello", "sw": "Jambo", "fr": "Bonjour", "es": "Hola", "de": "Hallo", "it": "Ciao", "pt": "Olá", "ru": "Привет", "zh": "你好", "ja": "こんにちは", "ko": "안녕하세요", "ar": "مرحبا", "hi": "नमस्ते", "tr": "Merhaba", "pl": "Cześć", "nl": "Hallo", "cs": "Ahoj" },
+        "hi": { "en": "Hi", "sw": "Habari", "fr": "Salut", "es": "Hola", "de": "Hallo", "it": "Ciao", "pt": "Oi", "ru": "Привет", "zh": "嗨", "ja": "やあ", "ko": "안녕", "ar": "مرحبا", "hi": "नमस्ते", "tr": "Selam", "pl": "Cześć", "nl": "Hoi", "cs": "Čau" },
+        "yes": { "en": "Yes", "sw": "Ndiyo", "fr": "Oui", "es": "Sí", "de": "Ja", "it": "Sì", "pt": "Sim", "ru": "Да", "zh": "是", "ja": "はい", "ko": "예", "ar": "نعم", "hi": "हाँ", "tr": "Evet", "pl": "Tak", "nl": "Ja", "cs": "Ano" },
+        "no": { "en": "No", "sw": "Hapana", "fr": "Non", "es": "No", "de": "Nein", "it": "No", "pt": "Não", "ru": "Нет", "zh": "不", "ja": "いいえ", "ko": "아니요", "ar": "لا", "hi": "नहीं", "tr": "Hayır", "pl": "Nie", "nl": "Nee", "cs": "Ne" },
+        "thanks": { "en": "Thanks", "sw": "Asante", "fr": "Merci", "es": "Gracias", "de": "Danke", "it": "Grazie", "pt": "Obrigado", "ru": "Спасибо", "zh": "谢谢", "ja": "ありがとう", "ko": "감사합니다", "ar": "شكرا", "hi": "धन्यवाद", "tr": "Teşekkürler", "pl": "Dziękuję", "nl": "Bedankt", "cs": "Děkuji" },
+        "thank you": { "en": "Thank you", "sw": "Asante sana", "fr": "Merci", "es": "Gracias", "de": "Vielen Dank", "it": "Grazie", "pt": "Obrigado", "ru": "Спасибо", "zh": "谢谢", "ja": "ありがとうございます", "ko": "감사합니다", "ar": "شكرا جزيلا", "hi": "धन्यवाद", "tr": "Teşekkür ederim", "pl": "Dziękuję", "nl": "Dank je", "cs": "Děkuji" },
+        "please": { "en": "Please", "sw": "Tafadhali", "fr": "S'il vous plaît", "es": "Por favor", "de": "Bitte", "it": "Per favore", "pt": "Por favor", "ru": "Пожалуйста", "zh": "请", "ja": "お願いします", "ko": "제발", "ar": "من فضلك", "hi": "कृपया", "tr": "Lütfen", "pl": "Proszę", "nl": "Alsjeblieft", "cs": "Prosím" },
+        "wait": { "en": "Wait", "sw": "Subiri", "fr": "Attendre", "es": "Espera", "de": "Warten", "it": "Aspetta", "pt": "Espere", "ru": "Ждать", "zh": "等一下", "ja": "待って", "ko": "기다려", "ar": "انتظر", "hi": "रुको", "tr": "Bekle", "pl": "Czekać", "nl": "Wacht", "cs": "Počkej" },
+        "help": { "en": "Help", "sw": "Msaada", "fr": "Aide", "es": "Ayuda", "de": "Hilfe", "it": "Aiuto", "pt": "Ajuda", "ru": "Помощь", "zh": "帮助", "ja": "助けて", "ko": "도와줘", "ar": "مساعدة", "hi": "मदद", "tr": "Yardım", "pl": "Pomoc", "nl": "Help", "cs": "Pomoc" },
+        "good morning": { "en": "Good morning", "sw": "Habari za asubuhi", "fr": "Bonjour", "es": "Buenos días", "de": "Guten Morgen", "it": "Buongiorno", "pt": "Bom dia", "ru": "Доброе утро", "zh": "早上好", "ja": "おはよう", "ko": "좋은 아침", "ar": "صباح الخير", "hi": "सुप्रभात", "tr": "Günaydın", "pl": "Dzień dobry", "nl": "Goedemorgen", "cs": "Dobré ráno" }
+    };
+
+    // --- 3. STATE ---
     let peer = null;
     let conn = null;
     let myRole = 'guest';
     let isRecording = false;
     let recognition = null;
     let html5QrCode = null;
-    let manuallyStopped = false; // Flag to track if user tapped to stop
+    let manuallyStopped = false;
+    let isOfflineMode = false;
 
-    // --- 3. DOM ---
+    // --- 4. DOM ---
     const langMeSelect = document.getElementById('langMe');
     const langGuestSelect = document.getElementById('langGuest');
     const micBtn = document.getElementById('micBtn');
@@ -483,10 +550,16 @@
     const statusBadge = document.getElementById('connStatus');
     const statusText = document.getElementById('statusText');
     const chatLog = document.getElementById('chatLog');
+    const offlineToggle = document.getElementById('offlineToggle');
 
-    // --- 4. INITIALIZATION ---
+    // Toggle Event
+    offlineToggle.addEventListener('change', (e) => {
+        isOfflineMode = e.target.checked;
+        addLog("System", isOfflineMode ? "Offline Dictionary Mode Enabled." : "Online API Mode Enabled.", "me");
+    });
+
+    // --- 5. INITIALIZATION ---
     function init() {
-        // Populate Languages
         languages.forEach(lang => {
             const opt1 = document.createElement('option');
             opt1.value = lang.code;
@@ -501,11 +574,10 @@
         langMeSelect.value = "en-US";
         langGuestSelect.value = "fr-FR";
 
-        // Speech Init - CONTINUOUS MODE
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
-            recognition.continuous = true; // KEY CHANGE: Keep listening forever
+            recognition.continuous = true;
             recognition.interimResults = true;
             
             recognition.onstart = () => {
@@ -519,16 +591,9 @@
             recognition.onend = () => {
                 isRecording = false;
                 micBtn.classList.remove('recording');
-                
-                // AUTO-RESTART LOGIC: 
-                // If the mic stopped but we didn't manually stop it (and we are connected), restart it.
                 if (!manuallyStopped && conn && conn.open) {
                     console.log("Mic stopped unexpectedly. Restarting...");
-                    try {
-                        recognition.start();
-                    } catch(e) {
-                        console.log("Restart failed (likely busy):", e);
-                    }
+                    try { recognition.start(); } catch(e) {}
                 } else {
                     liveText.textContent = manuallyStopped ? "Mic Stopped (Tap to Resume)" : "Tap to Speak";
                     if(manuallyStopped) micBtn.classList.add('stopped');
@@ -540,7 +605,6 @@
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         final += event.results[i][0].transcript;
-                        // Trigger translation only when a sentence is complete
                         if (final) handleVoiceInput(final);
                     } else {
                         interim += event.results[i][0].transcript;
@@ -551,24 +615,21 @@
             };
 
             recognition.onerror = (event) => {
-                console.error("Speech Error:", event.error);
-                // If it's a 'no-speech' error, we ignore it in continuous mode
-                if (event.error === 'no-speech') {
-                    // Do nothing, let it keep listening
-                } else if (event.error === 'not-allowed') {
-                    manuallyStopped = true; // Can't continue without permission
-                    liveText.textContent = "Microphone permission denied.";
+                if (event.error === 'no-speech') { } // Ignore in continuous
+                else if (event.error === 'not-allowed') {
+                    manuallyStopped = true;
+                    liveText.textContent = "Mic permission denied.";
                     micBtn.classList.remove('recording');
                     micBtn.classList.add('stopped');
                 }
             };
         } else {
-            alert("Voice not supported in this browser.");
+            alert("Voice not supported.");
             micBtn.classList.add('disabled');
         }
     }
 
-    // --- 5. MODAL & PEER LOGIC ---
+    // --- 6. MODAL & PEER LOGIC ---
     function showStep(step) {
         document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
         if (step === '1') {
@@ -587,52 +648,31 @@
     function initPeer() {
         const id = 'rafiki-' + Math.random().toString(36).substr(2, 9);
         peer = new Peer(id, { debug: 1 });
-
         peer.on('open', (id) => {
             document.getElementById('myPeerId').textContent = id;
-            // Generate QR Code
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById("qrcode"), {
-                text: id,
-                width: 180,
-                height: 180,
-                colorDark : "#004d40",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
+                text: id, width: 180, height: 180,
+                colorDark : "#004d40", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
             });
         });
-
-        peer.on('connection', (c) => {
-            conn = c;
-            setupConnection();
-        });
-
-        peer.on('error', (err) => {
-            console.error(err);
-            alert("Connection Error: " + err.type);
-        });
+        peer.on('connection', (c) => { conn = c; setupConnection(); });
+        peer.on('error', (err) => { console.error(err); alert("Connection Error: " + err.type); });
     }
 
     function connectToHost(idInput = null) {
         const hostId = idInput || document.getElementById('hostIdInput').value.trim();
         if (!hostId) return alert("Please enter a valid ID!");
-
         if (!peer) {
             const myId = 'rafiki-guest-' + Math.random().toString(36).substr(2, 9);
             peer = new Peer(myId, { debug: 1 });
-            peer.on('open', () => {
-                performConnect(hostId);
-            });
-        } else {
-            performConnect(hostId);
-        }
+            peer.on('open', () => performConnect(hostId));
+        } else { performConnect(hostId); }
     }
 
     function performConnect(hostId) {
         conn = peer.connect(hostId);
-        conn.on('open', () => {
-            setupConnection();
-        });
+        conn.on('open', () => setupConnection());
         conn.on('error', (err) => alert("Could not connect to Host."));
     }
 
@@ -642,108 +682,59 @@
         document.getElementById('setupModal').classList.remove('active');
         micBtn.classList.remove('disabled');
         micBtn.disabled = false;
-        
-        // Clear log and add success message
         chatLog.innerHTML = '';
         addLog("System", "Connected. Mic is ALWAYS ON. Tap mic button to Mute/Unmute.", "me");
 
-        // --- AUTO START MIC FOREVER ---
-        // Wait a brief moment then start continuous listening
         setTimeout(() => {
             manuallyStopped = false;
-            try {
-                if (recognition) {
-                    recognition.lang = langMeSelect.value;
-                    recognition.start();
-                }
-            } catch (e) {
-                console.log("Auto-mic blocked");
-                liveText.textContent = "Tap mic to start";
-            }
+            try { if (recognition) { recognition.lang = langMeSelect.value; recognition.start(); } } 
+            catch (e) { console.log("Auto-mic blocked"); liveText.textContent = "Tap mic to start"; }
         }, 600);
     }
 
     function finishSetup() {
-        if (myRole === 'host') {
-             document.getElementById('setupModal').classList.remove('active');
-        }
+        if (myRole === 'host') document.getElementById('setupModal').classList.remove('active');
     }
 
-    // --- 6. COPY ID ---
     function copyId() {
         const idText = document.getElementById('myPeerId').textContent;
         if (!idText || idText === "Generating ID...") return;
         const textArea = document.createElement("textarea");
         textArea.value = idText;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) alert("ID Copied to Clipboard!");
-        } catch (err) { alert("Copy failed"); }
+        textArea.style.position = "fixed"; textArea.style.left = "-9999px";
+        document.body.appendChild(textArea); textArea.select();
+        try { const successful = document.execCommand('copy'); if (successful) alert("ID Copied to Clipboard!"); } catch (err) { alert("Copy failed"); }
         document.body.removeChild(textArea);
     }
 
-    // --- 7. QR SCANNER LOGIC ---
     function startScanner() {
         document.getElementById('scanOverlay').classList.add('active');
         html5QrCode = new Html5Qrcode("qr-reader");
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         html5QrCode.start({ facingMode: "environment" }, config, 
             (decodedText, decodedResult) => {
-                stopScanner();
-                document.getElementById('hostIdInput').value = decodedText;
-                connectToHost(decodedText);
+                stopScanner(); document.getElementById('hostIdInput').value = decodedText; connectToHost(decodedText);
             }, (errorMessage) => {}
         ).catch(err => { alert("Camera error: " + err); stopScanner(); });
     }
 
     function stopScanner() {
         if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                document.getElementById('scanOverlay').classList.remove('active');
-            }).catch(err => console.log(err));
-        } else {
-            document.getElementById('scanOverlay').classList.remove('active');
-        }
+            html5QrCode.stop().then(() => { html5QrCode.clear(); document.getElementById('scanOverlay').classList.remove('active'); }).catch(err => console.log(err));
+        } else { document.getElementById('scanOverlay').classList.remove('active'); }
     }
 
-    // --- 8. MANUAL TOGGLE MIC (MUTE/UNMUTE) ---
     micBtn.addEventListener('click', () => {
-        if (!conn || !conn.open) {
-            alert("Please connect first!");
-            return;
-        }
-
-        // Force cancel any audio stack
+        if (!conn || !conn.open) { alert("Please connect first!"); return; }
         window.speechSynthesis.cancel();
-
         if (isRecording) {
-            // User wants to STOP (Mute)
-            manuallyStopped = true;
-            try {
-                recognition.stop();
-            } catch (e) {}
-            // UI update happens in onend
+            manuallyStopped = true; try { recognition.stop(); } catch (e) {}
         } else {
-            // User wants to START (Unmute)
             manuallyStopped = false;
-            try {
-                recognition.lang = langMeSelect.value;
-                recognition.start();
-            } catch (e) {
-                console.log("Start failed", e);
-                // Force reset
+            try { recognition.lang = langMeSelect.value; recognition.start(); } 
+            catch (e) {
                 try { recognition.stop(); } catch(stErr) {}
-                setTimeout(() => {
-                    try {
-                        recognition.lang = langMeSelect.value;
-                        recognition.start();
-                    } catch(retryErr) {}
-                }, 100);
+                setTimeout(() => { try { recognition.lang = langMeSelect.value; recognition.start(); } catch(retryErr) {} }, 100);
             }
         }
     });
@@ -752,22 +743,26 @@
         const sourceLang = langMeSelect.value;
         const targetLang = langGuestSelect.value;
         const translation = await translateText(text, sourceLang, targetLang);
-        
         addLog("Me", text + " -> " + translation, "me");
-
-        if (conn && conn.open) {
-            conn.send({ type: 'translation', text: translation, lang: targetLang });
-        } else {
-            speak(translation, targetLang);
-        }
-        
-        // Reset live text if we aren't hearing interim results
-        if (liveText.textContent.includes("Translating")) {
-             liveText.textContent = "Listening...";
-        }
+        if (conn && conn.open) { conn.send({ type: 'translation', text: translation, lang: targetLang }); } else { speak(translation, targetLang); }
+        if (liveText.textContent.includes("Translating")) liveText.textContent = "Listening...";
     }
 
     async function translateText(text, from, to) {
+        // OFFLINE MODE LOGIC
+        if (isOfflineMode) {
+            const sCode = from.split('-')[0];
+            const tCode = to.split('-')[0];
+            const cleanText = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+            
+            if (offlineDictionary[cleanText] && offlineDictionary[cleanText][tCode]) {
+                return offlineDictionary[cleanText][tCode];
+            } else {
+                return text + " (No Offline Trans)";
+            }
+        }
+
+        // ONLINE MODE LOGIC
         const sCode = from.split('-')[0];
         const tCode = to.split('-')[0];
         if (sCode === tCode) return text;
@@ -807,8 +802,7 @@
                 statusBadge.classList.remove('connected');
                 statusText.textContent = "Disconnected";
                 micBtn.classList.add('disabled');
-                manuallyStopped = true; // Stop listening when disconnected
-                try { recognition.stop(); } catch(e){}
+                manuallyStopped = true; try { recognition.stop(); } catch(e){}
                 alert("Partner disconnected.");
             });
         }
