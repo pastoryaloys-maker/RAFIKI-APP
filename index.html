@@ -500,16 +500,21 @@
             recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = true;
+            
             recognition.onstart = () => {
                 isRecording = true;
                 micBtn.classList.add('recording');
                 liveText.textContent = "Listening...";
             };
+            
             recognition.onend = () => {
                 isRecording = false;
                 micBtn.classList.remove('recording');
-                if (liveText.textContent === "Listening...") liveText.textContent = "Tap to Speak";
+                if (liveText.textContent === "Listening...") {
+                    liveText.textContent = "Tap to Speak";
+                }
             };
+
             recognition.onresult = (event) => {
                 let interim = '', final = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -519,8 +524,25 @@
                 if (interim) liveText.textContent = interim;
                 if (final) handleVoiceInput(final);
             };
+
+            // Error Handling to prevent Stacking
+            recognition.onerror = (event) => {
+                console.error("Speech Error:", event.error);
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                
+                if (event.error === 'not-allowed') {
+                    liveText.textContent = "Microphone permission denied.";
+                } else if (event.error === 'no-speech') {
+                    // Ignore no-speech, just reset
+                    liveText.textContent = "Tap to Speak";
+                } else {
+                    liveText.textContent = "Error: " + event.error;
+                }
+            };
         } else {
             alert("Voice not supported in this browser.");
+            micBtn.classList.add('disabled');
         }
     }
 
@@ -601,7 +623,21 @@
         
         // Clear log and add success message
         chatLog.innerHTML = '';
-        addLog("System", "Secure connection established.", "me");
+        addLog("System", "Secure connection established. Mic starting...", "me");
+
+        // --- NEW: AUTO START MIC ---
+        // Wait a moment for UI to settle, then try to start mic automatically
+        setTimeout(() => {
+            try {
+                if (!isRecording && recognition) {
+                    recognition.lang = langMeSelect.value;
+                    recognition.start();
+                }
+            } catch (e) {
+                console.log("Auto-mic blocked by browser (needs user tap)");
+                liveText.textContent = "Tap mic to speak";
+            }
+        }, 600);
     }
 
     function finishSetup() {
@@ -611,12 +647,44 @@
         }
     }
 
+    // --- 6. ROBUST COPY ID FUNCTION (FIXED) ---
     function copyId() {
-        const id = document.getElementById('myPeerId').textContent;
-        navigator.clipboard.writeText(id).then(() => alert("ID Copied!"));
+        const idText = document.getElementById('myPeerId').textContent;
+        
+        if (!idText || idText === "Generating ID...") {
+            alert("ID not ready yet.");
+            return;
+        }
+
+        // Create a temporary text area to select and copy text
+        const textArea = document.createElement("textarea");
+        textArea.value = idText;
+        
+        // Ensure textarea is not visible to user
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        
+        // Select and copy
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                alert("ID Copied to Clipboard!");
+            } else {
+                alert("Unable to copy ID");
+            }
+        } catch (err) {
+            console.error('Copy failed', err);
+            alert("Copy failed. Please select the ID manually.");
+        }
+        
+        // Cleanup
+        document.body.removeChild(textArea);
     }
 
-    // --- 6. QR SCANNER LOGIC ---
+    // --- 7. QR SCANNER LOGIC ---
     function startScanner() {
         document.getElementById('scanOverlay').classList.add('active');
         
@@ -650,16 +718,49 @@
         }
     }
 
-    // --- 7. MAIN APP LOGIC ---
+    // --- 8. ROBUST MIC LOGIC (MAINTAINED) ---
     micBtn.addEventListener('click', () => {
         if (!conn || !conn.open) {
             alert("Please connect first!");
             return;
         }
-        if (isRecording) recognition.stop();
-        else {
-            recognition.lang = langMeSelect.value;
-            recognition.start();
+
+        // 1. Force cancel any previous speech synthesis (Fixes audio stacking)
+        window.speechSynthesis.cancel();
+
+        if (isRecording) {
+            // Stop Logic
+            try {
+                recognition.stop();
+            } catch (e) {
+                console.log("Stop error ignored");
+            }
+            return;
+        }
+
+        // Start Logic - With Force Reset
+        try {
+            // Ensure clean state
+            if (recognition) {
+                recognition.lang = langMeSelect.value;
+                recognition.start();
+            }
+        } catch (e) {
+            console.error("Mic start failed, resetting...", e);
+            // If it fails (likely 'already started'), force stop and retry
+            try {
+                recognition.stop();
+            } catch (stopErr) {}
+            
+            // Small delay to allow browser to process 'stop'
+            setTimeout(() => {
+                try {
+                    recognition.lang = langMeSelect.value;
+                    recognition.start();
+                } catch (retryErr) {
+                    liveText.textContent = "Mic busy. Tap again.";
+                }
+            }, 100);
         }
     });
 
@@ -692,7 +793,7 @@
 
     function speak(text, lang) {
         if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
+        window.speechSynthesis.cancel(); // Clear stack before speaking
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = lang;
         utter.rate = 0.9;
