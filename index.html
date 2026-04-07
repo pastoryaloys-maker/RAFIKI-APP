@@ -4,11 +4,1021 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAFIKI PRO</title>
+    
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    ...
-    <!-- ENTIRE CONTENT OF YOUR rafiki-pro (1).html FILE AS GIVEN ABOVE -->
-    ...
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+        :root {
+            --primary: #004d40;
+            --primary-light: #00796b;
+            --primary-glow: rgba(0, 77, 64, 0.25);
+            --accent: #ffab00;
+            --accent-glow: rgba(255, 171, 0, 0.3);
+            --danger: #d50000;
+            --danger-glow: rgba(213, 0, 0, 0.3);
+            --muted-color: #78909c;
+            --success: #00c853;
+            --bg: #eef1f4;
+            --surface: #ffffff;
+            --surface-2: #f7f9fb;
+            --text-main: #1a2530;
+            --text-light: #5a7184;
+            --border: rgba(0,0,0,0.07);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 6px 24px rgba(0,0,0,0.09);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+            --radius: 20px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ======= HEADER ======= */
+        header {
+            background: var(--surface);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .brand-text { 
+            font-weight: 800; 
+            font-size: 1.35rem; 
+            color: var(--primary); 
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+        .brand-text span { color: var(--accent); }
+
+        .status-badge {
+            font-size: 0.72rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--surface-2);
+            color: var(--text-light);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            letter-spacing: 0.3px;
+            border: 1px solid var(--border);
+            transition: all 0.4s;
+        }
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; transition: 0.4s; }
+        .status-badge.connected { background: #e6f7ef; color: #00874a; border-color: #b2e6cb; }
+        .status-badge.connected .dot { background: var(--success); box-shadow: 0 0 7px var(--success); }
+
+        /* ======= MAIN ======= */
+        main { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 16px 16px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ======= CARD ======= */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        /* ======= LANG GRID ======= */
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .lang-group label { 
+            display: block; 
+            font-size: 0.68rem; 
+            font-weight: 700; 
+            color: var(--text-light); 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px;
+            margin-bottom: 7px; 
+        }
+        select {
+            width: 100%;
+            padding: 11px 32px 11px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-2);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            font-weight: 500;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300796b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 9px auto;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        select:focus { border-color: var(--primary-light); }
+
+        .offline-row {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .offline-label { font-size: 0.82rem; color: var(--text-light); font-weight: 600; }
+        .switch { position: relative; display: inline-block; width: 42px; height: 23px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top:0; left:0; right:0; bottom:0; background: #d0d5dd; border-radius: 23px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+        input:checked + .slider { background: var(--primary-light); }
+        input:checked + .slider:before { transform: translateX(19px); }
+
+        /* ======= CHAT LOG ======= */
+        .chat-log { display: flex; flex-direction: column; gap: 12px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-light);
+        }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
+        .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+        .log-item { display: flex; flex-direction: column; max-width: 82%; }
+        .log-item.me { align-self: flex-end; align-items: flex-end; }
+        .log-item.guest { align-self: flex-start; align-items: flex-start; }
+        .log-item.system { align-self: center; align-items: center; max-width: 100%; }
+
+        .bubble {
+            padding: 11px 16px;
+            border-radius: 18px;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+        .me .bubble { background: var(--primary); color: white; border-bottom-right-radius: 5px; }
+        .guest .bubble { background: #e8edf0; color: var(--text-main); border-bottom-left-radius: 5px; }
+        .system .bubble { 
+            background: #fff8e1; 
+            color: #7a5800; 
+            font-size: 0.78rem; 
+            border-radius: 10px; 
+            padding: 7px 14px;
+            border: 1px solid #ffe082;
+        }
+        .meta { font-size: 0.68rem; color: #a0aab4; margin-top: 4px; font-weight: 500; }
+
+        /* ======= CONTROLS ======= */
+        .controls-area {
+            background: var(--surface);
+            padding: 20px 20px 28px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        /* ---- Status Label ---- */
+        .mic-status-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            letter-spacing: 0.2px;
+            transition: color 0.3s;
+            min-height: 18px;
+        }
+        .mic-status-label.listening { color: var(--primary-light); }
+        .mic-status-label.muted { color: var(--accent); }
+
+        /* ---- Mic Controls Row ---- */
+        .mic-controls {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        /* ---- Main Mic Button ---- */
+        .mic-btn-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mic-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.4s;
+            pointer-events: none;
+        }
+
+        .mic-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: none;
+            background: #d0d7de;
+            color: #6b7b8a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 1;
+        }
+        .mic-btn:active { transform: scale(0.92) !important; }
+
+        /* State: IDLE (not connected) */
+        .mic-btn.disabled { background: #e4e8ec; color: #b0bec5; cursor: not-allowed; }
+        .mic-btn.disabled:active { transform: none !important; }
+
+        /* State: READY (connected, mic off) */
+        .mic-btn.ready { 
+            background: var(--surface-2); 
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+        .mic-btn.ready:hover { background: var(--primary); color: white; }
+
+        /* State: LISTENING (mic on, capturing) */
+        .mic-btn.listening { 
+            background: var(--primary); 
+            color: white;
+            box-shadow: 0 6px 24px var(--primary-glow);
+            transform: scale(1.05);
+        }
+        .mic-btn.listening + .mic-ring { 
+            border-color: var(--primary); 
+            animation: ring-pulse 2s infinite;
+        }
+
+        /* State: MUTED */
+        .mic-btn.muted { 
+            background: var(--accent); 
+            color: white;
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        /* ---- Mute Side Button ---- */
+        .mute-side-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: var(--shadow-sm);
+        }
+        .mute-side-btn:active { transform: scale(0.9); }
+        .mute-side-btn.active-mute { 
+            background: var(--accent); 
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+        .mute-side-btn.hidden-btn { opacity: 0; pointer-events: none; }
+
+        /* Live text */
+        .live-text {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-style: italic;
+            min-height: 18px;
+            transition: opacity 0.3s;
+        }
+
+        /* ======= ANIMATIONS ======= */
+        @keyframes ring-pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            70% { transform: scale(1.45); opacity: 0; }
+            100% { transform: scale(1.45); opacity: 0; }
+        }
+
+        /* ======= MODAL ======= */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10,18,28,0.88);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-content {
+            background: var(--surface);
+            width: 100%;
+            max-width: 390px;
+            border-radius: 26px;
+            padding: 28px 26px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            max-height: 92dvh;
+            overflow-y: auto;
+        }
+
+        .modal-logo { margin-bottom: 22px; }
+        .modal-title { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; letter-spacing: -0.3px; }
+        .modal-desc { color: var(--text-light); font-size: 0.88rem; margin-bottom: 24px; line-height: 1.6; }
+
+        .role-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 15px 18px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .role-btn:active { transform: scale(0.98); }
+        .role-btn .role-icon { font-size: 1.4rem; }
+        .role-btn .role-info small { display: block; font-size: 0.72rem; color: var(--text-light); font-weight: 500; margin-top: 1px; }
+        .role-btn.primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 18px var(--primary-glow); }
+        .role-btn.primary small { color: rgba(255,255,255,0.65); }
+        .role-btn.accent { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 18px var(--accent-glow); }
+        .role-btn.accent small { color: rgba(255,255,255,0.7); }
+        .role-btn:not(.primary):not(.accent):hover { border-color: var(--primary); }
+
+        .id-display {
+            background: var(--surface-2);
+            padding: 14px;
+            border-radius: 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin: 14px 0;
+            border: 1.5px dashed #ccc;
+            word-break: break-all;
+            color: var(--primary);
+            user-select: all;
+        }
+
+        #qrcode { display: flex; justify-content: center; margin: 16px 0; padding: 12px; background: white; border: 1px solid #eee; border-radius: 14px; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            text-align: center;
+            background: var(--surface-2);
+            color: var(--text-main);
+        }
+        input[type="text"]:focus { border-color: var(--primary-light); }
+
+        .btn-small { 
+            padding: 10px 18px; 
+            border: 1.5px solid var(--primary); 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700; 
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+        .btn-small:hover { background: var(--primary); color: white; }
+        .btn-text { background: transparent; border: none; color: var(--text-light); text-decoration: underline; cursor: pointer; margin-top: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; }
+
+        /* QR Scan Overlay */
+        .scan-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .scan-overlay.active { display: flex; }
+        .scan-container { width: 90%; max-width: 380px; background: white; border-radius: 20px; padding: 10px; position: relative; }
+        .close-scan { position: absolute; top: -44px; right: 0; color: white; font-size: 1.8rem; cursor: pointer; background: rgba(255,255,255,0.15); width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; }
+        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; }
+
+        .hidden { display: none !important; }
+
+        /* Tooltip hint */
+        .hint-pills {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hint-pill {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SETUP MODAL -->
+    <div id="setupModal" class="modal-overlay active">
+        
+        <!-- Step 1: Role -->
+        <div class="modal-content" id="step1">
+            <div class="modal-logo">
+                <svg width="180" height="52" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="46" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
+                    <text x="147" y="46" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="40" fill="#ffab00" letter-spacing="-1">pro</text>
+                    <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
+                </svg>
+            </div>
+            <p class="modal-desc">Live conversation translator.<br>Choose a role to get started.</p>
+            <button class="role-btn primary" onclick="showStep('host')">
+                <span class="role-icon">🟢</span>
+                <span class="role-info">Start as Host <small>Generate QR code &amp; wait for guest</small></span>
+            </button>
+            <button class="role-btn accent" onclick="showStep('guest')">
+                <span class="role-icon">🟠</span>
+                <span class="role-info">Join as Guest <small>Scan QR code or enter Host ID</small></span>
+            </button>
+        </div>
+
+        <!-- Step 2: Host -->
+        <div class="modal-content hidden" id="stepHost">
+            <div class="modal-title">Your Connection Code</div>
+            <p class="modal-desc">Share this QR Code or ID with the guest. Wait for them to connect.</p>
+            <div id="qrcode"></div>
+            <div class="id-display" id="myPeerId">Generating...</div>
+            <button class="btn-small" onclick="copyId()">Copy ID</button>
+            <br><br>
+            <button class="role-btn primary" onclick="finishSetup()">
+                <span class="role-icon">✓</span>
+                <span class="role-info">Start Chat <small>Mic stays OFF until you tap it</small></span>
+            </button>
+            <button class="btn-text" onclick="showStep('1')">← Back</button>
+        </div>
+
+        <!-- Step 3: Guest -->
+        <div class="modal-content hidden" id="stepGuest">
+            <div class="modal-title">Join a Session</div>
+            <p class="modal-desc">Scan the Host's QR Code or enter their ID manually.</p>
+            <button class="role-btn accent" onclick="startScanner()" style="border-style:dashed; background: rgba(255,171,0,0.08);">
+                <span class="role-icon">📸</span>
+                <span class="role-info">Scan QR Code <small>Point camera at Host's screen</small></span>
+            </button>
+            <div style="margin: 12px 0; font-weight: 700; color: #bbb; font-size: 0.75rem; letter-spacing: 1px;">— OR —</div>
+            <input type="text" id="hostIdInput" placeholder="Paste or type Host ID">
+            <button class="role-btn primary" onclick="connectToHost()">
+                <span class="role-icon">🔗</span>
+                <span class="role-info">Connect via ID</span>
+            </button>
+            <button class="btn-text" onclick="showStep('1')">← Back</button>
+        </div>
+    </div>
+
+    <!-- SCANNER OVERLAY -->
+    <div id="scanOverlay" class="scan-overlay">
+        <button class="close-scan" onclick="stopScanner()">×</button>
+        <div class="scan-container">
+            <div id="qr-reader"></div>
+        </div>
+        <p style="color:rgba(255,255,255,0.7); margin-top:18px; font-size:0.85rem; font-family:'DM Sans',sans-serif;">Point camera at the Host's QR Code</p>
+    </div>
+
+    <!-- APP HEADER -->
+    <header>
+        <div class="brand-text">RAFIKI<span>pro</span></div>
+        <div class="status-badge" id="connStatus">
+            <div class="dot"></div>
+            <span id="statusText">Offline</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- LANG CARD -->
+        <div class="card">
+            <div class="lang-grid">
+                <div class="lang-group">
+                    <label>My Language</label>
+                    <select id="langMe"></select>
+                </div>
+                <div class="lang-group">
+                    <label>Their Language</label>
+                    <select id="langGuest"></select>
+                </div>
+            </div>
+            <div class="offline-row">
+                <span class="offline-label">📖 Offline Dictionary</span>
+                <label class="switch">
+                    <input type="checkbox" id="offlineToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- CHAT LOG -->
+        <div class="chat-log" id="chatLog">
+            <div class="empty-state">
+                <div class="icon">💬</div>
+                <p>Connect with a partner to start translating.<br>Tap the mic when you want to speak.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- CONTROLS -->
+    <div class="controls-area">
+        <!-- Live transcript -->
+        <div class="live-text" id="liveText"></div>
+
+        <!-- Mic controls -->
+        <div class="mic-controls">
+
+            <!-- Mute toggle (left side) -->
+            <button class="mute-side-btn hidden-btn" id="muteBtn" title="Mute / Unmute">
+                <!-- Mute icon (shown when listening) -->
+                <svg id="muteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+            </button>
+
+            <!-- Main mic button -->
+            <div class="mic-btn-wrap">
+                <button id="micBtn" class="mic-btn disabled" title="Tap to speak">
+                    <!-- Mic ON icon -->
+                    <svg id="micOnIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+                <div class="mic-ring" id="micRing"></div>
+            </div>
+
+            <!-- Placeholder (right side for balance) -->
+            <div style="width:48px; height:48px;"></div>
+        </div>
+
+        <!-- State hint pills -->
+        <div class="hint-pills" id="hintPills">
+            <div class="hint-pill">🔇 Tap mic to start</div>
+        </div>
+    </div>
+
+<script>
+// ==========================================
+// 1. LANGUAGE LIST
+// ==========================================
+const languages = [
+    { code: "en-US", name: "English (US)" }, { code: "en-GB", name: "English (UK)" },
+    { code: "sw-KE", name: "Swahili" }, { code: "fr-FR", name: "French" },
+    { code: "es-ES", name: "Spanish" }, { code: "de-DE", name: "German" },
+    { code: "it-IT", name: "Italian" }, { code: "pt-PT", name: "Portuguese" },
+    { code: "ru-RU", name: "Russian" }, { code: "zh-CN", name: "Chinese" },
+    { code: "ja-JP", name: "Japanese" }, { code: "ko-KR", name: "Korean" },
+    { code: "ar-SA", name: "Arabic" }, { code: "hi-IN", name: "Hindi" },
+    { code: "tr-TR", name: "Turkish" }, { code: "pl-PL", name: "Polish" },
+    { code: "nl-NL", name: "Dutch" }, { code: "cs-CZ", name: "Czech" }
+];
+
+// ==========================================
+// 2. OFFLINE DICTIONARY
+// ==========================================
+const offlineDictionary = {
+    "hello": { en:"Hello", sw:"Jambo", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo", cs:"Ahoj" },
+    "hi":    { en:"Hi", sw:"Habari", fr:"Salut", es:"Hola", de:"Hallo", it:"Ciao", pt:"Oi", ru:"Привет", zh:"嗨", ja:"やあ", ko:"안녕", ar:"مرحبا", hi:"नमस्ते", tr:"Selam", pl:"Cześć", nl:"Hoi", cs:"Čau" },
+    "yes":   { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja", cs:"Ano" },
+    "no":    { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee", cs:"Ne" },
+    "thanks":     { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt", cs:"Děkuji" },
+    "thank you":  { en:"Thank you", sw:"Asante sana", fr:"Merci", es:"Gracias", de:"Vielen Dank", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとうございます", ko:"감사합니다", ar:"شكرا جزيلا", hi:"धन्यवाद", tr:"Teşekkür ederim", pl:"Dziękuję", nl:"Dank je", cs:"Děkuji" },
+    "please":     { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft", cs:"Prosím" },
+    "wait":       { en:"Wait", sw:"Subiri", fr:"Attendre", es:"Espera", de:"Warten", it:"Aspetta", pt:"Espere", ru:"Ждать", zh:"等一下", ja:"待って", ko:"기다려", ar:"انتظر", hi:"रुको", tr:"Bekle", pl:"Czekać", nl:"Wacht", cs:"Počkej" },
+    "help":       { en:"Help", sw:"Msaada", fr:"Aide", es:"Ayuda", de:"Hilfe", it:"Aiuto", pt:"Ajuda", ru:"Помощь", zh:"帮助", ja:"助けて", ko:"도와줘", ar:"مساعدة", hi:"मदद", tr:"Yardım", pl:"Pomoc", nl:"Help", cs:"Pomoc" },
+    "good morning":{ en:"Good morning", sw:"Habari za asubuhi", fr:"Bonjour", es:"Buenos días", de:"Guten Morgen", it:"Buongiorno", pt:"Bom dia", ru:"Доброе утро", zh:"早上好", ja:"おはよう", ko:"좋은 아침", ar:"صباح الخير", hi:"सुप्रभात", tr:"Günaydın", pl:"Dzień dobry", nl:"Goedemorgen", cs:"Dobré ráno" },
+    "goodbye":    { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens", cs:"Sbohem" }
+};
+
+// ==========================================
+// 3. STATE
+// ==========================================
+let peer = null;
+let conn = null;
+let myRole = 'guest';
+let recognition = null;
+let html5QrCode = null;
+let isOfflineMode = false;
+
+// MIC STATES: 'off' | 'listening' | 'muted'
+let micState = 'off';
+let dataListenerAttached = false;
+
+// ==========================================
+// 4. DOM REFS
+// ==========================================
+const langMeSelect     = document.getElementById('langMe');
+const langGuestSelect  = document.getElementById('langGuest');
+const micBtn           = document.getElementById('micBtn');
+const muteBtn          = document.getElementById('muteBtn');
+const liveText         = document.getElementById('liveText');
+const statusBadge      = document.getElementById('connStatus');
+const statusText       = document.getElementById('statusText');
+const chatLog          = document.getElementById('chatLog');
+const offlineToggle    = document.getElementById('offlineToggle');
+const hintPills        = document.getElementById('hintPills');
+const micStatusLabel   = document.querySelector('.mic-status-label');
+
+offlineToggle.addEventListener('change', (e) => {
+    isOfflineMode = e.target.checked;
+    addLog("system", isOfflineMode ? "📖 Offline Dictionary mode ON" : "🌐 Online Translation mode ON", "system");
+});
+
+// ==========================================
+// 5. MIC STATE MACHINE
+// ==========================================
+function setMicState(state) {
+    micState = state;
+    micBtn.classList.remove('disabled', 'ready', 'listening', 'muted');
+
+    if (state === 'off') {
+        // Not connected
+        micBtn.classList.add('disabled');
+        micBtn.disabled = true;
+        muteBtn.classList.add('hidden-btn');
+        liveText.textContent = '';
+        hintPills.innerHTML = '<div class="hint-pill">🔇 Tap mic to start</div>';
+
+    } else if (state === 'ready') {
+        // Connected, mic not started yet
+        micBtn.classList.add('ready');
+        micBtn.disabled = false;
+        muteBtn.classList.add('hidden-btn');
+        liveText.textContent = '';
+        hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap to speak</div>';
+
+    } else if (state === 'listening') {
+        micBtn.classList.add('listening');
+        micBtn.disabled = false;
+        muteBtn.classList.remove('hidden-btn');
+        muteBtn.classList.remove('active-mute');
+        muteBtn.title = 'Mute microphone';
+        liveText.textContent = 'Listening...';
+        hintPills.innerHTML = '<div class="hint-pill">🟢 Mic ON</div><div class="hint-pill">Tap mic to stop · Side button to mute</div>';
+
+    } else if (state === 'muted') {
+        micBtn.classList.add('muted');
+        micBtn.disabled = false;
+        muteBtn.classList.remove('hidden-btn');
+        muteBtn.classList.add('active-mute');
+        muteBtn.title = 'Unmute microphone';
+        liveText.textContent = 'Muted — tap mic or unmute to continue';
+        hintPills.innerHTML = '<div class="hint-pill">🔇 Muted</div><div class="hint-pill">Tap mic to stop · Side button to unmute</div>';
+    }
+}
+
+// ==========================================
+// 6. SPEECH RECOGNITION SETUP
+// ==========================================
+function initSpeechRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        alert("Speech recognition not supported in this browser.");
+        return;
+    }
+    recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+        if (micState === 'listening') {
+            liveText.textContent = 'Listening...';
+        }
+    };
+
+    recognition.onend = () => {
+        // Only auto-restart if we are actively in 'listening' state
+        if (micState === 'listening' && conn && conn.open) {
+            try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e) {}
+        }
+    };
+
+    recognition.onresult = (event) => {
+        if (micState !== 'listening') return; // ignore if muted
+        let interim = '', final = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) final += event.results[i][0].transcript;
+            else interim += event.results[i][0].transcript;
+        }
+        if (interim) liveText.textContent = '🎤 ' + interim;
+        if (final) { liveText.textContent = 'Translating...'; handleVoiceInput(final); }
+    };
+
+    recognition.onerror = (event) => {
+        if (event.error === 'not-allowed') {
+            liveText.textContent = '⚠️ Mic permission denied.';
+            setMicState('ready');
+        }
+    };
+}
+
+// ==========================================
+// 7. MIC BUTTON — MAIN TOGGLE
+// Start listening ↔ Stop completely
+// ==========================================
+micBtn.addEventListener('click', () => {
+    if (!conn || !conn.open) return;
+
+    if (micState === 'ready') {
+        // Start listening
+        startListening();
+    } else if (micState === 'listening' || micState === 'muted') {
+        // Stop completely
+        stopListening();
+    }
+});
+
+// ==========================================
+// 8. MUTE BUTTON — MUTE / UNMUTE
+// Keeps the session alive but pauses capture
+// ==========================================
+muteBtn.addEventListener('click', () => {
+    if (!conn || !conn.open) return;
+
+    if (micState === 'listening') {
+        // Mute: stop recognition but stay in session
+        try { recognition.stop(); } catch(e) {}
+        setMicState('muted');
+        addLog("system", "🔇 You muted your mic to avoid echo.", "system");
+    } else if (micState === 'muted') {
+        // Unmute: restart recognition
+        startListening();
+        addLog("system", "🎙️ Mic unmuted.", "system");
+    }
+});
+
+function startListening() {
+    setMicState('listening');
+    window.speechSynthesis.cancel();
+    try {
+        recognition.lang = langMeSelect.value;
+        recognition.start();
+    } catch(e) {
+        try { recognition.stop(); } catch(e2) {}
+        setTimeout(() => {
+            try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e3) {}
+        }, 150);
+    }
+}
+
+function stopListening() {
+    try { recognition.stop(); } catch(e) {}
+    setMicState('ready');
+    liveText.textContent = '';
+}
+
+// ==========================================
+// 9. VOICE INPUT → TRANSLATE → SEND
+// ==========================================
+async function handleVoiceInput(text) {
+    const sourceLang = langMeSelect.value;
+    const targetLang = langGuestSelect.value;
+    const translation = await translateText(text, sourceLang, targetLang);
+    addLog(text + " → " + translation, "me");
+    if (conn && conn.open) {
+        conn.send({ type: 'translation', text: translation, lang: targetLang });
+    } else {
+        speak(translation, targetLang);
+    }
+    if (micState === 'listening') liveText.textContent = 'Listening...';
+}
+
+async function translateText(text, from, to) {
+    if (isOfflineMode) {
+        const tCode = to.split('-')[0];
+        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+        if (offlineDictionary[clean] && offlineDictionary[clean][tCode]) return offlineDictionary[clean][tCode];
+        return text + " (no offline translation)";
+    }
+    const sCode = from.split('-')[0], tCode = to.split('-')[0];
+    if (sCode === tCode) return text;
+    try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sCode}|${tCode}`);
+        const data = await res.json();
+        return data.responseData.translatedText;
+    } catch(e) { return text; }
+}
+
+function speak(text, lang) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang; u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+}
+
+function addLog(text, type) {
+    // Remove empty state if present
+    const emptyState = chatLog.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+
+    const div = document.createElement('div');
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    div.className = `log-item ${type}`;
+
+    if (type === 'system') {
+        div.innerHTML = `<div class="bubble">${text}</div>`;
+    } else {
+        const sender = type === 'me' ? 'You' : 'Partner';
+        div.innerHTML = `<div class="bubble">${text}</div><div class="meta">${sender} · ${time}</div>`;
+    }
+    chatLog.appendChild(div);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// ==========================================
+// 10. PEER / CONNECTION LOGIC
+// ==========================================
+function showStep(step) {
+    document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
+    if (step === '1') {
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('setupModal').classList.add('active');
+    } else if (step === 'host') {
+        myRole = 'host';
+        document.getElementById('stepHost').classList.remove('hidden');
+        initPeer();
+    } else if (step === 'guest') {
+        myRole = 'guest';
+        document.getElementById('stepGuest').classList.remove('hidden');
+    }
+}
+
+function initPeer() {
+    const id = 'rafiki-' + Math.random().toString(36).substr(2, 9);
+    peer = new Peer(id, { debug: 1 });
+    peer.on('open', (id) => {
+        document.getElementById('myPeerId').textContent = id;
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), { text: id, width: 180, height: 180, colorDark: "#004d40", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+    });
+    peer.on('connection', (c) => { conn = c; conn.on('open', () => setupConnection()); });
+    peer.on('error', (err) => { console.error(err); alert("Connection Error: " + err.type); });
+}
+
+function connectToHost(idInput = null) {
+    const hostId = idInput || document.getElementById('hostIdInput').value.trim();
+    if (!hostId) return alert("Please enter a valid ID!");
+    if (!peer) {
+        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2, 9);
+        peer = new Peer(myId, { debug: 1 });
+        peer.on('open', () => performConnect(hostId));
+        peer.on('error', (err) => alert("Peer error: " + err.type));
+    } else { performConnect(hostId); }
+}
+
+function performConnect(hostId) {
+    conn = peer.connect(hostId);
+    conn.on('open', () => setupConnection());
+    conn.on('error', () => alert("Could not connect to Host. Check the ID and try again."));
+}
+
+function setupConnection() {
+    statusBadge.classList.add('connected');
+    statusText.textContent = 'Connected';
+    document.getElementById('setupModal').classList.remove('active');
+    chatLog.innerHTML = '';
+
+    // Attach data listener ONCE
+    if (!dataListenerAttached) {
+        conn.on('data', (data) => {
+            if (data.type === 'translation') {
+                speak(data.text, data.lang);
+                addLog('Partner: ' + data.text, 'guest');
+            }
+        });
+        conn.on('close', handleDisconnect);
+        conn.on('error', handleDisconnect);
+        dataListenerAttached = true;
+    }
+
+    // Mic starts in READY (off) state — user must tap to speak
+    setMicState('ready');
+    addLog("✅ Connected! Tap the mic button when you want to speak. Use the side button to mute (avoids echo when both mics are on).", "system");
+}
+
+function handleDisconnect() {
+    statusBadge.classList.remove('connected');
+    statusText.textContent = 'Disconnected';
+    try { recognition.stop(); } catch(e) {}
+    setMicState('off');
+    dataListenerAttached = false;
+    addLog("❌ Partner disconnected.", "system");
+}
+
+function finishSetup() {
+    if (myRole === 'host') document.getElementById('setupModal').classList.remove('active');
+}
+
+function copyId() {
+    const idText = document.getElementById('myPeerId').textContent;
+    if (!idText || idText === 'Generating...') return;
+    navigator.clipboard ? navigator.clipboard.writeText(idText).then(() => alert("ID Copied!")) : (() => {
+        const ta = document.createElement("textarea");
+        ta.value = idText; ta.style.position = "fixed"; ta.style.left = "-9999px";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); alert("ID Copied!"); } catch(e) { alert("Copy failed."); }
+        document.body.removeChild(ta);
+    })();
+}
+
+function startScanner() {
+    document.getElementById('scanOverlay').classList.add('active');
+    html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        (decoded) => { stopScanner(); document.getElementById('hostIdInput').value = decoded; connectToHost(decoded); },
+        () => {}
+    ).catch(err => { alert("Camera error: " + err); stopScanner(); });
+}
+
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => { html5QrCode.clear(); document.getElementById('scanOverlay').classList.remove('active'); }).catch(() => document.getElementById('scanOverlay').classList.remove('active'));
+    } else { document.getElementById('scanOverlay').classList.remove('active'); }
+}
+
+// ==========================================
+// 11. INIT
+// ==========================================
+function init() {
+    languages.forEach(lang => {
+        [langMeSelect, langGuestSelect].forEach(sel => {
+            const opt = document.createElement('option');
+            opt.value = lang.code; opt.textContent = lang.name;
+            sel.appendChild(opt);
+        });
+    });
+    langMeSelect.value = "en-US";
+    langGuestSelect.value = "sw-KE";
+
+    initSpeechRecognition();
+    setMicState('off');
+}
+
+init();
+</script>
+</body>
 </html>
