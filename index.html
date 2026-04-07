@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAFIKI PRO</title>
-    
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -15,12 +14,11 @@
         :root {
             --primary: #004d40;
             --primary-light: #00796b;
-            --primary-glow: rgba(0, 77, 64, 0.25);
+            --primary-glow: rgba(0,77,64,0.25);
             --accent: #ffab00;
-            --accent-glow: rgba(255, 171, 0, 0.3);
+            --accent-glow: rgba(255,171,0,0.3);
             --danger: #d50000;
-            --danger-glow: rgba(213, 0, 0, 0.3);
-            --muted-color: #78909c;
+            --danger-glow: rgba(213,0,0,0.3);
             --success: #00c853;
             --bg: #eef1f4;
             --surface: #ffffff;
@@ -32,6 +30,29 @@
             --shadow-md: 0 6px 24px rgba(0,0,0,0.09);
             --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
             --radius: 20px;
+            --bubble-fs: 14px;
+            --bubble-fw: 400;
+            --bubble-lh: 1.5;
+            --my-bubble-bg: #004d40;
+            --my-bubble-text: #ffffff;
+            --their-bubble-bg: #e8edf0;
+            --their-bubble-text: #1a2530;
+            --chat-font: 'DM Sans', sans-serif;
+            --bubble-radius: 18px;
+        }
+
+        body.dark {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-2: #21262d;
+            --text-main: #e6edf3;
+            --text-light: #8b949e;
+            --border: rgba(255,255,255,0.08);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 6px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+            --their-bubble-bg: #2d333b;
+            --their-bubble-text: #e6edf3;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
@@ -44,123 +65,81 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: background 0.3s, color 0.3s;
         }
 
-        /* ======= HEADER ======= */
+        /* HEADER */
         header {
             background: var(--surface);
-            padding: 14px 20px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
             z-index: 10;
             flex-shrink: 0;
+            transition: background 0.3s, border-color 0.3s;
         }
-
-        .brand-text { 
-            font-weight: 800; 
-            font-size: 1.35rem; 
-            color: var(--primary); 
-            letter-spacing: -0.5px;
-            line-height: 1;
-        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .brand-text { font-weight: 800; font-size: 1.28rem; color: var(--primary); letter-spacing: -0.5px; line-height: 1; }
         .brand-text span { color: var(--accent); }
+        .header-right { display: flex; align-items: center; gap: 7px; }
 
         .status-badge {
-            font-size: 0.72rem;
-            padding: 6px 12px;
-            border-radius: 20px;
-            background: var(--surface-2);
-            color: var(--text-light);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            letter-spacing: 0.3px;
-            border: 1px solid var(--border);
-            transition: all 0.4s;
+            font-size: 0.69rem; padding: 5px 10px; border-radius: 20px;
+            background: var(--surface-2); color: var(--text-light);
+            font-weight: 700; display: flex; align-items: center; gap: 6px;
+            border: 1px solid var(--border); transition: all 0.4s;
         }
         .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; transition: 0.4s; }
         .status-badge.connected { background: #e6f7ef; color: #00874a; border-color: #b2e6cb; }
+        body.dark .status-badge.connected { background: rgba(0,200,83,0.12); color: #4caf50; border-color: rgba(76,175,80,0.28); }
         .status-badge.connected .dot { background: var(--success); box-shadow: 0 0 7px var(--success); }
 
-        /* ======= MAIN ======= */
-        main { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 16px 16px 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--surface-2);
+            color: var(--text-light); display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: all 0.2s;
         }
+        .icon-btn:active { transform: scale(0.88); }
+        .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-        /* ======= CARD ======= */
+        /* MAIN */
+        main { flex: 1; overflow-y: auto; padding: 13px 13px 6px; display: flex; flex-direction: column; gap: 10px; }
+
         .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 18px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
+            background: var(--surface); border-radius: var(--radius); padding: 15px;
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+            transition: background 0.3s, border-color 0.3s;
         }
-
-        /* ======= LANG GRID ======= */
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .lang-group label { 
-            display: block; 
-            font-size: 0.68rem; 
-            font-weight: 700; 
-            color: var(--text-light); 
-            text-transform: uppercase; 
-            letter-spacing: 0.8px;
-            margin-bottom: 7px; 
-        }
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .lang-group label { display: block; font-size: 0.63rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
         select {
-            width: 100%;
-            padding: 11px 32px 11px 12px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            background: var(--surface-2);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem;
-            color: var(--text-main);
-            font-weight: 500;
-            appearance: none;
+            width: 100%; padding: 10px 28px 10px 10px; border: 1.5px solid var(--border); border-radius: 10px;
+            background: var(--surface-2); font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+            color: var(--text-main); font-weight: 500; appearance: none;
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300796b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px top 50%;
-            background-size: 9px auto;
-            cursor: pointer;
-            transition: border-color 0.2s;
+            background-repeat: no-repeat; background-position: right 8px top 50%; background-size: 8px auto;
+            cursor: pointer; transition: border-color 0.2s, background 0.3s, color 0.3s;
         }
         select:focus { border-color: var(--primary-light); }
+        .offline-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .offline-label { font-size: 0.79rem; color: var(--text-light); font-weight: 600; }
 
-        .offline-row {
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .offline-label { font-size: 0.82rem; color: var(--text-light); font-weight: 600; }
+        /* TOGGLE */
         .switch { position: relative; display: inline-block; width: 42px; height: 23px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top:0; left:0; right:0; bottom:0; background: #d0d5dd; border-radius: 23px; transition: .3s; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #d0d5dd; border-radius: 23px; transition: .3s; }
         .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
         input:checked + .slider { background: var(--primary-light); }
         input:checked + .slider:before { transform: translateX(19px); }
 
-        /* ======= CHAT LOG ======= */
-        .chat-log { display: flex; flex-direction: column; gap: 12px; }
-
-        .empty-state {
-            text-align: center;
-            padding: 30px 20px;
-            color: var(--text-light);
-        }
-        .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
-        .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+        /* CHAT */
+        .chat-log { display: flex; flex-direction: column; gap: 10px; }
+        .empty-state { text-align: center; padding: 26px 20px; color: var(--text-light); }
+        .empty-state .icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
+        .empty-state p { font-size: 0.82rem; line-height: 1.6; }
 
         .log-item { display: flex; flex-direction: column; max-width: 82%; }
         .log-item.me { align-self: flex-end; align-items: flex-end; }
@@ -168,594 +147,887 @@
         .log-item.system { align-self: center; align-items: center; max-width: 100%; }
 
         .bubble {
-            padding: 11px 16px;
-            border-radius: 18px;
-            font-size: 0.92rem;
-            line-height: 1.45;
+            padding: 10px 15px;
+            border-radius: var(--bubble-radius);
+            font-size: var(--bubble-fs);
+            font-weight: var(--bubble-fw);
+            line-height: var(--bubble-lh);
+            font-family: var(--chat-font);
+            transition: font-size 0.2s, border-radius 0.2s, font-weight 0.2s, line-height 0.2s;
         }
-        .me .bubble { background: var(--primary); color: white; border-bottom-right-radius: 5px; }
-        .guest .bubble { background: #e8edf0; color: var(--text-main); border-bottom-left-radius: 5px; }
-        .system .bubble { 
-            background: #fff8e1; 
-            color: #7a5800; 
-            font-size: 0.78rem; 
-            border-radius: 10px; 
-            padding: 7px 14px;
-            border: 1px solid #ffe082;
-        }
-        .meta { font-size: 0.68rem; color: #a0aab4; margin-top: 4px; font-weight: 500; }
+        .me .bubble { background: var(--my-bubble-bg); color: var(--my-bubble-text); }
+        .guest .bubble { background: var(--their-bubble-bg); color: var(--their-bubble-text); }
+        .system .bubble { background: #fff8e1; color: #7a5800; font-size: 0.75rem; border-radius: 10px; padding: 6px 13px; border: 1px solid #ffe082; }
+        body.dark .system .bubble { background: rgba(255,171,0,0.09); color: #ffd54f; border-color: rgba(255,171,0,0.22); }
+        .meta { font-size: 0.65rem; color: #a0aab4; margin-top: 3px; font-weight: 500; }
+        body.dark .meta { color: #484f58; }
 
-        /* ======= CONTROLS ======= */
+        /* CONTROLS */
         .controls-area {
-            background: var(--surface);
-            padding: 20px 20px 28px;
+            background: var(--surface); padding: 16px 20px 24px;
             border-top: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 14px;
-            flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center; gap: 11px;
+            flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
         }
-
-        /* ---- Status Label ---- */
-        .mic-status-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-light);
-            letter-spacing: 0.2px;
-            transition: color 0.3s;
-            min-height: 18px;
-        }
-        .mic-status-label.listening { color: var(--primary-light); }
-        .mic-status-label.muted { color: var(--accent); }
-
-        /* ---- Mic Controls Row ---- */
-        .mic-controls {
-            display: flex;
-            align-items: center;
-            gap: 22px;
-        }
-
-        /* ---- Main Mic Button ---- */
-        .mic-btn-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mic-ring {
-            position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            transition: all 0.4s;
-            pointer-events: none;
-        }
-
+        .live-text { font-size: 0.77rem; color: var(--text-light); font-style: italic; min-height: 18px; }
+        .mic-controls { display: flex; align-items: center; gap: 20px; }
+        .mic-btn-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+        .mic-ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid transparent; pointer-events: none; }
         .mic-btn {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            border: none;
-            background: #d0d7de;
-            color: #6b7b8a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            z-index: 1;
+            width: 68px; height: 68px; border-radius: 50%; border: none;
+            background: #d0d7de; color: #6b7b8a; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative; z-index: 1;
         }
-        .mic-btn:active { transform: scale(0.92) !important; }
-
-        /* State: IDLE (not connected) */
+        .mic-btn:active { transform: scale(0.9) !important; }
         .mic-btn.disabled { background: #e4e8ec; color: #b0bec5; cursor: not-allowed; }
         .mic-btn.disabled:active { transform: none !important; }
-
-        /* State: READY (connected, mic off) */
-        .mic-btn.ready { 
-            background: var(--surface-2); 
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            box-shadow: 0 4px 16px var(--primary-glow);
-        }
+        .mic-btn.ready { background: var(--surface-2); color: var(--primary); border: 2px solid var(--primary); box-shadow: 0 4px 16px var(--primary-glow); }
         .mic-btn.ready:hover { background: var(--primary); color: white; }
-
-        /* State: LISTENING (mic on, capturing) */
-        .mic-btn.listening { 
-            background: var(--primary); 
-            color: white;
-            box-shadow: 0 6px 24px var(--primary-glow);
-            transform: scale(1.05);
-        }
-        .mic-btn.listening + .mic-ring { 
-            border-color: var(--primary); 
-            animation: ring-pulse 2s infinite;
-        }
-
-        /* State: MUTED */
-        .mic-btn.muted { 
-            background: var(--accent); 
-            color: white;
-            box-shadow: 0 6px 20px var(--accent-glow);
-        }
-
-        /* ---- Mute Side Button ---- */
+        .mic-btn.listening { background: var(--primary); color: white; box-shadow: 0 6px 24px var(--primary-glow); transform: scale(1.05); }
+        .mic-btn.listening ~ .mic-ring { border-color: var(--primary); animation: ring-pulse 2s infinite; }
+        .mic-btn.muted { background: var(--accent); color: white; box-shadow: 0 6px 20px var(--accent-glow); }
         .mute-side-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 1.5px solid var(--border);
-            background: var(--surface-2);
-            color: var(--text-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.25s;
-            box-shadow: var(--shadow-sm);
+            width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--border);
+            background: var(--surface-2); color: var(--text-light); display: flex;
+            justify-content: center; align-items: center; cursor: pointer; transition: all 0.25s; box-shadow: var(--shadow-sm);
         }
-        .mute-side-btn:active { transform: scale(0.9); }
-        .mute-side-btn.active-mute { 
-            background: var(--accent); 
-            color: white;
-            border-color: var(--accent);
-            box-shadow: 0 4px 14px var(--accent-glow);
-        }
+        .mute-side-btn:active { transform: scale(0.88); }
+        .mute-side-btn.active-mute { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 14px var(--accent-glow); }
         .mute-side-btn.hidden-btn { opacity: 0; pointer-events: none; }
+        .hint-pills { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+        .hint-pill { background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 0.69rem; font-weight: 600; color: var(--text-light); }
 
-        /* Live text */
-        .live-text {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            font-style: italic;
-            min-height: 18px;
-            transition: opacity 0.3s;
+        @keyframes ring-pulse { 0% { transform: scale(1); opacity: 0.7; } 70% { transform: scale(1.45); opacity: 0; } 100% { transform: scale(1.45); opacity: 0; } }
+
+        /* ============================================================
+           SETTINGS DRAWER
+        ============================================================ */
+        .settings-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px); z-index: 90;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
+        .settings-backdrop.open { opacity: 1; pointer-events: all; }
 
-        /* ======= ANIMATIONS ======= */
-        @keyframes ring-pulse {
-            0% { transform: scale(1); opacity: 0.7; }
-            70% { transform: scale(1.45); opacity: 0; }
-            100% { transform: scale(1.45); opacity: 0; }
+        .settings-drawer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--surface); border-radius: 26px 26px 0 0;
+            z-index: 95; transform: translateY(100%);
+            transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+            max-height: 88dvh; display: flex; flex-direction: column;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
         }
+        .settings-drawer.open { transform: translateY(0); }
 
-        /* ======= MODAL ======= */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(10,18,28,0.88);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+        .drawer-handle { width: 38px; height: 4px; background: var(--border); border-radius: 4px; margin: 11px auto 0; flex-shrink: 0; }
+
+        .drawer-header {
+            padding: 13px 20px 11px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0;
         }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-
-        .modal-content {
-            background: var(--surface);
-            width: 100%;
-            max-width: 390px;
-            border-radius: 26px;
-            padding: 28px 26px;
-            text-align: center;
-            box-shadow: var(--shadow-lg);
-            max-height: 92dvh;
-            overflow-y: auto;
+        .drawer-title { font-size: 1.05rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.2px; }
+        .drawer-close {
+            width: 30px; height: 30px; border-radius: 50%; border: none;
+            background: var(--surface-2); color: var(--text-light); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;
         }
+        .drawer-close:hover { background: var(--danger); color: white; }
 
-        .modal-logo { margin-bottom: 22px; }
-        .modal-title { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; letter-spacing: -0.3px; }
-        .modal-desc { color: var(--text-light); font-size: 0.88rem; margin-bottom: 24px; line-height: 1.6; }
+        .drawer-body { overflow-y: auto; padding: 14px 20px 36px; display: flex; flex-direction: column; gap: 20px; }
 
-        .role-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 15px 18px;
-            border: 1.5px solid var(--border);
-            background: var(--surface-2);
-            border-radius: 16px;
-            margin-bottom: 10px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-main);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
+        .setting-section { display: flex; flex-direction: column; gap: 13px; }
+        .section-title { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--primary); padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+
+        .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; }
+        .setting-label { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .setting-label strong { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .setting-label small { font-size: 0.69rem; color: var(--text-light); }
+
+        .seg-control { display: flex; gap: 3px; background: var(--surface-2); border-radius: 10px; padding: 3px; border: 1px solid var(--border); }
+        .seg-btn {
+            flex: 1; padding: 7px 8px; border: none; border-radius: 7px;
+            background: transparent; color: var(--text-light);
+            font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 600;
+            cursor: pointer; transition: all 0.18s; white-space: nowrap;
         }
-        .role-btn:active { transform: scale(0.98); }
-        .role-btn .role-icon { font-size: 1.4rem; }
-        .role-btn .role-info small { display: block; font-size: 0.72rem; color: var(--text-light); font-weight: 500; margin-top: 1px; }
-        .role-btn.primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 18px var(--primary-glow); }
-        .role-btn.primary small { color: rgba(255,255,255,0.65); }
-        .role-btn.accent { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 18px var(--accent-glow); }
-        .role-btn.accent small { color: rgba(255,255,255,0.7); }
-        .role-btn:not(.primary):not(.accent):hover { border-color: var(--primary); }
+        .seg-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
+        body.dark .seg-btn.active { background: #0d1117; }
 
-        .id-display {
-            background: var(--surface-2);
-            padding: 14px;
-            border-radius: 12px;
-            font-family: 'DM Mono', monospace;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            margin: 14px 0;
-            border: 1.5px dashed #ccc;
-            word-break: break-all;
-            color: var(--primary);
-            user-select: all;
+        .color-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .color-swatch {
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+            border: 2.5px solid transparent; transition: all 0.18s; flex-shrink: 0;
         }
+        .color-swatch.active { border-color: white; transform: scale(1.18); box-shadow: 0 0 0 2px var(--text-main); }
 
-        #qrcode { display: flex; justify-content: center; margin: 16px 0; padding: 12px; background: white; border: 1px solid #eee; border-radius: 14px; }
+        .range-wrap { display: flex; align-items: center; gap: 9px; flex: 1; }
+        .range-wrap input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; background: var(--border); border-radius: 4px; outline: none; accent-color: var(--primary); }
+        .range-val { font-size: 0.76rem; font-weight: 700; color: var(--primary); min-width: 30px; text-align: right; }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 500;
-            margin-bottom: 12px;
-            text-align: center;
-            background: var(--surface-2);
-            color: var(--text-main);
+        .danger-btn {
+            width: 100%; padding: 12px; border: 1.5px solid #fca5a5; background: #fff5f5;
+            color: #b91c1c; border-radius: 11px; font-family: 'DM Sans', sans-serif;
+            font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
         }
-        input[type="text"]:focus { border-color: var(--primary-light); }
+        .danger-btn:hover { background: #fee2e2; }
+        body.dark .danger-btn { background: rgba(185,28,28,0.1); border-color: rgba(185,28,28,0.32); color: #f87171; }
 
-        .btn-small { 
-            padding: 10px 18px; 
-            border: 1.5px solid var(--primary); 
-            border-radius: 20px; 
-            cursor: pointer; 
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 700; 
-            font-size: 0.85rem;
-            background: transparent;
-            color: var(--primary);
-            transition: all 0.2s;
-        }
-        .btn-small:hover { background: var(--primary); color: white; }
-        .btn-text { background: transparent; border: none; color: var(--text-light); text-decoration: underline; cursor: pointer; margin-top: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; }
+        .reset-link { text-align: center; font-size: 0.76rem; color: var(--text-light); cursor: pointer; text-decoration: underline; background: none; border: none; font-family: 'DM Sans', sans-serif; display: block; width: 100%; padding: 4px; }
 
-        /* QR Scan Overlay */
-        .scan-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.92);
-            z-index: 200;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .scan-overlay.active { display: flex; }
-        .scan-container { width: 90%; max-width: 380px; background: white; border-radius: 20px; padding: 10px; position: relative; }
-        .close-scan { position: absolute; top: -44px; right: 0; color: white; font-size: 1.8rem; cursor: pointer; background: rgba(255,255,255,0.15); width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; }
-        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; }
+        .about-card { background: var(--surface-2); border-radius: 13px; padding: 13px 15px; border: 1px solid var(--border); }
+        .about-row { display: flex; justify-content: space-between; padding: 4px 0; }
+        .about-row:not(:last-child) { border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+        .about-row span:first-child { font-size: 0.79rem; color: var(--text-light); font-weight: 600; }
+        .about-row span:last-child { font-size: 0.79rem; font-weight: 700; color: var(--text-main); }
 
-        .hidden { display: none !important; }
-
-        /* Tooltip hint */
-        .hint-pills {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .hint-pill {
+        /* Font preview */
+        .font-preview {
             background: var(--surface-2);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: var(--bubble-fs, 0.92rem);
+            font-family: var(--chat-font, 'DM Sans', sans-serif);
+            font-weight: var(--bubble-fw, 400);
+            line-height: var(--bubble-lh, 1.5);
+            color: var(--text-main);
+            transition: all 0.2s;
         }
+
+        /* Custom color picker input */
+        .custom-color-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .custom-color-label { font-size: 0.72rem; font-weight: 600; color: var(--text-light); }
+        .custom-color-hint { font-size: 0.7rem; color: var(--text-light); }
+        .color-picker-input {
+            -webkit-appearance: none;
+            width: 28px; height: 28px;
+            border-radius: 50%; border: 2px solid var(--border);
+            padding: 0; cursor: pointer;
+            background: none;
+        }
+        .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+        .color-picker-input::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        /* Settings name inputs */
+        #s_myName, #s_partnerName {
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+        }
+        #s_myName:focus, #s_partnerName:focus { border-color: var(--primary-light); outline: none; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(10,18,28,0.88); backdrop-filter: blur(10px); z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: var(--surface); width: 100%; max-width: 385px; border-radius: 24px; padding: 24px 22px; text-align: center; box-shadow: var(--shadow-lg); max-height: 92dvh; overflow-y: auto; }
+        .modal-logo { margin-bottom: 18px; }
+        .modal-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 7px; }
+        .modal-desc { color: var(--text-light); font-size: 0.84rem; margin-bottom: 20px; line-height: 1.6; }
+        .role-btn { display: flex; align-items: center; gap: 11px; width: 100%; padding: 13px 15px; border: 1.5px solid var(--border); background: var(--surface-2); border-radius: 15px; margin-bottom: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; text-align: left; }
+        .role-btn:active { transform: scale(0.98); }
+        .role-btn .role-icon { font-size: 1.25rem; }
+        .role-btn .role-info small { display: block; font-size: 0.68rem; color: var(--text-light); font-weight: 500; margin-top: 1px; }
+        .role-btn.primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 18px var(--primary-glow); }
+        .role-btn.primary small { color: rgba(255,255,255,0.6); }
+        .role-btn.accent { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 18px var(--accent-glow); }
+        .role-btn.accent small { color: rgba(255,255,255,0.7); }
+        .id-display { background: var(--surface-2); padding: 12px; border-radius: 10px; font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; margin: 12px 0; border: 1.5px dashed #ccc; word-break: break-all; color: var(--primary); user-select: all; }
+        #qrcode { display: flex; justify-content: center; margin: 13px 0; padding: 10px; background: white; border: 1px solid #eee; border-radius: 12px; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; margin-bottom: 10px; text-align: center; background: var(--surface-2); color: var(--text-main); }
+        input[type="text"]:focus { border-color: var(--primary-light); }
+        .btn-small { padding: 8px 16px; border: 1.5px solid var(--primary); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.82rem; background: transparent; color: var(--primary); transition: all 0.2s; }
+        .btn-small:hover { background: var(--primary); color: white; }
+        .btn-text { background: transparent; border: none; color: var(--text-light); text-decoration: underline; cursor: pointer; margin-top: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; }
+        .scan-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .scan-overlay.active { display: flex; }
+        .scan-container { width: 90%; max-width: 380px; background: white; border-radius: 20px; padding: 10px; position: relative; }
+        .close-scan { position: absolute; top: -42px; right: 0; color: white; font-size: 1.7rem; cursor: pointer; background: rgba(255,255,255,0.14); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; }
+        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- SETUP MODAL -->
-    <div id="setupModal" class="modal-overlay active">
-        
-        <!-- Step 1: Role -->
-        <div class="modal-content" id="step1">
-            <div class="modal-logo">
-                <svg width="180" height="52" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
-                    <text x="0" y="46" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
-                    <text x="147" y="46" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="40" fill="#ffab00" letter-spacing="-1">pro</text>
-                    <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
-                </svg>
-            </div>
-            <p class="modal-desc">Live conversation translator.<br>Choose a role to get started.</p>
-            <button class="role-btn primary" onclick="showStep('host')">
-                <span class="role-icon">🟢</span>
-                <span class="role-info">Start as Host <small>Generate QR code &amp; wait for guest</small></span>
-            </button>
-            <button class="role-btn accent" onclick="showStep('guest')">
-                <span class="role-icon">🟠</span>
-                <span class="role-info">Join as Guest <small>Scan QR code or enter Host ID</small></span>
-            </button>
+<!-- SETUP MODAL -->
+<div id="setupModal" class="modal-overlay active">
+    <div class="modal-content" id="step1">
+        <div class="modal-logo">
+            <svg width="160" height="48" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
+                <text x="0" y="46" font-family="Arial" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
+                <text x="147" y="46" font-family="Arial" font-weight="800" font-size="40" fill="#ffab00" letter-spacing="-1">pro</text>
+                <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
+            </svg>
         </div>
-
-        <!-- Step 2: Host -->
-        <div class="modal-content hidden" id="stepHost">
-            <div class="modal-title">Your Connection Code</div>
-            <p class="modal-desc">Share this QR Code or ID with the guest. Wait for them to connect.</p>
-            <div id="qrcode"></div>
-            <div class="id-display" id="myPeerId">Generating...</div>
-            <button class="btn-small" onclick="copyId()">Copy ID</button>
-            <br><br>
-            <button class="role-btn primary" onclick="finishSetup()">
-                <span class="role-icon">✓</span>
-                <span class="role-info">Start Chat <small>Mic stays OFF until you tap it</small></span>
-            </button>
-            <button class="btn-text" onclick="showStep('1')">← Back</button>
-        </div>
-
-        <!-- Step 3: Guest -->
-        <div class="modal-content hidden" id="stepGuest">
-            <div class="modal-title">Join a Session</div>
-            <p class="modal-desc">Scan the Host's QR Code or enter their ID manually.</p>
-            <button class="role-btn accent" onclick="startScanner()" style="border-style:dashed; background: rgba(255,171,0,0.08);">
-                <span class="role-icon">📸</span>
-                <span class="role-info">Scan QR Code <small>Point camera at Host's screen</small></span>
-            </button>
-            <div style="margin: 12px 0; font-weight: 700; color: #bbb; font-size: 0.75rem; letter-spacing: 1px;">— OR —</div>
-            <input type="text" id="hostIdInput" placeholder="Paste or type Host ID">
-            <button class="role-btn primary" onclick="connectToHost()">
-                <span class="role-icon">🔗</span>
-                <span class="role-info">Connect via ID</span>
-            </button>
-            <button class="btn-text" onclick="showStep('1')">← Back</button>
-        </div>
+        <p class="modal-desc">Live conversation translator.<br>Choose a role to begin.</p>
+        <button class="role-btn primary" onclick="showStep('host')">
+            <span class="role-icon">🟢</span>
+            <span class="role-info">Start as Host <small>Generate QR code &amp; wait for guest</small></span>
+        </button>
+        <button class="role-btn accent" onclick="showStep('guest')">
+            <span class="role-icon">🟠</span>
+            <span class="role-info">Join as Guest <small>Scan QR code or enter Host ID</small></span>
+        </button>
     </div>
 
-    <!-- SCANNER OVERLAY -->
-    <div id="scanOverlay" class="scan-overlay">
-        <button class="close-scan" onclick="stopScanner()">×</button>
-        <div class="scan-container">
-            <div id="qr-reader"></div>
-        </div>
-        <p style="color:rgba(255,255,255,0.7); margin-top:18px; font-size:0.85rem; font-family:'DM Sans',sans-serif;">Point camera at the Host's QR Code</p>
+    <div class="modal-content hidden" id="stepHost">
+        <div class="modal-title">Your Connection Code</div>
+        <p class="modal-desc">Share this QR or ID with your guest.</p>
+        <div id="qrcode"></div>
+        <div class="id-display" id="myPeerId">Generating...</div>
+        <button class="btn-small" onclick="copyId()">Copy ID</button><br><br>
+        <button class="role-btn primary" onclick="finishSetup()">
+            <span class="role-icon">✓</span>
+            <span class="role-info">Start Chat <small>Mic stays OFF until you tap</small></span>
+        </button>
+        <button class="btn-text" onclick="showStep('1')">← Back</button>
     </div>
 
-    <!-- APP HEADER -->
-    <header>
+    <div class="modal-content hidden" id="stepGuest">
+        <div class="modal-title">Join a Session</div>
+        <p class="modal-desc">Scan Host's QR code or enter their ID.</p>
+        <button class="role-btn accent" onclick="startScanner()" style="border-style:dashed;background:rgba(255,171,0,0.08)">
+            <span class="role-icon">📸</span>
+            <span class="role-info">Scan QR Code <small>Point camera at Host's screen</small></span>
+        </button>
+        <div style="margin:10px 0;font-weight:700;color:#bbb;font-size:0.72rem;letter-spacing:1px;">— OR —</div>
+        <input type="text" id="hostIdInput" placeholder="Paste or type Host ID">
+        <button class="role-btn primary" onclick="connectToHost()">
+            <span class="role-icon">🔗</span>
+            <span class="role-info">Connect via ID</span>
+        </button>
+        <button class="btn-text" onclick="showStep('1')">← Back</button>
+    </div>
+</div>
+
+<!-- SCANNER -->
+<div id="scanOverlay" class="scan-overlay">
+    <button class="close-scan" onclick="stopScanner()">×</button>
+    <div class="scan-container"><div id="qr-reader"></div></div>
+    <p style="color:rgba(255,255,255,0.7);margin-top:14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;">Point camera at the Host's QR Code</p>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="header-left">
         <div class="brand-text">RAFIKI<span>pro</span></div>
+    </div>
+    <div class="header-right">
         <div class="status-badge" id="connStatus">
             <div class="dot"></div>
             <span id="statusText">Offline</span>
         </div>
-    </header>
+        <button class="icon-btn" onclick="openSettings()" title="Settings" aria-label="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+    </div>
+</header>
 
-    <main>
-        <!-- LANG CARD -->
-        <div class="card">
-            <div class="lang-grid">
-                <div class="lang-group">
-                    <label>My Language</label>
-                    <select id="langMe"></select>
-                </div>
-                <div class="lang-group">
-                    <label>Their Language</label>
-                    <select id="langGuest"></select>
-                </div>
+<!-- MAIN -->
+<main>
+    <div class="card">
+        <div class="lang-grid">
+            <div class="lang-group">
+                <label>My Language</label>
+                <select id="langMe"></select>
             </div>
-            <div class="offline-row">
-                <span class="offline-label">📖 Offline Dictionary</span>
-                <label class="switch">
-                    <input type="checkbox" id="offlineToggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-
-        <!-- CHAT LOG -->
-        <div class="chat-log" id="chatLog">
-            <div class="empty-state">
-                <div class="icon">💬</div>
-                <p>Connect with a partner to start translating.<br>Tap the mic when you want to speak.</p>
+            <div class="lang-group">
+                <label>Their Language</label>
+                <select id="langGuest"></select>
             </div>
         </div>
-    </main>
+        <div class="offline-row">
+            <span class="offline-label">📖 Offline Dictionary</span>
+            <label class="switch"><input type="checkbox" id="offlineToggle"><span class="slider"></span></label>
+        </div>
+    </div>
+    <div class="chat-log" id="chatLog">
+        <div class="empty-state">
+            <div class="icon">💬</div>
+            <p>Connect with a partner to start.<br>Tap the mic when you want to speak.</p>
+        </div>
+    </div>
+</main>
 
-    <!-- CONTROLS -->
-    <div class="controls-area">
-        <!-- Live transcript -->
-        <div class="live-text" id="liveText"></div>
-
-        <!-- Mic controls -->
-        <div class="mic-controls">
-
-            <!-- Mute toggle (left side) -->
-            <button class="mute-side-btn hidden-btn" id="muteBtn" title="Mute / Unmute">
-                <!-- Mute icon (shown when listening) -->
-                <svg id="muteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+<!-- CONTROLS -->
+<div class="controls-area">
+    <div class="live-text" id="liveText"></div>
+    <div class="mic-controls">
+        <button class="mute-side-btn hidden-btn" id="muteBtn" title="Mute / Unmute">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+        </button>
+        <div class="mic-btn-wrap">
+            <button id="micBtn" class="mic-btn disabled">
+                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                     <line x1="12" y1="19" x2="12" y2="23"></line>
                     <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
             </button>
+            <div class="mic-ring" id="micRing"></div>
+        </div>
+        <div style="width:44px;height:44px;"></div>
+    </div>
+    <div class="hint-pills" id="hintPills">
+        <div class="hint-pill">🔇 Connect first to use mic</div>
+    </div>
+</div>
 
-            <!-- Main mic button -->
-            <div class="mic-btn-wrap">
-                <button id="micBtn" class="mic-btn disabled" title="Tap to speak">
-                    <!-- Mic ON icon -->
-                    <svg id="micOnIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-                <div class="mic-ring" id="micRing"></div>
+<!-- SETTINGS BACKDROP -->
+<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
+
+<!-- SETTINGS DRAWER -->
+<div class="settings-drawer" id="settingsDrawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+        <span class="drawer-title">⚙️ Settings</span>
+        <button class="drawer-close" onclick="closeSettings()">×</button>
+    </div>
+    <div class="drawer-body">
+
+        <!-- ── APPEARANCE ── -->
+        <div class="setting-section">
+            <div class="section-title">🎨 Appearance</div>
+
+            <!-- Dark Mode -->
+            <div class="setting-row">
+                <div class="setting-label">
+                    <strong>🌙 Dark Mode</strong>
+                    <small>Switch to dark theme</small>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="s_darkMode" onchange="applyDarkMode(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
 
-            <!-- Placeholder (right side for balance) -->
-            <div style="width:48px; height:48px;"></div>
+            <!-- Font Size Slider -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
+                    <div><strong>🔤 Font Size</strong><br><small>Chat bubble text size</small></div>
+                    <span class="range-val" id="fontSizeVal" style="min-width:36px;text-align:right">14px</span>
+                </div>
+                <div class="range-wrap">
+                    <span style="font-size:0.72rem;color:var(--text-light);width:14px">A</span>
+                    <input type="range" id="s_fontSize" min="11" max="22" step="1" value="14" oninput="setFontSizeSlider(this)">
+                    <span style="font-size:1rem;color:var(--text-light);width:14px">A</span>
+                </div>
+                <div class="font-preview" id="fontPreview">The quick brown fox jumps</div>
+            </div>
+
+            <!-- Font Weight -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:7px;">
+                <div class="setting-label"><strong>⚖️ Font Weight</strong><small>Thickness of text in bubbles</small></div>
+                <div class="seg-control" id="fontWeightSeg">
+                    <button class="seg-btn" data-weight="300" onclick="setFontWeight(this)" style="font-weight:300">Light</button>
+                    <button class="seg-btn active" data-weight="400" onclick="setFontWeight(this)" style="font-weight:400">Regular</button>
+                    <button class="seg-btn" data-weight="600" onclick="setFontWeight(this)" style="font-weight:600">Semi-Bold</button>
+                    <button class="seg-btn" data-weight="800" onclick="setFontWeight(this)" style="font-weight:800">Bold</button>
+                </div>
+            </div>
+
+            <!-- Font Style -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:7px;">
+                <div class="setting-label"><strong>✍️ Font Style</strong><small>Typeface used in chat bubbles</small></div>
+                <div class="seg-control">
+                    <button class="seg-btn active" data-font="'DM Sans',sans-serif" onclick="setChatFont(this)" style="font-family:'DM Sans',sans-serif">Sans</button>
+                    <button class="seg-btn" data-font="Georgia,serif" onclick="setChatFont(this)" style="font-family:Georgia,serif">Serif</button>
+                    <button class="seg-btn" data-font="'DM Mono',monospace" onclick="setChatFont(this)" style="font-family:'DM Mono',monospace">Mono</button>
+                    <button class="seg-btn" data-font="cursive" onclick="setChatFont(this)" style="font-family:cursive">Cursive</button>
+                </div>
+            </div>
+
+            <!-- Line Spacing -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
+                    <div><strong>↕️ Line Spacing</strong><br><small>Space between lines in bubbles</small></div>
+                    <span class="range-val" id="lineHeightVal">1.5</span>
+                </div>
+                <div class="range-wrap">
+                    <span style="font-size:0.72rem;color:var(--text-light)">≡</span>
+                    <input type="range" id="s_lineHeight" min="1.2" max="2.2" step="0.1" value="1.5" oninput="setLineHeight(this)">
+                    <span style="font-size:0.9rem;color:var(--text-light)">☰</span>
+                </div>
+            </div>
         </div>
 
-        <!-- State hint pills -->
-        <div class="hint-pills" id="hintPills">
-            <div class="hint-pill">🔇 Tap mic to start</div>
+        <!-- ── BUBBLE COLORS ── -->
+        <div class="setting-section">
+            <div class="section-title">🫧 Bubble Colors</div>
+
+            <!-- My Bubble Color -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label"><strong>🟢 My Bubble Color</strong><small>Background of your messages</small></div>
+                <div class="color-row" id="bubbleColorRow">
+                    <div class="color-swatch active" style="background:#004d40" data-bg="#004d40" data-text="#ffffff" onclick="setBubbleColor(this)" title="Teal"></div>
+                    <div class="color-swatch" style="background:#1565c0" data-bg="#1565c0" data-text="#ffffff" onclick="setBubbleColor(this)" title="Blue"></div>
+                    <div class="color-swatch" style="background:#6a1b9a" data-bg="#6a1b9a" data-text="#ffffff" onclick="setBubbleColor(this)" title="Purple"></div>
+                    <div class="color-swatch" style="background:#c62828" data-bg="#c62828" data-text="#ffffff" onclick="setBubbleColor(this)" title="Red"></div>
+                    <div class="color-swatch" style="background:#e65100" data-bg="#e65100" data-text="#ffffff" onclick="setBubbleColor(this)" title="Orange"></div>
+                    <div class="color-swatch" style="background:#2e7d32" data-bg="#2e7d32" data-text="#ffffff" onclick="setBubbleColor(this)" title="Green"></div>
+                    <div class="color-swatch" style="background:#37474f" data-bg="#37474f" data-text="#ffffff" onclick="setBubbleColor(this)" title="Slate"></div>
+                    <div class="color-swatch" style="background:#f5f5f5;border:1.5px solid #ccc" data-bg="#f5f5f5" data-text="#1a2530" onclick="setBubbleColor(this)" title="Light"></div>
+                </div>
+                <!-- Custom color picker for my bubble -->
+                <div class="custom-color-row">
+                    <label class="custom-color-label">Custom:</label>
+                    <input type="color" id="s_myBubbleCustom" value="#004d40" oninput="setMyBubbleCustom(this)" class="color-picker-input">
+                    <span class="custom-color-hint">Pick any color</span>
+                </div>
+            </div>
+
+            <!-- My Font Color -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label"><strong>🖊️ My Text Color</strong><small>Color of text in your messages</small></div>
+                <div class="color-row" id="myTextColorRow">
+                    <div class="color-swatch active" style="background:#ffffff;border:1.5px solid #ccc" data-color="#ffffff" onclick="setMyTextColor(this)" title="White"></div>
+                    <div class="color-swatch" style="background:#1a2530" data-color="#1a2530" onclick="setMyTextColor(this)" title="Dark"></div>
+                    <div class="color-swatch" style="background:#fffde7" data-color="#fffde7" onclick="setMyTextColor(this)" title="Cream"></div>
+                    <div class="color-swatch" style="background:#e3f2fd" data-color="#e3f2fd" onclick="setMyTextColor(this)" title="Ice Blue"></div>
+                    <div class="color-swatch" style="background:#f3e5f5" data-color="#f3e5f5" onclick="setMyTextColor(this)" title="Lavender"></div>
+                    <input type="color" id="s_myTextCustom" value="#ffffff" oninput="setMyTextColorCustom(this)" class="color-picker-input" title="Custom text color" style="margin-left:4px">
+                </div>
+            </div>
+
+            <!-- Partner Bubble Color -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label"><strong>🟠 Partner Bubble Color</strong><small>Background of partner's messages</small></div>
+                <div class="color-row" id="theirBubbleColorRow">
+                    <div class="color-swatch active" style="background:#e8edf0;border:1.5px solid #ccc" data-bg="#e8edf0" data-text="#1a2530" onclick="setTheirBubbleColor(this)" title="Default"></div>
+                    <div class="color-swatch" style="background:#fff3e0" data-bg="#fff3e0" data-text="#7a3800" onclick="setTheirBubbleColor(this)" title="Amber"></div>
+                    <div class="color-swatch" style="background:#e8f5e9" data-bg="#e8f5e9" data-text="#1b5e20" onclick="setTheirBubbleColor(this)" title="Mint"></div>
+                    <div class="color-swatch" style="background:#e3f2fd" data-bg="#e3f2fd" data-text="#0d47a1" onclick="setTheirBubbleColor(this)" title="Sky"></div>
+                    <div class="color-swatch" style="background:#fce4ec" data-bg="#fce4ec" data-text="#880e4f" onclick="setTheirBubbleColor(this)" title="Rose"></div>
+                    <div class="color-swatch" style="background:#ede7f6" data-bg="#ede7f6" data-text="#4a148c" onclick="setTheirBubbleColor(this)" title="Lavender"></div>
+                    <input type="color" id="s_theirBubbleCustom" value="#e8edf0" oninput="setTheirBubbleCustom(this)" class="color-picker-input" title="Custom partner bubble color" style="margin-left:4px">
+                </div>
+            </div>
+
+            <!-- Bubble Shape -->
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:7px;">
+                <div class="setting-label"><strong>💬 Bubble Shape</strong><small>Corner style of message bubbles</small></div>
+                <div class="seg-control">
+                    <button class="seg-btn active" data-radius="18px" onclick="setBubbleRadius(this)">Rounded</button>
+                    <button class="seg-btn" data-radius="9px" onclick="setBubbleRadius(this)">Soft</button>
+                    <button class="seg-btn" data-radius="3px" onclick="setBubbleRadius(this)">Square</button>
+                    <button class="seg-btn" data-radius="30px" onclick="setBubbleRadius(this)">Pill</button>
+                </div>
+            </div>
         </div>
+
+        <!-- ── SPEECH & TRANSLATION ── -->
+        <div class="setting-section">
+            <div class="section-title">🗣️ Speech &amp; Translation</div>
+
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
+                    <div><strong>🔊 Playback Speed</strong><br><small>Speed of translated speech</small></div>
+                    <span class="range-val" id="speechRateVal">0.9×</span>
+                </div>
+                <div class="range-wrap">
+                    <span style="font-size:0.72rem;color:var(--text-light)">🐢</span>
+                    <input type="range" id="s_speechRate" min="0.5" max="1.8" step="0.1" value="0.9" oninput="setSpeechRate(this)">
+                    <span style="font-size:0.72rem;color:var(--text-light)">🐇</span>
+                </div>
+            </div>
+
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
+                    <div><strong>🎚️ Speech Pitch</strong><br><small>Tone of spoken translations</small></div>
+                    <span class="range-val" id="speechPitchVal">1.0</span>
+                </div>
+                <div class="range-wrap">
+                    <span style="font-size:0.72rem;color:var(--text-light)">▼</span>
+                    <input type="range" id="s_speechPitch" min="0.5" max="2.0" step="0.1" value="1.0" oninput="setSpeechPitch(this)">
+                    <span style="font-size:0.72rem;color:var(--text-light)">▲</span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>🔈 Auto-Speak Incoming</strong><small>Read partner's translation aloud</small></div>
+                <label class="switch"><input type="checkbox" id="s_autoSpeak" checked onchange="settings.autoSpeak=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>📝 Show Original + Translation</strong><small>Show what was said and the translation</small></div>
+                <label class="switch"><input type="checkbox" id="s_showOriginal" checked onchange="settings.showOriginal=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <!-- ── CHAT ── -->
+        <div class="setting-section">
+            <div class="section-title">💬 Chat Display</div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>🕐 Show Timestamps</strong><small>Display time on each message</small></div>
+                <label class="switch"><input type="checkbox" id="s_timestamps" checked onchange="settings.timestamps=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>👤 Show Sender Labels</strong><small>Show "You" / "Partner" labels</small></div>
+                <label class="switch"><input type="checkbox" id="s_senderLabels" checked onchange="settings.senderLabels=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>🔔 Sound on Incoming</strong><small>Play a ping when partner speaks</small></div>
+                <label class="switch"><input type="checkbox" id="s_notifSound" onchange="settings.notifSound=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>📳 Vibrate on Incoming</strong><small>Vibrate when partner sends a message</small></div>
+                <label class="switch"><input type="checkbox" id="s_vibrate" onchange="settings.vibrate=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>✏️ My Display Name</strong><small>Label shown on your messages</small></div>
+                <input type="text" id="s_myName" value="You" placeholder="You" style="width:90px;padding:7px 10px;margin:0;text-align:left;font-size:0.82rem;border-radius:8px;" oninput="settings.myName=this.value.trim()||'You';saveSettings()">
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label"><strong>✏️ Partner Display Name</strong><small>Label shown on partner's messages</small></div>
+                <input type="text" id="s_partnerName" value="Partner" placeholder="Partner" style="width:90px;padding:7px 10px;margin:0;text-align:left;font-size:0.82rem;border-radius:8px;" oninput="settings.partnerName=this.value.trim()||'Partner';saveSettings()">
+            </div>
+
+            <button class="danger-btn" onclick="clearChat()">🗑️ Clear Chat History</button>
+        </div>
+
+        <!-- ── ABOUT ── -->
+        <div class="setting-section">
+            <div class="section-title">ℹ️ About</div>
+            <div class="about-card">
+                <div class="about-row"><span>App</span><span>RAFIKI PRO</span></div>
+                <div class="about-row"><span>Version</span><span>2.2.0</span></div>
+                <div class="about-row"><span>P2P Engine</span><span>PeerJS v1.5.2</span></div>
+                <div class="about-row"><span>Translation</span><span>MyMemory API</span></div>
+                <div class="about-row"><span>Speech</span><span>Web Speech API</span></div>
+            </div>
+            <button class="reset-link" onclick="resetAllSettings()">↺ Reset all settings to defaults</button>
+        </div>
+
     </div>
+</div>
 
 <script>
-// ==========================================
-// 1. LANGUAGE LIST
-// ==========================================
+// ============================================================
+// LANGUAGES
+// ============================================================
 const languages = [
-    { code: "en-US", name: "English (US)" }, { code: "en-GB", name: "English (UK)" },
-    { code: "sw-KE", name: "Swahili" }, { code: "fr-FR", name: "French" },
-    { code: "es-ES", name: "Spanish" }, { code: "de-DE", name: "German" },
-    { code: "it-IT", name: "Italian" }, { code: "pt-PT", name: "Portuguese" },
-    { code: "ru-RU", name: "Russian" }, { code: "zh-CN", name: "Chinese" },
-    { code: "ja-JP", name: "Japanese" }, { code: "ko-KR", name: "Korean" },
-    { code: "ar-SA", name: "Arabic" }, { code: "hi-IN", name: "Hindi" },
-    { code: "tr-TR", name: "Turkish" }, { code: "pl-PL", name: "Polish" },
-    { code: "nl-NL", name: "Dutch" }, { code: "cs-CZ", name: "Czech" }
+    { code:"en-US", name:"English (US)" }, { code:"en-GB", name:"English (UK)" },
+    { code:"sw-KE", name:"Swahili" },      { code:"fr-FR", name:"French" },
+    { code:"es-ES", name:"Spanish" },      { code:"de-DE", name:"German" },
+    { code:"it-IT", name:"Italian" },      { code:"pt-PT", name:"Portuguese" },
+    { code:"ru-RU", name:"Russian" },      { code:"zh-CN", name:"Chinese" },
+    { code:"ja-JP", name:"Japanese" },     { code:"ko-KR", name:"Korean" },
+    { code:"ar-SA", name:"Arabic" },       { code:"hi-IN", name:"Hindi" },
+    { code:"tr-TR", name:"Turkish" },      { code:"pl-PL", name:"Polish" },
+    { code:"nl-NL", name:"Dutch" },        { code:"cs-CZ", name:"Czech" }
 ];
 
-// ==========================================
-// 2. OFFLINE DICTIONARY
-// ==========================================
+// ============================================================
+// OFFLINE DICTIONARY
+// ============================================================
 const offlineDictionary = {
-    "hello": { en:"Hello", sw:"Jambo", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo", cs:"Ahoj" },
-    "hi":    { en:"Hi", sw:"Habari", fr:"Salut", es:"Hola", de:"Hallo", it:"Ciao", pt:"Oi", ru:"Привет", zh:"嗨", ja:"やあ", ko:"안녕", ar:"مرحبا", hi:"नमस्ते", tr:"Selam", pl:"Cześć", nl:"Hoi", cs:"Čau" },
-    "yes":   { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja", cs:"Ano" },
-    "no":    { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee", cs:"Ne" },
-    "thanks":     { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt", cs:"Děkuji" },
-    "thank you":  { en:"Thank you", sw:"Asante sana", fr:"Merci", es:"Gracias", de:"Vielen Dank", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとうございます", ko:"감사합니다", ar:"شكرا جزيلا", hi:"धन्यवाद", tr:"Teşekkür ederim", pl:"Dziękuję", nl:"Dank je", cs:"Děkuji" },
-    "please":     { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft", cs:"Prosím" },
-    "wait":       { en:"Wait", sw:"Subiri", fr:"Attendre", es:"Espera", de:"Warten", it:"Aspetta", pt:"Espere", ru:"Ждать", zh:"等一下", ja:"待って", ko:"기다려", ar:"انتظر", hi:"रुको", tr:"Bekle", pl:"Czekać", nl:"Wacht", cs:"Počkej" },
-    "help":       { en:"Help", sw:"Msaada", fr:"Aide", es:"Ayuda", de:"Hilfe", it:"Aiuto", pt:"Ajuda", ru:"Помощь", zh:"帮助", ja:"助けて", ko:"도와줘", ar:"مساعدة", hi:"मदद", tr:"Yardım", pl:"Pomoc", nl:"Help", cs:"Pomoc" },
+    "hello":       { en:"Hello", sw:"Jambo", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo", cs:"Ahoj" },
+    "hi":          { en:"Hi", sw:"Habari", fr:"Salut", es:"Hola", de:"Hallo", it:"Ciao", pt:"Oi", ru:"Привет", zh:"嗨", ja:"やあ", ko:"안녕", ar:"مرحبا", hi:"नमस्ते", tr:"Selam", pl:"Cześć", nl:"Hoi", cs:"Čau" },
+    "yes":         { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja", cs:"Ano" },
+    "no":          { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee", cs:"Ne" },
+    "thanks":      { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt", cs:"Děkuji" },
+    "thank you":   { en:"Thank you", sw:"Asante sana", fr:"Merci", es:"Gracias", de:"Vielen Dank", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとうございます", ko:"감사합니다", ar:"شكرا جزيلا", hi:"धन्यवाद", tr:"Teşekkür ederim", pl:"Dziękuję", nl:"Dank je", cs:"Děkuji" },
+    "please":      { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft", cs:"Prosím" },
+    "wait":        { en:"Wait", sw:"Subiri", fr:"Attendre", es:"Espera", de:"Warten", it:"Aspetta", pt:"Espere", ru:"Ждать", zh:"等一下", ja:"待って", ko:"기다려", ar:"انتظر", hi:"रुको", tr:"Bekle", pl:"Czekać", nl:"Wacht", cs:"Počkej" },
+    "help":        { en:"Help", sw:"Msaada", fr:"Aide", es:"Ayuda", de:"Hilfe", it:"Aiuto", pt:"Ajuda", ru:"Помощь", zh:"帮助", ja:"助けて", ko:"도와줘", ar:"مساعدة", hi:"मदद", tr:"Yardım", pl:"Pomoc", nl:"Help", cs:"Pomoc" },
     "good morning":{ en:"Good morning", sw:"Habari za asubuhi", fr:"Bonjour", es:"Buenos días", de:"Guten Morgen", it:"Buongiorno", pt:"Bom dia", ru:"Доброе утро", zh:"早上好", ja:"おはよう", ko:"좋은 아침", ar:"صباح الخير", hi:"सुप्रभात", tr:"Günaydın", pl:"Dzień dobry", nl:"Goedemorgen", cs:"Dobré ráno" },
-    "goodbye":    { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens", cs:"Sbohem" }
+    "goodbye":     { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens", cs:"Sbohem" }
 };
 
-// ==========================================
-// 3. STATE
-// ==========================================
-let peer = null;
-let conn = null;
-let myRole = 'guest';
-let recognition = null;
-let html5QrCode = null;
-let isOfflineMode = false;
+// ============================================================
+// SETTINGS
+// ============================================================
+const DEFAULT_SETTINGS = {
+    darkMode: false,
+    fontSize: 14,           // px integer for slider
+    fontWeight: '400',
+    chatFont: "'DM Sans',sans-serif",
+    lineHeight: 1.5,
+    bubbleBg: '#004d40',
+    bubbleText: '#ffffff',
+    theirBubbleBg: '#e8edf0',
+    theirBubbleText: '#1a2530',
+    bubbleRadius: '18px',
+    speechRate: 0.9,
+    speechPitch: 1.0,
+    autoSpeak: true,
+    showOriginal: true,
+    timestamps: true,
+    senderLabels: true,
+    notifSound: false,
+    vibrate: false,
+    myName: 'You',
+    partnerName: 'Partner',
+};
+let settings = { ...DEFAULT_SETTINGS };
 
-// MIC STATES: 'off' | 'listening' | 'muted'
-let micState = 'off';
-let dataListenerAttached = false;
+function loadSettings() {
+    try {
+        const saved = localStorage.getItem('rafiki_settings');
+        if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+    } catch(e) {}
+    applyAllSettings();
+}
+function saveSettings() {
+    try { localStorage.setItem('rafiki_settings', JSON.stringify(settings)); } catch(e) {}
+}
+function applyAllSettings() {
+    const root = document.documentElement;
 
-// ==========================================
-// 4. DOM REFS
-// ==========================================
-const langMeSelect     = document.getElementById('langMe');
-const langGuestSelect  = document.getElementById('langGuest');
-const micBtn           = document.getElementById('micBtn');
-const muteBtn          = document.getElementById('muteBtn');
-const liveText         = document.getElementById('liveText');
-const statusBadge      = document.getElementById('connStatus');
-const statusText       = document.getElementById('statusText');
-const chatLog          = document.getElementById('chatLog');
-const offlineToggle    = document.getElementById('offlineToggle');
-const hintPills        = document.getElementById('hintPills');
-const micStatusLabel   = document.querySelector('.mic-status-label');
+    // Dark mode
+    document.body.classList.toggle('dark', settings.darkMode);
+    document.getElementById('s_darkMode').checked = settings.darkMode;
 
-offlineToggle.addEventListener('change', (e) => {
+    // Font size
+    const fsPx = settings.fontSize || 14;
+    root.style.setProperty('--bubble-fs', fsPx + 'px');
+    document.getElementById('s_fontSize').value = fsPx;
+    document.getElementById('fontSizeVal').textContent = fsPx + 'px';
+
+    // Font weight
+    root.style.setProperty('--bubble-fw', settings.fontWeight || '400');
+    document.querySelectorAll('#fontWeightSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.weight === (settings.fontWeight || '400')));
+
+    // Font family
+    root.style.setProperty('--chat-font', settings.chatFont);
+    document.querySelectorAll('[data-font]').forEach(b => b.classList.toggle('active', b.dataset.font === settings.chatFont));
+
+    // Line height
+    root.style.setProperty('--bubble-lh', settings.lineHeight);
+    document.getElementById('s_lineHeight').value = settings.lineHeight;
+    document.getElementById('lineHeightVal').textContent = parseFloat(settings.lineHeight).toFixed(1);
+
+    // My bubble colors
+    root.style.setProperty('--my-bubble-bg', settings.bubbleBg);
+    root.style.setProperty('--my-bubble-text', settings.bubbleText);
+    document.querySelectorAll('#bubbleColorRow .color-swatch').forEach(s => s.classList.toggle('active', s.dataset.bg === settings.bubbleBg));
+    document.getElementById('s_myBubbleCustom').value = settings.bubbleBg.startsWith('#') && settings.bubbleBg.length === 7 ? settings.bubbleBg : '#004d40';
+    document.querySelectorAll('#myTextColorRow .color-swatch').forEach(s => s.classList.toggle('active', s.dataset.color === settings.bubbleText));
+
+    // Their bubble colors
+    root.style.setProperty('--their-bubble-bg', settings.theirBubbleBg);
+    root.style.setProperty('--their-bubble-text', settings.theirBubbleText);
+    document.querySelectorAll('#theirBubbleColorRow .color-swatch').forEach(s => s.classList.toggle('active', s.dataset.bg === settings.theirBubbleBg));
+
+    // Bubble radius
+    root.style.setProperty('--bubble-radius', settings.bubbleRadius);
+    document.querySelectorAll('[data-radius]').forEach(b => b.classList.toggle('active', b.dataset.radius === settings.bubbleRadius));
+
+    // Speech
+    document.getElementById('s_speechRate').value = settings.speechRate;
+    document.getElementById('speechRateVal').textContent = parseFloat(settings.speechRate).toFixed(1) + '×';
+    document.getElementById('s_speechPitch').value = settings.speechPitch;
+    document.getElementById('speechPitchVal').textContent = parseFloat(settings.speechPitch).toFixed(1);
+
+    // Toggles
+    document.getElementById('s_autoSpeak').checked = settings.autoSpeak;
+    document.getElementById('s_showOriginal').checked = settings.showOriginal;
+    document.getElementById('s_timestamps').checked = settings.timestamps;
+    document.getElementById('s_senderLabels').checked = settings.senderLabels;
+    document.getElementById('s_notifSound').checked = settings.notifSound;
+    document.getElementById('s_vibrate').checked = settings.vibrate;
+
+    // Names
+    document.getElementById('s_myName').value = settings.myName;
+    document.getElementById('s_partnerName').value = settings.partnerName;
+
+    updateFontPreview();
+}
+
+function updateFontPreview() {
+    const p = document.getElementById('fontPreview');
+    if (!p) return;
+    p.style.fontFamily = settings.chatFont;
+    p.style.fontSize = (settings.fontSize || 14) + 'px';
+    p.style.fontWeight = settings.fontWeight || '400';
+    p.style.lineHeight = settings.lineHeight || 1.5;
+}
+
+function applyDarkMode(val) {
+    settings.darkMode = val; document.body.classList.toggle('dark', val); saveSettings();
+}
+function setFontSizeSlider(input) {
+    settings.fontSize = parseInt(input.value);
+    document.getElementById('fontSizeVal').textContent = settings.fontSize + 'px';
+    document.documentElement.style.setProperty('--bubble-fs', settings.fontSize + 'px');
+    updateFontPreview(); saveSettings();
+}
+function setFontWeight(btn) {
+    document.querySelectorAll('#fontWeightSeg .seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); settings.fontWeight = btn.dataset.weight;
+    document.documentElement.style.setProperty('--bubble-fw', settings.fontWeight);
+    updateFontPreview(); saveSettings();
+}
+function setChatFont(btn) {
+    document.querySelectorAll('[data-font]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); settings.chatFont = btn.dataset.font;
+    document.documentElement.style.setProperty('--chat-font', settings.chatFont);
+    updateFontPreview(); saveSettings();
+}
+function setLineHeight(input) {
+    settings.lineHeight = parseFloat(input.value);
+    document.getElementById('lineHeightVal').textContent = settings.lineHeight.toFixed(1);
+    document.documentElement.style.setProperty('--bubble-lh', settings.lineHeight);
+    updateFontPreview(); saveSettings();
+}
+function setBubbleColor(swatch) {
+    document.querySelectorAll('#bubbleColorRow .color-swatch').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+    settings.bubbleBg = swatch.dataset.bg; settings.bubbleText = swatch.dataset.text;
+    document.documentElement.style.setProperty('--my-bubble-bg', settings.bubbleBg);
+    document.documentElement.style.setProperty('--my-bubble-text', settings.bubbleText);
+    saveSettings();
+}
+function setMyBubbleCustom(input) {
+    settings.bubbleBg = input.value;
+    document.querySelectorAll('#bubbleColorRow .color-swatch').forEach(s => s.classList.remove('active'));
+    document.documentElement.style.setProperty('--my-bubble-bg', settings.bubbleBg);
+    saveSettings();
+}
+function setMyTextColor(swatch) {
+    document.querySelectorAll('#myTextColorRow .color-swatch').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+    settings.bubbleText = swatch.dataset.color;
+    document.documentElement.style.setProperty('--my-bubble-text', settings.bubbleText);
+    saveSettings();
+}
+function setMyTextColorCustom(input) {
+    settings.bubbleText = input.value;
+    document.querySelectorAll('#myTextColorRow .color-swatch').forEach(s => s.classList.remove('active'));
+    document.documentElement.style.setProperty('--my-bubble-text', settings.bubbleText);
+    saveSettings();
+}
+function setTheirBubbleColor(swatch) {
+    document.querySelectorAll('#theirBubbleColorRow .color-swatch').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+    settings.theirBubbleBg = swatch.dataset.bg; settings.theirBubbleText = swatch.dataset.text;
+    document.documentElement.style.setProperty('--their-bubble-bg', settings.theirBubbleBg);
+    document.documentElement.style.setProperty('--their-bubble-text', settings.theirBubbleText);
+    saveSettings();
+}
+function setTheirBubbleCustom(input) {
+    settings.theirBubbleBg = input.value;
+    document.querySelectorAll('#theirBubbleColorRow .color-swatch').forEach(s => s.classList.remove('active'));
+    document.documentElement.style.setProperty('--their-bubble-bg', settings.theirBubbleBg);
+    saveSettings();
+}
+function setBubbleRadius(btn) {
+    document.querySelectorAll('[data-radius]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); settings.bubbleRadius = btn.dataset.radius;
+    document.documentElement.style.setProperty('--bubble-radius', settings.bubbleRadius);
+    saveSettings();
+}
+function setSpeechRate(input) {
+    settings.speechRate = parseFloat(input.value);
+    document.getElementById('speechRateVal').textContent = settings.speechRate.toFixed(1) + '×';
+    saveSettings();
+}
+function setSpeechPitch(input) {
+    settings.speechPitch = parseFloat(input.value);
+    document.getElementById('speechPitchVal').textContent = settings.speechPitch.toFixed(1);
+    saveSettings();
+}
+function clearChat() {
+    if (!confirm('Clear all chat messages?')) return;
+    chatLog.innerHTML = '<div class="empty-state"><div class="icon">🗑️</div><p>Chat cleared.</p></div>';
+    closeSettings();
+}
+function resetAllSettings() {
+    if (!confirm('Reset all settings to defaults?')) return;
+    settings = { ...DEFAULT_SETTINGS }; saveSettings(); applyAllSettings();
+}
+function openSettings() {
+    document.getElementById('settingsDrawer').classList.add('open');
+    document.getElementById('settingsBackdrop').classList.add('open');
+}
+function closeSettings() {
+    document.getElementById('settingsDrawer').classList.remove('open');
+    document.getElementById('settingsBackdrop').classList.remove('open');
+}
+
+// ============================================================
+// APP STATE
+// ============================================================
+let peer = null, conn = null, myRole = 'guest';
+let recognition = null, html5QrCode = null;
+let isOfflineMode = false, micState = 'off', dataListenerAttached = false;
+
+const langMeSelect    = document.getElementById('langMe');
+const langGuestSelect = document.getElementById('langGuest');
+const micBtn          = document.getElementById('micBtn');
+const muteBtn         = document.getElementById('muteBtn');
+const liveText        = document.getElementById('liveText');
+const statusBadge     = document.getElementById('connStatus');
+const statusText      = document.getElementById('statusText');
+const chatLog         = document.getElementById('chatLog');
+const offlineToggle   = document.getElementById('offlineToggle');
+const hintPills       = document.getElementById('hintPills');
+
+offlineToggle.addEventListener('change', e => {
     isOfflineMode = e.target.checked;
-    addLog("system", isOfflineMode ? "📖 Offline Dictionary mode ON" : "🌐 Online Translation mode ON", "system");
+    addLog(isOfflineMode ? "📖 Offline Dictionary mode ON" : "🌐 Online Translation mode ON", "system");
 });
 
-// ==========================================
-// 5. MIC STATE MACHINE
-// ==========================================
+// ============================================================
+// MIC STATE MACHINE
+// ============================================================
 function setMicState(state) {
     micState = state;
-    micBtn.classList.remove('disabled', 'ready', 'listening', 'muted');
-
+    micBtn.classList.remove('disabled','ready','listening','muted');
     if (state === 'off') {
-        // Not connected
-        micBtn.classList.add('disabled');
-        micBtn.disabled = true;
-        muteBtn.classList.add('hidden-btn');
-        liveText.textContent = '';
-        hintPills.innerHTML = '<div class="hint-pill">🔇 Tap mic to start</div>';
-
+        micBtn.classList.add('disabled'); micBtn.disabled = true;
+        muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
+        hintPills.innerHTML = '<div class="hint-pill">🔇 Connect first to use mic</div>';
     } else if (state === 'ready') {
-        // Connected, mic not started yet
-        micBtn.classList.add('ready');
-        micBtn.disabled = false;
-        muteBtn.classList.add('hidden-btn');
-        liveText.textContent = '';
-        hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap to speak</div>';
-
+        micBtn.classList.add('ready'); micBtn.disabled = false;
+        muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
+        hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap mic to speak</div>';
     } else if (state === 'listening') {
-        micBtn.classList.add('listening');
-        micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn');
-        muteBtn.classList.remove('active-mute');
-        muteBtn.title = 'Mute microphone';
+        micBtn.classList.add('listening'); micBtn.disabled = false;
+        muteBtn.classList.remove('hidden-btn','active-mute'); muteBtn.title = 'Mute';
         liveText.textContent = 'Listening...';
-        hintPills.innerHTML = '<div class="hint-pill">🟢 Mic ON</div><div class="hint-pill">Tap mic to stop · Side button to mute</div>';
-
+        hintPills.innerHTML = '<div class="hint-pill">🟢 Mic ON</div><div class="hint-pill">Side → Mute</div>';
     } else if (state === 'muted') {
-        micBtn.classList.add('muted');
-        micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn');
-        muteBtn.classList.add('active-mute');
-        muteBtn.title = 'Unmute microphone';
-        liveText.textContent = 'Muted — tap mic or unmute to continue';
-        hintPills.innerHTML = '<div class="hint-pill">🔇 Muted</div><div class="hint-pill">Tap mic to stop · Side button to unmute</div>';
+        micBtn.classList.add('muted'); micBtn.disabled = false;
+        muteBtn.classList.remove('hidden-btn'); muteBtn.classList.add('active-mute'); muteBtn.title = 'Unmute';
+        liveText.textContent = 'Muted — tap side button to unmute';
+        hintPills.innerHTML = '<div class="hint-pill">🔇 Muted</div><div class="hint-pill">Side → Unmute</div>';
     }
 }
 
-// ==========================================
-// 6. SPEECH RECOGNITION SETUP
-// ==========================================
+// ============================================================
+// SPEECH RECOGNITION
+// ============================================================
 function initSpeechRecognition() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-        alert("Speech recognition not supported in this browser.");
-        return;
-    }
+    if (!SR) { alert("Speech recognition not supported."); return; }
     recognition = new SR();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-        if (micState === 'listening') {
-            liveText.textContent = 'Listening...';
-        }
-    };
-
+    recognition.continuous = true; recognition.interimResults = true;
     recognition.onend = () => {
-        // Only auto-restart if we are actively in 'listening' state
         if (micState === 'listening' && conn && conn.open) {
             try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e) {}
         }
     };
-
     recognition.onresult = (event) => {
-        if (micState !== 'listening') return; // ignore if muted
+        if (micState !== 'listening') return;
         let interim = '', final = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) final += event.results[i][0].transcript;
@@ -764,91 +1036,58 @@ function initSpeechRecognition() {
         if (interim) liveText.textContent = '🎤 ' + interim;
         if (final) { liveText.textContent = 'Translating...'; handleVoiceInput(final); }
     };
-
-    recognition.onerror = (event) => {
-        if (event.error === 'not-allowed') {
-            liveText.textContent = '⚠️ Mic permission denied.';
-            setMicState('ready');
-        }
+    recognition.onerror = (e) => {
+        if (e.error === 'not-allowed') { liveText.textContent = '⚠️ Mic permission denied.'; setMicState('ready'); }
     };
 }
 
-// ==========================================
-// 7. MIC BUTTON — MAIN TOGGLE
-// Start listening ↔ Stop completely
-// ==========================================
+// ============================================================
+// MIC BUTTONS
+// ============================================================
 micBtn.addEventListener('click', () => {
     if (!conn || !conn.open) return;
-
-    if (micState === 'ready') {
-        // Start listening
-        startListening();
-    } else if (micState === 'listening' || micState === 'muted') {
-        // Stop completely
-        stopListening();
-    }
+    if (micState === 'ready') startListening();
+    else if (micState === 'listening' || micState === 'muted') stopListening();
 });
-
-// ==========================================
-// 8. MUTE BUTTON — MUTE / UNMUTE
-// Keeps the session alive but pauses capture
-// ==========================================
 muteBtn.addEventListener('click', () => {
     if (!conn || !conn.open) return;
-
     if (micState === 'listening') {
-        // Mute: stop recognition but stay in session
         try { recognition.stop(); } catch(e) {}
-        setMicState('muted');
-        addLog("system", "🔇 You muted your mic to avoid echo.", "system");
+        setMicState('muted'); addLog("🔇 You muted your mic.", "system");
     } else if (micState === 'muted') {
-        // Unmute: restart recognition
-        startListening();
-        addLog("system", "🎙️ Mic unmuted.", "system");
+        startListening(); addLog("🎙️ Mic unmuted.", "system");
     }
 });
-
 function startListening() {
-    setMicState('listening');
-    window.speechSynthesis.cancel();
-    try {
-        recognition.lang = langMeSelect.value;
-        recognition.start();
-    } catch(e) {
+    setMicState('listening'); window.speechSynthesis.cancel();
+    try { recognition.lang = langMeSelect.value; recognition.start(); }
+    catch(e) {
         try { recognition.stop(); } catch(e2) {}
-        setTimeout(() => {
-            try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e3) {}
-        }, 150);
+        setTimeout(() => { try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e3) {} }, 150);
     }
 }
-
 function stopListening() {
     try { recognition.stop(); } catch(e) {}
-    setMicState('ready');
-    liveText.textContent = '';
+    setMicState('ready'); liveText.textContent = '';
 }
 
-// ==========================================
-// 9. VOICE INPUT → TRANSLATE → SEND
-// ==========================================
+// ============================================================
+// VOICE → TRANSLATE → SEND
+// ============================================================
 async function handleVoiceInput(text) {
-    const sourceLang = langMeSelect.value;
-    const targetLang = langGuestSelect.value;
+    const sourceLang = langMeSelect.value, targetLang = langGuestSelect.value;
     const translation = await translateText(text, sourceLang, targetLang);
-    addLog(text + " → " + translation, "me");
-    if (conn && conn.open) {
-        conn.send({ type: 'translation', text: translation, lang: targetLang });
-    } else {
-        speak(translation, targetLang);
-    }
+    const display = settings.showOriginal ? `${text} → ${translation}` : translation;
+    addLog(display, "me");
+    if (conn && conn.open) conn.send({ type:'translation', text:translation, lang:targetLang });
+    else speak(translation, targetLang);
     if (micState === 'listening') liveText.textContent = 'Listening...';
 }
-
 async function translateText(text, from, to) {
     if (isOfflineMode) {
         const tCode = to.split('-')[0];
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-        if (offlineDictionary[clean] && offlineDictionary[clean][tCode]) return offlineDictionary[clean][tCode];
+        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        if (offlineDictionary[clean]?.[tCode]) return offlineDictionary[clean][tCode];
         return text + " (no offline translation)";
     }
     const sCode = from.split('-')[0], tCode = to.split('-')[0];
@@ -859,165 +1098,139 @@ async function translateText(text, from, to) {
         return data.responseData.translatedText;
     } catch(e) { return text; }
 }
-
 function speak(text, lang) {
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis || !settings.autoSpeak) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang; u.rate = 0.9;
+    u.lang = lang; u.rate = settings.speechRate; u.pitch = settings.speechPitch;
     window.speechSynthesis.speak(u);
 }
-
+function playPing() {
+    if (settings.notifSound) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine'; osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            osc.start(); osc.stop(ctx.currentTime + 0.3);
+        } catch(e) {}
+    }
+    if (settings.vibrate && navigator.vibrate) {
+        navigator.vibrate(60);
+    }
+}
 function addLog(text, type) {
-    // Remove empty state if present
-    const emptyState = chatLog.querySelector('.empty-state');
-    if (emptyState) emptyState.remove();
-
+    const empty = chatLog.querySelector('.empty-state');
+    if (empty) empty.remove();
     const div = document.createElement('div');
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const time = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
     div.className = `log-item ${type}`;
-
-    if (type === 'system') {
-        div.innerHTML = `<div class="bubble">${text}</div>`;
-    } else {
-        const sender = type === 'me' ? 'You' : 'Partner';
-        div.innerHTML = `<div class="bubble">${text}</div><div class="meta">${sender} · ${time}</div>`;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble'; bubble.textContent = text;
+    div.appendChild(bubble);
+    if (type !== 'system') {
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const parts = [];
+        if (settings.senderLabels) parts.push(type === 'me' ? (settings.myName || 'You') : (settings.partnerName || 'Partner'));
+        if (settings.timestamps) parts.push(time);
+        meta.textContent = parts.join(' · ');
+        if (parts.length) div.appendChild(meta);
     }
     chatLog.appendChild(div);
     chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// ==========================================
-// 10. PEER / CONNECTION LOGIC
-// ==========================================
+// ============================================================
+// PEER / CONNECTION
+// ============================================================
 function showStep(step) {
     document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-    if (step === '1') {
-        document.getElementById('step1').classList.remove('hidden');
-        document.getElementById('setupModal').classList.add('active');
-    } else if (step === 'host') {
-        myRole = 'host';
-        document.getElementById('stepHost').classList.remove('hidden');
-        initPeer();
-    } else if (step === 'guest') {
-        myRole = 'guest';
-        document.getElementById('stepGuest').classList.remove('hidden');
-    }
+    if (step === '1') { document.getElementById('step1').classList.remove('hidden'); document.getElementById('setupModal').classList.add('active'); }
+    else if (step === 'host') { myRole = 'host'; document.getElementById('stepHost').classList.remove('hidden'); initPeer(); }
+    else if (step === 'guest') { myRole = 'guest'; document.getElementById('stepGuest').classList.remove('hidden'); }
 }
-
 function initPeer() {
-    const id = 'rafiki-' + Math.random().toString(36).substr(2, 9);
-    peer = new Peer(id, { debug: 1 });
+    const id = 'rafiki-' + Math.random().toString(36).substr(2,9);
+    peer = new Peer(id, { debug:1 });
     peer.on('open', (id) => {
         document.getElementById('myPeerId').textContent = id;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: id, width: 180, height: 180, colorDark: "#004d40", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+        new QRCode(document.getElementById("qrcode"), { text:id, width:175, height:175, colorDark:"#004d40", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.H });
     });
     peer.on('connection', (c) => { conn = c; conn.on('open', () => setupConnection()); });
     peer.on('error', (err) => { console.error(err); alert("Connection Error: " + err.type); });
 }
-
 function connectToHost(idInput = null) {
     const hostId = idInput || document.getElementById('hostIdInput').value.trim();
     if (!hostId) return alert("Please enter a valid ID!");
     if (!peer) {
-        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2, 9);
-        peer = new Peer(myId, { debug: 1 });
+        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2,9);
+        peer = new Peer(myId, { debug:1 });
         peer.on('open', () => performConnect(hostId));
         peer.on('error', (err) => alert("Peer error: " + err.type));
     } else { performConnect(hostId); }
 }
-
 function performConnect(hostId) {
     conn = peer.connect(hostId);
     conn.on('open', () => setupConnection());
     conn.on('error', () => alert("Could not connect to Host. Check the ID and try again."));
 }
-
 function setupConnection() {
-    statusBadge.classList.add('connected');
-    statusText.textContent = 'Connected';
+    statusBadge.classList.add('connected'); statusText.textContent = 'Connected';
     document.getElementById('setupModal').classList.remove('active');
     chatLog.innerHTML = '';
-
-    // Attach data listener ONCE
     if (!dataListenerAttached) {
         conn.on('data', (data) => {
-            if (data.type === 'translation') {
-                speak(data.text, data.lang);
-                addLog('Partner: ' + data.text, 'guest');
-            }
+            if (data.type === 'translation') { speak(data.text, data.lang); playPing(); addLog('Partner: ' + data.text, 'guest'); }
         });
-        conn.on('close', handleDisconnect);
-        conn.on('error', handleDisconnect);
+        conn.on('close', handleDisconnect); conn.on('error', handleDisconnect);
         dataListenerAttached = true;
     }
-
-    // Mic starts in READY (off) state — user must tap to speak
     setMicState('ready');
-    addLog("✅ Connected! Tap the mic button when you want to speak. Use the side button to mute (avoids echo when both mics are on).", "system");
+    addLog("✅ Connected! Tap the mic to speak. Use the side button to mute.", "system");
 }
-
 function handleDisconnect() {
-    statusBadge.classList.remove('connected');
-    statusText.textContent = 'Disconnected';
+    statusBadge.classList.remove('connected'); statusText.textContent = 'Disconnected';
     try { recognition.stop(); } catch(e) {}
-    setMicState('off');
-    dataListenerAttached = false;
+    setMicState('off'); dataListenerAttached = false;
     addLog("❌ Partner disconnected.", "system");
 }
-
-function finishSetup() {
-    if (myRole === 'host') document.getElementById('setupModal').classList.remove('active');
-}
-
+function finishSetup() { if (myRole === 'host') document.getElementById('setupModal').classList.remove('active'); }
 function copyId() {
-    const idText = document.getElementById('myPeerId').textContent;
-    if (!idText || idText === 'Generating...') return;
-    navigator.clipboard ? navigator.clipboard.writeText(idText).then(() => alert("ID Copied!")) : (() => {
-        const ta = document.createElement("textarea");
-        ta.value = idText; ta.style.position = "fixed"; ta.style.left = "-9999px";
-        document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); alert("ID Copied!"); } catch(e) { alert("Copy failed."); }
-        document.body.removeChild(ta);
-    })();
+    const t = document.getElementById('myPeerId').textContent;
+    if (!t || t === 'Generating...') return;
+    navigator.clipboard ? navigator.clipboard.writeText(t).then(() => alert("ID Copied!"))
+    : (() => { const ta = document.createElement("textarea"); ta.value = t; ta.style.cssText = "position:fixed;left:-9999px"; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); alert("ID Copied!"); } catch(e) {} document.body.removeChild(ta); })();
 }
-
 function startScanner() {
     document.getElementById('scanOverlay').classList.add('active');
     html5QrCode = new Html5Qrcode("qr-reader");
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        (decoded) => { stopScanner(); document.getElementById('hostIdInput').value = decoded; connectToHost(decoded); },
-        () => {}
+    html5QrCode.start({ facingMode:"environment" }, { fps:10, qrbox:{ width:235, height:235 } },
+        (decoded) => { stopScanner(); document.getElementById('hostIdInput').value = decoded; connectToHost(decoded); }, () => {}
     ).catch(err => { alert("Camera error: " + err); stopScanner(); });
 }
-
 function stopScanner() {
     if (html5QrCode) {
         html5QrCode.stop().then(() => { html5QrCode.clear(); document.getElementById('scanOverlay').classList.remove('active'); }).catch(() => document.getElementById('scanOverlay').classList.remove('active'));
     } else { document.getElementById('scanOverlay').classList.remove('active'); }
 }
 
-// ==========================================
-// 11. INIT
-// ==========================================
+// ============================================================
+// INIT
+// ============================================================
 function init() {
     languages.forEach(lang => {
         [langMeSelect, langGuestSelect].forEach(sel => {
             const opt = document.createElement('option');
-            opt.value = lang.code; opt.textContent = lang.name;
-            sel.appendChild(opt);
+            opt.value = lang.code; opt.textContent = lang.name; sel.appendChild(opt);
         });
     });
-    langMeSelect.value = "en-US";
-    langGuestSelect.value = "sw-KE";
-
-    initSpeechRecognition();
-    setMicState('off');
+    langMeSelect.value = "en-US"; langGuestSelect.value = "sw-KE";
+    initSpeechRecognition(); setMicState('off'); loadSettings();
 }
-
 init();
 </script>
 </body>
