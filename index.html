@@ -296,7 +296,6 @@
         .scan-container { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 10px; position: relative; overflow: hidden; }
         .close-scan { position: absolute; top: -50px; right: 0; color: white; font-size: 2rem; cursor: pointer; background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; z-index: 10; }
         #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; min-height: 250px; }
-        /* Fix for html5-qrcode video styling */
         #qr-reader video { object-fit: cover; border-radius: 12px; }
         
         .hidden { display: none !important; }
@@ -323,7 +322,7 @@
 <!-- SETUP MODAL -->
 <div id="setupModal" class="modal-overlay active">
     <div class="modal-content" id="step1">
-        <!-- ORIGINAL LOGO RESTORED -->
+        <!-- ORIGINAL LOGO -->
         <div style="margin: 0 auto 20px auto;">
             <svg width="160" height="48" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
                 <text x="0" y="46" font-family="Arial" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
@@ -814,13 +813,8 @@ function initSpeechRecognition() {
     recognition.interimResults = true; 
     recognition.maxAlternatives = 1; 
     
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ audio: {
-            echoCancellation: settings.noiseSupp,
-            noiseSuppression: settings.noiseSupp,
-            autoGainControl: settings.noiseSupp
-        }}).then(stream => {}).catch(e => console.log("Audio init:", e));
-    }
+    // REMOVED: The getUserMedia call here to prevent permission conflicts.
+    // Web Speech API handles its own permissions when start() is called.
 
     recognition.onend = () => {
         if (micState === 'listening' && conn && conn.open) {
@@ -851,9 +845,12 @@ function initSpeechRecognition() {
     };
     
     recognition.onerror = (e) => {
+        console.error("Speech Error", e.error);
         if (e.error === 'not-allowed') { 
-            showToast("Mic permission denied.", "error"); 
+            showToast("Mic permission denied. Check browser settings.", "error"); 
             setMicState('ready'); 
+        } else if (e.error === 'no-speech') {
+            // Just ignore no-speech errors to keep flow smooth
         }
     };
 }
@@ -901,19 +898,30 @@ function cleanInput(text) {
 }
 
 // ============================================================
-// VOICE → TRANSLATE → SEND
+// VOICE → TRANSLATE → SEND (FIXED LOGIC)
 // ============================================================
 async function handleVoiceInput(text) {
     const cleaned = cleanInput(text);
     if(!cleaned) return; 
+    
     const sourceLang = langMeSelect.value, targetLang = langGuestSelect.value;
     const translation = await translateText(cleaned, sourceLang, targetLang);
+    
     const display = translation; 
     addLog(display, "me");
-    speak(translation, targetLang);
+
+    // --- CRITICAL FIX ---
+    // IF CONNECTED: Send to Peer. Peer will speak.
+    // IF NOT CONNECTED (Solo Mode): Speak locally.
     if (conn && conn.open) {
         conn.send({ type:'translation', text:translation, lang:targetLang });
+        // DO NOT speak locally to avoid hearing your own voice
+        showToast("Sent to partner", "success");
+    } else {
+        // Not connected (Testing/Offline), speak locally so user knows it worked
+        speak(translation, targetLang);
     }
+
     if (micState === 'listening') liveText.textContent = 'Listening...';
 }
 
@@ -1018,6 +1026,7 @@ function setupConnection() {
     if (!dataListenerAttached) {
         conn.on('data', (data) => {
             if (data.type === 'translation') { 
+                // LOGIC FIX: Receiver speaks the translation
                 speak(data.text, data.lang); 
                 addLog(data.text, "guest"); 
             }
@@ -1053,7 +1062,6 @@ function copyId() {
 async function startScanner() {
     document.getElementById('scanOverlay').classList.add('active');
     
-    // If an instance already exists, clear it first to prevent errors
     if (html5QrCode) {
         try {
             await html5QrCode.stop();
@@ -1065,7 +1073,6 @@ async function startScanner() {
         }
     }
 
-    // Wait a tiny bit for DOM to update (display: flex)
     setTimeout(async () => {
         try {
             html5QrCode = new Html5Qrcode("qr-reader");
@@ -1075,15 +1082,12 @@ async function startScanner() {
                 { facingMode: "environment" }, 
                 config, 
                 (decodedText, decodedResult) => {
-                    // Success callback
                     stopScanner();
                     document.getElementById('hostIdInput').value = decodedText;
                     showToast("QR Code Scanned!", "success");
                     connectToHost(decodedText);
                 },
-                (errorMessage) => {
-                    // Failure callback (scanning... do nothing)
-                }
+                (errorMessage) => {}
             );
         } catch (err) {
             console.error("Scanner start error", err);
@@ -1099,9 +1103,7 @@ async function stopScanner() {
         try {
             await html5QrCode.stop();
             await html5QrCode.clear();
-        } catch (err) {
-            // Ignore errors if already stopped
-        }
+        } catch (err) {}
         html5QrCode = null;
     }
 }
