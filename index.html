@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAFIKI PRO ULTRA</title>
+    <title>RAFIKI PRO ULTRA - Fixed</title>
     <!-- PeerJS for P2P -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <!-- QR Code Generator -->
@@ -483,20 +483,6 @@
                 </select>
             </div>
 
-            <!-- Confidence Threshold -->
-            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
-                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
-                    <div><strong>🎯 Speech Confidence</strong><br><small>Ignore uncertain speech (Filter Noise)</small></div>
-                    <span class="range-val" id="confVal">Loose</span>
-                </div>
-                <div class="range-wrap">
-                    <span style="font-size:0.72rem;color:var(--text-light)">Loose</span>
-                    <!-- Changed default to 0.1 (Loose) -->
-                    <input type="range" id="s_confidence" min="0" max="1" step="0.1" value="0.1" oninput="setConfidence(this)">
-                    <span style="font-size:0.72rem;color:var(--text-light)">Strict</span>
-                </div>
-            </div>
-            
             <!-- Noise Cancellation -->
              <div class="setting-row">
                 <div class="setting-label"><strong>🔇 Noise Suppression</strong><small>Use system noise filters</small></div>
@@ -550,8 +536,8 @@
             <div class="section-title">ℹ️ About</div>
             <div class="about-card">
                 <div class="about-row"><span>App</span><span>RAFIKI PRO ULTRA</span></div>
+                <div class="about-row"><span>Version</span><span>2.0 Fixed</span></div>
                 <div class="about-row"><span>Engine</span><span>Native Web APIs</span></div>
-                <div class="about-row"><span>Speech</span><span>Loose Filter (Default)</span></div>
             </div>
             <button class="danger-btn" onclick="clearChat()">🗑️ Clear Chat History</button>
         </div>
@@ -560,7 +546,7 @@
 
 <script>
 // ============================================================
-// TOAST SYSTEM (Replaces Alerts)
+// TOAST SYSTEM
 // ============================================================
 function showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -616,7 +602,6 @@ const DEFAULT_SETTINGS = {
     fontSize: 14,
     bubbleBg: '#004d40',
     bubbleText: '#ffffff',
-    confidence: 0.1, // FIXED: Set to 0.1 (Loose) by default to catch more speech
     noiseSupp: true,
     autoSpeak: true,
     manualVoiceURI: null, 
@@ -646,7 +631,6 @@ function applyAllSettings() {
     root.style.setProperty('--my-bubble-text', settings.bubbleText);
     
     document.getElementById('s_noiseSupp').checked = settings.noiseSupp;
-    setConfidence({value: settings.confidence});
     
     if(settings.manualVoiceURI) {
         const sel = document.getElementById('voiceSelect');
@@ -671,15 +655,6 @@ function setBubbleColor(swatch) {
     document.documentElement.style.setProperty('--my-bubble-text', settings.bubbleText);
     saveSettings();
 }
-function setConfidence(input) {
-    settings.confidence = parseFloat(input.value);
-    const val = settings.confidence;
-    let label = "Med";
-    if(val < 0.4) label = "Loose";
-    if(val > 0.8) label = "Strict";
-    document.getElementById('confVal').textContent = label;
-    saveSettings();
-}
 function clearChat() {
     chatLog.innerHTML = '<div class="empty-state"><div class="icon">🗑️</div><p>Chat cleared.</p></div>';
     closeSettings();
@@ -699,9 +674,10 @@ function closeSettings() {
 // ============================================================
 let peer = null, conn = null, myRole = 'guest';
 let recognition = null, html5QrCode = null;
-let isOfflineMode = false, micState = 'off', dataListenerAttached = false;
+let isOfflineMode = false, micState = 'off';
 let synth = window.speechSynthesis;
 let availableVoices = [];
+let shouldRestart = false; // FIX: Control auto-restart
 
 const langMeSelect    = document.getElementById('langMe');
 const langGuestSelect = document.getElementById('langGuest');
@@ -801,7 +777,7 @@ function setMicState(state) {
 }
 
 // ============================================================
-// SPEECH RECOGNITION
+// SPEECH RECOGNITION - FIXED
 // ============================================================
 function initSpeechRecognition() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -810,13 +786,23 @@ function initSpeechRecognition() {
         return;
     }
     recognition = new SR();
-    recognition.continuous = true; 
+    recognition.continuous = false; // FIX: Changed to false to prevent endless listening
     recognition.interimResults = true; 
     recognition.maxAlternatives = 1; 
     
+    // FIX: Only restart if explicitly allowed
     recognition.onend = () => {
-        if (micState === 'listening' && conn && conn.open) {
-            try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e) {}
+        console.log('Recognition ended, shouldRestart:', shouldRestart, 'micState:', micState);
+        if (shouldRestart && micState === 'listening' && conn && conn.open) {
+            console.log('Auto-restarting recognition...');
+            setTimeout(() => {
+                try { 
+                    recognition.lang = langMeSelect.value; 
+                    recognition.start(); 
+                } catch(e) {
+                    console.log('Restart failed:', e);
+                }
+            }, 100);
         }
     };
     
@@ -826,12 +812,6 @@ function initSpeechRecognition() {
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             const result = event.results[i];
             if (result.isFinal) {
-                // FIXED LOGIC: Only filter if confidence is EXTREMELY low (< 0.05)
-                // By default (0.1), almost everything passes now.
-                if (result[0].confidence < 0.05) {
-                    console.log("Ignoring extremely low confidence speech:", result[0].confidence);
-                    continue;
-                }
                 final += result[0].transcript;
             } else {
                 interim += result[0].transcript;
@@ -848,42 +828,64 @@ function initSpeechRecognition() {
         console.error("Speech Error", e.error);
         if (e.error === 'not-allowed') { 
             showToast("Mic permission denied. Check browser settings.", "error"); 
-            setMicState('ready'); 
+            stopListening(); 
         } else if (e.error === 'no-speech') {
-            // Just ignore no-speech errors to keep flow smooth
+            // Ignore and continue
+        } else if (e.error === 'aborted') {
+            // Ignore - user stopped it
         }
     };
 }
 
 // ============================================================
-// MIC CONTROLS
+// MIC CONTROLS - FIXED
 // ============================================================
 micBtn.addEventListener('click', () => {
-    if (!conn || !conn.open) return;
+    if (!conn || !conn.open) {
+        showToast("Connect to a partner first", "error");
+        return;
+    }
     if (micState === 'ready') startListening();
     else if (micState === 'listening' || micState === 'muted') stopListening();
 });
+
 muteBtn.addEventListener('click', () => {
     if (!conn || !conn.open) return;
     if (micState === 'listening') {
+        shouldRestart = false; // FIX: Stop auto-restart
         try { recognition.stop(); } catch(e) {}
-        setMicState('muted'); addLog("🔇 Mic muted.", "system");
+        setMicState('muted'); 
+        addLog("🔇 Mic muted.", "system");
     } else if (micState === 'muted') {
-        startListening(); addLog("🎙️ Mic active.", "system");
+        startListening(); 
+        addLog("🎙️ Mic active.", "system");
     }
 });
 
 function startListening() {
-    setMicState('listening'); window.speechSynthesis.cancel();
-    try { recognition.lang = langMeSelect.value; recognition.start(); }
-    catch(e) {
+    shouldRestart = true; // FIX: Enable auto-restart
+    setMicState('listening'); 
+    // FIX: Don't cancel speech - partner might be speaking
+    try { 
+        recognition.lang = langMeSelect.value; 
+        recognition.start(); 
+    } catch(e) {
+        console.log('Start error:', e);
         try { recognition.stop(); } catch(e2) {}
-        setTimeout(() => { try { recognition.lang = langMeSelect.value; recognition.start(); } catch(e3) {} }, 150);
+        setTimeout(() => { 
+            try { 
+                recognition.lang = langMeSelect.value; 
+                recognition.start(); 
+            } catch(e3) {} 
+        }, 150);
     }
 }
+
 function stopListening() {
+    shouldRestart = false; // FIX: Disable auto-restart
     try { recognition.stop(); } catch(e) {}
-    setMicState('ready'); liveText.textContent = '';
+    setMicState('ready'); 
+    liveText.textContent = '';
 }
 
 // ============================================================
@@ -898,28 +900,37 @@ function cleanInput(text) {
 }
 
 // ============================================================
-// VOICE → TRANSLATE → SEND
+// VOICE → TRANSLATE → SEND - FIXED
 // ============================================================
 async function handleVoiceInput(text) {
-    // DEBUG: Show what was heard
     console.log("Heard:", text);
     
     const cleaned = cleanInput(text);
-    if(!cleaned) return; 
+    if(!cleaned) {
+        console.log("Cleaned text empty, ignoring");
+        return;
+    }
     
-    const sourceLang = langMeSelect.value, targetLang = langGuestSelect.value;
+    const sourceLang = langMeSelect.value;
+    const targetLang = langGuestSelect.value;
+    
+    // FIX: Show ORIGINAL text on sender's side
+    addLog(cleaned, "me");
+    
+    // Translate to partner's language
     const translation = await translateText(cleaned, sourceLang, targetLang);
     
-    const display = translation; 
-    addLog(display, "me");
-
-    // IF CONNECTED: Send to Peer. Peer will speak.
-    // IF NOT CONNECTED (Solo Mode): Speak locally.
+    // Send translation to partner
     if (conn && conn.open) {
-        conn.send({ type:'translation', text:translation, lang:targetLang });
-        // DO NOT speak locally to avoid hearing your own voice
+        console.log("Sending to peer:", translation);
+        conn.send({ 
+            type: 'translation', 
+            text: translation, 
+            lang: targetLang,
+            original: cleaned // FIX: Send original too for debugging
+        });
     } else {
-        // Not connected (Testing/Offline), speak locally
+        console.log("Not connected - speaking locally for testing");
         speak(translation, targetLang);
     }
 
@@ -950,7 +961,7 @@ async function translateText(text, from, to) {
 
 function speak(text, lang) {
     if (!synth || !settings.autoSpeak) return;
-    synth.cancel(); 
+    synth.cancel(); // Cancel only MY pending speech
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     const bestVoice = getBestVoice(lang);
@@ -959,6 +970,7 @@ function speak(text, lang) {
     }
     u.rate = 1.0; 
     u.pitch = 1.0;
+    console.log('Speaking:', text, 'in', lang);
     synth.speak(u);
 }
 
@@ -982,83 +994,153 @@ function addLog(text, type) {
 }
 
 // ============================================================
-// PEER / CONNECTION
+// PEER / CONNECTION - FIXED
 // ============================================================
 function showStep(step) {
     document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-    if (step === '1') { document.getElementById('step1').classList.remove('hidden'); document.getElementById('setupModal').classList.add('active'); }
-    else if (step === 'host') { myRole = 'host'; document.getElementById('stepHost').classList.remove('hidden'); initPeer(); }
-    else if (step === 'guest') { myRole = 'guest'; document.getElementById('stepGuest').classList.remove('hidden'); }
+    if (step === '1') { 
+        document.getElementById('step1').classList.remove('hidden'); 
+        document.getElementById('setupModal').classList.add('active'); 
+    }
+    else if (step === 'host') { 
+        myRole = 'host'; 
+        document.getElementById('stepHost').classList.remove('hidden'); 
+        initPeer(); 
+    }
+    else if (step === 'guest') { 
+        myRole = 'guest'; 
+        document.getElementById('stepGuest').classList.remove('hidden'); 
+    }
 }
 
 function initPeer() {
     const id = 'rafiki-' + Math.random().toString(36).substr(2,9);
-    peer = new Peer(id, { debug:0 }); 
+    peer = new Peer(id, { debug: 0 }); 
+    
     peer.on('open', (id) => {
+        console.log('Peer opened with ID:', id);
         document.getElementById('myPeerId').textContent = id;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text:id, width:175, height:175, colorDark:"#004d40", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.H });
+        new QRCode(document.getElementById("qrcode"), { 
+            text: id, 
+            width: 175, 
+            height: 175, 
+            colorDark: "#004d40", 
+            colorLight: "#ffffff", 
+            correctLevel: QRCode.CorrectLevel.H 
+        });
     });
-    peer.on('connection', (c) => { conn = c; conn.on('open', () => setupConnection()); });
-    peer.on('error', (err) => { showToast("Connection Error: " + err.type, "error"); });
+    
+    peer.on('connection', (c) => { 
+        console.log('Incoming connection from guest');
+        conn = c; 
+        setupConnectionListeners(); // FIX: Setup listeners immediately
+    });
+    
+    peer.on('error', (err) => { 
+        console.error('Peer error:', err);
+        showToast("Connection Error: " + err.type, "error"); 
+    });
 }
 
 function connectToHost(idInput = null) {
     const hostId = idInput || document.getElementById('hostIdInput').value.trim();
     if (!hostId) return showToast("Please enter a valid ID!", "error");
+    
     if (!peer) {
         const myId = 'rafiki-g-' + Math.random().toString(36).substr(2,9);
-        peer = new Peer(myId, { debug:0 });
-        peer.on('open', () => performConnect(hostId));
-        peer.on('error', (err) => showToast("Peer error: " + err.type, "error"));
-    } else { performConnect(hostId); }
+        peer = new Peer(myId, { debug: 0 });
+        peer.on('open', () => {
+            console.log('Guest peer opened, connecting to:', hostId);
+            performConnect(hostId);
+        });
+        peer.on('error', (err) => {
+            console.error('Guest peer error:', err);
+            showToast("Peer error: " + err.type, "error");
+        });
+    } else { 
+        performConnect(hostId); 
+    }
 }
 
 function performConnect(hostId) {
+    console.log('Performing connection to:', hostId);
     conn = peer.connect(hostId);
-    conn.on('open', () => setupConnection());
-    conn.on('error', () => showToast("Could not connect to Host.", "error"));
+    setupConnectionListeners(); // FIX: Setup listeners immediately
 }
 
-function setupConnection() {
-    statusBadge.classList.add('connected'); statusText.textContent = 'Connected';
-    document.getElementById('setupModal').classList.remove('active');
-    chatLog.innerHTML = '';
-    if (!dataListenerAttached) {
-        conn.on('data', (data) => {
-            if (data.type === 'translation') { 
-                // LOGIC FIX: Receiver speaks the translation
-                speak(data.text, data.lang); 
-                addLog(data.text, "guest"); 
-            }
-        });
-        conn.on('close', handleDisconnect); 
-        conn.on('error', handleDisconnect);
-        dataListenerAttached = true;
-    }
-    setMicState('ready');
-    addLog("✅ Connected! Tap mic to speak.", "system");
-    showToast("Partner Connected", "success");
+// FIX: Separate function for setting up connection listeners
+function setupConnectionListeners() {
+    if (!conn) return;
+    
+    conn.on('open', () => {
+        console.log('Connection opened!');
+        statusBadge.classList.add('connected'); 
+        statusText.textContent = 'Connected';
+        document.getElementById('setupModal').classList.remove('active');
+        chatLog.innerHTML = '';
+        setMicState('ready');
+        addLog("✅ Connected! Tap mic to speak.", "system");
+        showToast("Partner Connected", "success");
+    });
+    
+    // FIX: Proper data handler
+    conn.on('data', (data) => {
+        console.log('Received data:', data);
+        if (data.type === 'translation') {
+            // FIX: Receiver speaks AND displays the translation
+            speak(data.text, data.lang); 
+            addLog(data.text, "guest");
+        }
+    });
+    
+    conn.on('close', () => {
+        console.log('Connection closed');
+        handleDisconnect();
+    });
+    
+    conn.on('error', (err) => {
+        console.error('Connection error:', err);
+        handleDisconnect();
+    });
 }
 
 function handleDisconnect() {
-    statusBadge.classList.remove('connected'); statusText.textContent = 'Disconnected';
+    statusBadge.classList.remove('connected'); 
+    statusText.textContent = 'Disconnected';
+    shouldRestart = false; // FIX: Stop auto-restart
     try { recognition.stop(); } catch(e) {}
-    setMicState('off'); dataListenerAttached = false;
+    setMicState('off');
     addLog("❌ Partner disconnected.", "system");
+    showToast("Partner Disconnected", "error");
 }
 
-function finishSetup() { if (myRole === 'host') document.getElementById('setupModal').classList.remove('active'); }
+function finishSetup() { 
+    if (myRole === 'host') {
+        document.getElementById('setupModal').classList.remove('active'); 
+    }
+}
 
 function copyId() {
     const t = document.getElementById('myPeerId').textContent;
     if (!t || t === 'Generating...') return;
     navigator.clipboard ? navigator.clipboard.writeText(t).then(() => showToast("ID Copied!", "success"))
-    : (() => { const ta = document.createElement("textarea"); ta.value = t; ta.style.cssText = "position:fixed;left:-9999px"; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); showToast("ID Copied!", "success"); } catch(e) {} document.body.removeChild(ta); })();
+    : (() => { 
+        const ta = document.createElement("textarea"); 
+        ta.value = t; 
+        ta.style.cssText = "position:fixed;left:-9999px"; 
+        document.body.appendChild(ta); 
+        ta.select(); 
+        try { 
+            document.execCommand('copy'); 
+            showToast("ID Copied!", "success"); 
+        } catch(e) {} 
+        document.body.removeChild(ta); 
+    })();
 }
 
 // ============================================================
-// FIXED QR SCANNER LOGIC
+// QR SCANNER - FIXED
 // ============================================================
 async function startScanner() {
     document.getElementById('scanOverlay').classList.add('active');
@@ -1083,6 +1165,7 @@ async function startScanner() {
                 { facingMode: "environment" }, 
                 config, 
                 (decodedText, decodedResult) => {
+                    console.log('QR Scanned:', decodedText);
                     stopScanner();
                     document.getElementById('hostIdInput').value = decodedText;
                     showToast("QR Code Scanned!", "success");
@@ -1113,10 +1196,13 @@ async function stopScanner() {
 // INIT
 // ============================================================
 function init() {
+    console.log('Initializing RAFIKI PRO...');
     languages.forEach(lang => {
         [langMeSelect, langGuestSelect].forEach(sel => {
             const opt = document.createElement('option');
-            opt.value = lang.code; opt.textContent = lang.name; sel.appendChild(opt);
+            opt.value = lang.code; 
+            opt.textContent = lang.name; 
+            sel.appendChild(opt);
         });
     });
     langMeSelect.value = "en-US"; 
@@ -1125,6 +1211,7 @@ function init() {
     setMicState('off'); 
     loadSettings();
     populateVoiceList(); 
+    console.log('Initialization complete');
 }
 init();
 </script>
