@@ -3,7 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAFIKI PRO ULTRA - Fixed</title>
+    <title>RAFIKI PRO</title>
+
+    <!-- ══ PWA: Manifest ════════════════════════════════════════════════════ -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- ══ PWA: Theme & Status Bar ══════════════════════════════════════════ -->
+    <meta name="theme-color" content="#004d40">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RAFIKI PRO">
+
+    <!-- ══ PWA: Apple Touch Icons ════════════════════════════════════════════ -->
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512x512.png">
+
+    <!-- ══ PWA: Favicon ══════════════════════════════════════════════════════ -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+
+    <!-- ══ SEO Meta ══════════════════════════════════════════════════════════ -->
+    <meta name="description" content="RAFIKI PRO — Real-time P2P voice translation. Speak your language, your partner hears theirs. No server needed.">
+    <meta name="application-name" content="RAFIKI PRO">
+
+    <!-- ══ External Scripts ══════════════════════════════════════════════════ -->
     <!-- PeerJS for P2P -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <!-- QR Code Generator -->
@@ -1215,5 +1240,28 @@ function init() {
 }
 init();
 </script>
+
+<!-- ══ PWA: Service Worker Registration ══════════════════════════════════════ -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/RAFIKI-APP/sw.js', { scope: '/RAFIKI-APP/' })
+        .then(reg => {
+          console.log('[RAFIKI PRO] Service Worker registered ✅', reg.scope);
+          reg.update();
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                showToast('🔄 New version available — refresh to update!', 'info');
+              }
+            });
+          });
+        })
+        .catch(err => console.warn('[RAFIKI PRO] SW registration failed:', err));
+    });
+  }
+</script>
+
 </body>
 </html>
