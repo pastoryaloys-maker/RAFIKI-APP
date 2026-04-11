@@ -1175,21 +1175,30 @@ init();
 
 <script>
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/RAFIKI-APP/sw.js', { scope: '/RAFIKI-APP/' })
-            .then(reg => {
-                console.log('[RAFIKI PRO] SW registered ✅', reg.scope);
-                reg.update();
-                reg.addEventListener('updatefound', () => {
-                    const newWorker = reg.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showToast('🔄 New version available — refresh to update!', 'info');
-                        }
-                    });
+    window.addEventListener('load', async () => {
+        try {
+            const probe = await fetch('/RAFIKI-APP/sw.js', { method: 'HEAD' });
+            if (!probe.ok) {
+                console.info('[RAFIKI PRO] sw.js not found yet — skipping SW registration');
+                return;
+            }
+            const reg = await navigator.serviceWorker.register(
+                '/RAFIKI-APP/sw.js',
+                { scope: '/RAFIKI-APP/' }
+            );
+            console.log('[RAFIKI PRO] Service Worker registered ✅', reg.scope);
+            reg.update();
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        showToast('🔄 New version available — refresh to update!', 'info');
+                    }
                 });
-            })
-            .catch(err => console.warn('[RAFIKI PRO] SW registration failed:', err));
+            });
+        } catch (err) {
+            console.warn('[RAFIKI PRO] SW registration failed:', err);
+        }
     });
 }
 </script>
