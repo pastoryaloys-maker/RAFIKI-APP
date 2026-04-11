@@ -4,36 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAFIKI PRO</title>
-
-    <!-- ══ PWA: Manifest ════════════════════════════════════════════════════ -->
     <link rel="manifest" href="manifest.json">
-
-    <!-- ══ PWA: Theme & Status Bar ══════════════════════════════════════════ -->
     <meta name="theme-color" content="#004d40">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RAFIKI PRO">
-
-    <!-- ══ PWA: Apple Touch Icons ════════════════════════════════════════════ -->
     <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
     <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512x512.png">
-
-    <!-- ══ PWA: Favicon ══════════════════════════════════════════════════════ -->
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
-
-    <!-- ══ SEO Meta ══════════════════════════════════════════════════════════ -->
     <meta name="description" content="RAFIKI PRO — Real-time P2P voice translation. Speak your language, your partner hears theirs. No server needed.">
     <meta name="application-name" content="RAFIKI PRO">
-
-    <!-- ══ External Scripts ══════════════════════════════════════════════════ -->
-    <!-- PeerJS for P2P -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- QR Code Scanner -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
@@ -96,7 +81,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* HEADER */
         header {
             background: var(--surface); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
@@ -124,7 +108,6 @@
         .icon-btn:active { transform: scale(0.88); }
         .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-        /* MAIN */
         main { flex: 1; overflow-y: auto; padding: 13px 13px 6px; display: flex; flex-direction: column; gap: 10px; }
 
         .card {
@@ -146,7 +129,6 @@
         .offline-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .offline-label { font-size: 0.79rem; color: var(--text-light); font-weight: 600; }
 
-        /* TOGGLE */
         .switch { position: relative; display: inline-block; width: 42px; height: 23px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; inset: 0; background: #d0d5dd; border-radius: 23px; transition: .3s; }
@@ -154,7 +136,6 @@
         input:checked + .slider { background: var(--primary-light); }
         input:checked + .slider:before { transform: translateX(19px); }
 
-        /* CHAT */
         .chat-log { display: flex; flex-direction: column; gap: 10px; }
         .empty-state { text-align: center; padding: 26px 20px; color: var(--text-light); }
         .empty-state .icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
@@ -177,7 +158,6 @@
         .meta { font-size: 0.65rem; color: #a0aab4; margin-top: 3px; font-weight: 500; }
         body.dark .meta { color: #484f58; }
 
-        /* CONTROLS */
         .controls-area {
             background: var(--surface); padding: 16px 20px 24px; border-top: 1px solid var(--border);
             display: flex; flex-direction: column; align-items: center; gap: 11px; flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
@@ -212,7 +192,6 @@
 
         @keyframes ring-pulse { 0% { transform: scale(1); opacity: 0.7; } 70% { transform: scale(1.45); opacity: 0; } 100% { transform: scale(1.45); opacity: 0; } }
 
-        /* SETTINGS DRAWER */
         .settings-backdrop {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 90;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
@@ -267,35 +246,14 @@
         .danger-btn:hover { background: #fee2e2; }
         body.dark .danger-btn { background: rgba(185,28,28,0.1); border-color: rgba(185,28,28,0.32); color: #f87171; }
 
-        .reset-link { text-align: center; font-size: 0.76rem; color: var(--text-light); cursor: pointer; text-decoration: underline; background: none; border: none; font-family: 'DM Sans', sans-serif; display: block; width: 100%; padding: 4px; }
-
         .about-card { background: var(--surface-2); border-radius: 13px; padding: 13px 15px; border: 1px solid var(--border); }
         .about-row { display: flex; justify-content: space-between; padding: 4px 0; }
         .about-row:not(:last-child) { border-bottom: 1px solid var(--border); margin-bottom: 4px; }
         .about-row span:first-child { font-size: 0.79rem; color: var(--text-light); font-weight: 600; }
         .about-row span:last-child { font-size: 0.79rem; font-weight: 700; color: var(--text-main); }
 
-        .font-preview {
-            background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
-            font-size: var(--bubble-fs, 0.92rem); font-family: var(--chat-font, 'DM Sans', sans-serif);
-            font-weight: var(--bubble-fw, 400); line-height: var(--bubble-lh, 1.5); color: var(--text-main); transition: all 0.2s;
-        }
-
-        .custom-color-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-        .custom-color-label { font-size: 0.72rem; font-weight: 600; color: var(--text-light); }
-        .color-picker-input { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); padding: 0; cursor: pointer; background: none; }
-        .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
-        .color-picker-input::-webkit-color-swatch { border: none; border-radius: 50%; }
-
-        #s_myName, #s_partnerName {
-            border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text-main); font-family: 'DM Sans', sans-serif;
-        }
-        #s_myName:focus, #s_partnerName:focus { border-color: var(--primary-light); outline: none; }
-
-        /* Voice Select */
         #voiceSelect { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); margin-top: 5px; font-size: 0.8rem; }
 
-        /* MODAL */
         .modal-overlay { position: fixed; inset: 0; background: rgba(10,18,28,0.88); backdrop-filter: blur(10px); z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
         .modal-content { background: var(--surface); width: 100%; max-width: 385px; border-radius: 24px; padding: 24px 22px; text-align: center; box-shadow: var(--shadow-lg); max-height: 92dvh; overflow-y: auto; }
@@ -322,10 +280,8 @@
         .close-scan { position: absolute; top: -50px; right: 0; color: white; font-size: 2rem; cursor: pointer; background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; z-index: 10; }
         #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; min-height: 250px; }
         #qr-reader video { object-fit: cover; border-radius: 12px; }
-        
         .hidden { display: none !important; }
 
-        /* TOAST NOTIFICATIONS */
         #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 350px; pointer-events: none; }
         .toast {
             background: var(--surface); color: var(--text-main); padding: 12px 16px; border-radius: 12px;
@@ -336,18 +292,15 @@
         .toast.error { border-left: 4px solid var(--danger); }
         .toast.success { border-left: 4px solid var(--success); }
         .toast.info { border-left: 4px solid var(--primary); }
-
     </style>
 </head>
 <body>
 
-<!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
 <!-- SETUP MODAL -->
 <div id="setupModal" class="modal-overlay active">
     <div class="modal-content" id="step1">
-        <!-- ORIGINAL LOGO -->
         <div style="margin: 0 auto 20px auto;">
             <svg width="160" height="48" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
                 <text x="0" y="46" font-family="Arial" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
@@ -355,7 +308,6 @@
                 <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
             </svg>
         </div>
-
         <p class="modal-desc">Live conversation translator.<br>Choose a role to begin.</p>
         <button class="role-btn primary" onclick="showStep('host')">
             <span class="role-icon">🟢</span>
@@ -373,9 +325,10 @@
         <div id="qrcode"></div>
         <div class="id-display" id="myPeerId">Generating...</div>
         <button class="btn-small" onclick="copyId()">Copy ID</button><br><br>
+        <!-- FIX: Host "Start Chat" now shows a waiting message if no guest yet connected -->
         <button class="role-btn primary" onclick="finishSetup()">
             <span class="role-icon">✓</span>
-            <span class="role-info">Start Chat <small>Mic stays OFF until you tap</small></span>
+            <span class="role-info">Start Chat <small>Mic stays OFF until guest connects</small></span>
         </button>
         <button class="btn-text" onclick="showStep('1')">← Back</button>
     </div>
@@ -431,11 +384,12 @@
         <div class="lang-grid">
             <div class="lang-group">
                 <label>My Language</label>
-                <select id="langMe" onchange="updateVoiceHint()"></select>
+                <!-- FIX: Removed onchange=updateVoiceHint() to prevent noisy toasts on every language change -->
+                <select id="langMe"></select>
             </div>
             <div class="lang-group">
                 <label>Their Language</label>
-                <select id="langGuest" onchange="updateVoiceHint()"></select>
+                <select id="langGuest"></select>
             </div>
         </div>
         <div class="offline-row">
@@ -497,7 +451,7 @@
         <div class="setting-section">
             <div class="section-title">🎙️ Audio Precision</div>
 
-            <!-- Voice Selection -->
+            <!-- FIX: Voice select options now use voiceURI as value (was index number) -->
             <div class="setting-row" style="flex-direction:column; align-items:stretch; gap:5px;">
                 <div class="setting-label">
                     <strong>🗣️ Select Voice (Manual)</strong>
@@ -509,9 +463,15 @@
             </div>
 
             <!-- Noise Cancellation -->
-             <div class="setting-row">
+            <div class="setting-row">
                 <div class="setting-label"><strong>🔇 Noise Suppression</strong><small>Use system noise filters</small></div>
                 <label class="switch"><input type="checkbox" id="s_noiseSupp" checked onchange="settings.noiseSupp=this.checked;saveSettings()"><span class="slider"></span></label>
+            </div>
+
+            <!-- FIX: Added missing autoSpeak toggle that was in settings state but had no UI -->
+            <div class="setting-row">
+                <div class="setting-label"><strong>🔊 Auto-Speak Translation</strong><small>Read translations aloud automatically</small></div>
+                <label class="switch"><input type="checkbox" id="s_autoSpeak" checked onchange="settings.autoSpeak=this.checked;saveSettings()"><span class="slider"></span></label>
             </div>
         </div>
 
@@ -528,8 +488,7 @@
                     <span class="slider"></span>
                 </label>
             </div>
-             <!-- Font Size Slider -->
-             <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+            <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
                 <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
                     <div><strong>🔤 Font Size</strong><br><small>Chat bubble text size</small></div>
                     <span class="range-val" id="fontSizeVal" style="min-width:36px;text-align:right">14px</span>
@@ -542,8 +501,8 @@
             </div>
         </div>
 
-         <!-- BUBBLE COLORS -->
-         <div class="setting-section">
+        <!-- BUBBLE COLORS -->
+        <div class="setting-section">
             <div class="section-title">🫧 Bubble Colors</div>
             <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
                 <div class="setting-label"><strong>🟢 My Bubble Color</strong></div>
@@ -561,7 +520,7 @@
             <div class="section-title">ℹ️ About</div>
             <div class="about-card">
                 <div class="about-row"><span>App</span><span>RAFIKI PRO ULTRA</span></div>
-                <div class="about-row"><span>Version</span><span>2.0 Fixed</span></div>
+                <div class="about-row"><span>Version</span><span>2.1 Fixed</span></div>
                 <div class="about-row"><span>Engine</span><span>Native Web APIs</span></div>
             </div>
             <button class="danger-btn" onclick="clearChat()">🗑️ Clear Chat History</button>
@@ -577,13 +536,10 @@ function showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    let icon = '';
-    if(type === 'success') icon = '✅';
-    if(type === 'error') icon = '⚠️';
-    if(type === 'info') icon = 'ℹ️';
-    toast.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    const icons = { success: '✅', error: '⚠️', info: 'ℹ️' };
+    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
     container.appendChild(toast);
-    toast.offsetHeight;
+    toast.offsetHeight; // force reflow
     toast.classList.add('show');
     setTimeout(() => {
         toast.classList.remove('show');
@@ -610,13 +566,13 @@ const languages = [
 // OFFLINE DICTIONARY
 // ============================================================
 const offlineDictionary = {
-    "hello":       { en:"Hello", sw:"Habari", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo" },
-    "yes":         { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja" },
-    "no":          { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee" },
-    "thanks":      { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt" },
-    "please":      { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft" },
-    "good morning":{ en:"Good morning", sw:"Habari za asubuhi", fr:"Bonjour", es:"Buenos días", de:"Guten Morgen", it:"Buongiorno", pt:"Bom dia", ru:"Доброе утро", zh:"早上好", ja:"おはよう", ko:"좋은 아침", ar:"صباح الخير", hi:"सुप्रभात", tr:"Günaydın", pl:"Dzień dobry", nl:"Goedemorgen" },
-    "goodbye":     { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens" }
+    "hello":        { en:"Hello", sw:"Habari", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo" },
+    "yes":          { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja" },
+    "no":           { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee" },
+    "thanks":       { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt" },
+    "please":       { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft" },
+    "good morning": { en:"Good morning", sw:"Habari za asubuhi", fr:"Bonjour", es:"Buenos días", de:"Guten Morgen", it:"Buongiorno", pt:"Bom dia", ru:"Доброе утро", zh:"早上好", ja:"おはよう", ko:"좋은 아침", ar:"صباح الخير", hi:"सुप्रभात", tr:"Günaydın", pl:"Dzień dobry", nl:"Goedemorgen" },
+    "goodbye":      { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens" }
 };
 
 // ============================================================
@@ -629,7 +585,8 @@ const DEFAULT_SETTINGS = {
     bubbleText: '#ffffff',
     noiseSupp: true,
     autoSpeak: true,
-    manualVoiceURI: null, 
+    // FIX: Store voiceURI string (was storing numeric index before)
+    manualVoiceURI: null,
 };
 let settings = { ...DEFAULT_SETTINGS };
 
@@ -640,55 +597,70 @@ function loadSettings() {
     } catch(e) {}
     applyAllSettings();
 }
+
 function saveSettings() {
     try { localStorage.setItem('rafiki_pro_settings', JSON.stringify(settings)); } catch(e) {}
 }
+
 function applyAllSettings() {
     const root = document.documentElement;
     document.body.classList.toggle('dark', settings.darkMode);
     document.getElementById('s_darkMode').checked = settings.darkMode;
-    
+
     root.style.setProperty('--bubble-fs', settings.fontSize + 'px');
     document.getElementById('s_fontSize').value = settings.fontSize;
     document.getElementById('fontSizeVal').textContent = settings.fontSize + 'px';
-    
+
     root.style.setProperty('--my-bubble-bg', settings.bubbleBg);
     root.style.setProperty('--my-bubble-text', settings.bubbleText);
-    
+
     document.getElementById('s_noiseSupp').checked = settings.noiseSupp;
-    
-    if(settings.manualVoiceURI) {
+    document.getElementById('s_autoSpeak').checked = settings.autoSpeak;
+
+    // FIX: Restore voice by voiceURI (options now use voiceURI as value)
+    if (settings.manualVoiceURI) {
         const sel = document.getElementById('voiceSelect');
-        sel.value = settings.manualVoiceURI;
+        // Only set if the option already exists in the list
+        const match = Array.from(sel.options).find(o => o.value === settings.manualVoiceURI);
+        if (match) sel.value = settings.manualVoiceURI;
     }
 }
 
 function applyDarkMode(val) {
-    settings.darkMode = val; document.body.classList.toggle('dark', val); saveSettings();
+    settings.darkMode = val;
+    document.body.classList.toggle('dark', val);
+    saveSettings();
 }
+
 function setFontSizeSlider(input) {
     settings.fontSize = parseInt(input.value);
     document.getElementById('fontSizeVal').textContent = settings.fontSize + 'px';
     document.documentElement.style.setProperty('--bubble-fs', settings.fontSize + 'px');
     saveSettings();
 }
+
 function setBubbleColor(swatch) {
     document.querySelectorAll('#bubbleColorRow .color-swatch').forEach(s => s.classList.remove('active'));
     swatch.classList.add('active');
-    settings.bubbleBg = swatch.dataset.bg; settings.bubbleText = swatch.dataset.text;
+    settings.bubbleBg = swatch.dataset.bg;
+    settings.bubbleText = swatch.dataset.text;
     document.documentElement.style.setProperty('--my-bubble-bg', settings.bubbleBg);
     document.documentElement.style.setProperty('--my-bubble-text', settings.bubbleText);
     saveSettings();
 }
+
 function clearChat() {
     chatLog.innerHTML = '<div class="empty-state"><div class="icon">🗑️</div><p>Chat cleared.</p></div>';
     closeSettings();
 }
+
 function openSettings() {
+    // FIX: Always repopulate voice list on open (voices may have loaded async since init)
     populateVoiceList();
     document.getElementById('settingsDrawer').classList.add('open');
     document.getElementById('settingsBackdrop').classList.add('open');
 }
+
 function closeSettings() {
     document.getElementById('settingsDrawer').classList.remove('open');
     document.getElementById('settingsBackdrop').classList.remove('open');
@@ -702,7 +674,7 @@ let recognition = null, html5QrCode = null;
 let isOfflineMode = false, micState = 'off';
 let synth = window.speechSynthesis;
 let availableVoices = [];
-let shouldRestart = false; // FIX: Control auto-restart
+let shouldRestart = false;
 
 const langMeSelect    = document.getElementById('langMe');
 const langGuestSelect = document.getElementById('langGuest');
@@ -725,53 +697,46 @@ offlineToggle.addEventListener('change', e => {
 // VOICE ENGINE
 // ============================================================
 function populateVoiceList() {
-    availableVoices = synth.getVoices().sort(function (a, b) {
-        const aname = a.name.toUpperCase(), bname = b.name.toUpperCase();
-        if ( aname < bname ) return -1;
-        else if ( aname == bname ) return 0;
-        else return +1;
-    });
-    
+    availableVoices = synth.getVoices().sort((a, b) =>
+        a.name.toUpperCase() < b.name.toUpperCase() ? -1 : a.name.toUpperCase() > b.name.toUpperCase() ? 1 : 0
+    );
+
+    // FIX: Option value is now voiceURI (was numeric index — broke save/restore)
     voiceSelect.innerHTML = '<option value="">Auto (Best Match)</option>';
-    availableVoices.forEach((voice, i) => {
+    availableVoices.forEach(voice => {
         const option = document.createElement('option');
         option.textContent = `${voice.name} (${voice.lang})`;
-        option.value = i; 
+        option.value = voice.voiceURI; // FIX: was `i` (index number)
         voiceSelect.appendChild(option);
     });
+
+    // Restore saved selection after repopulating
+    if (settings.manualVoiceURI) {
+        const match = Array.from(voiceSelect.options).find(o => o.value === settings.manualVoiceURI);
+        if (match) voiceSelect.value = settings.manualVoiceURI;
+    }
 }
 
 if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = populateVoiceList;
 }
 
-function manualVoiceSelect(idx) {
-    if(idx === "") {
-        settings.manualVoiceURI = null;
-    } else {
-        settings.manualVoiceURI = availableVoices[idx].voiceURI;
-    }
+// FIX: manualVoiceSelect now receives voiceURI directly (option values are now voiceURIs)
+function manualVoiceSelect(voiceURI) {
+    settings.manualVoiceURI = voiceURI || null;
     saveSettings();
-    updateVoiceHint();
-}
-
-function updateVoiceHint() {
-    const lang = langGuestSelect.value; 
-    const region = lang.split('-')[1];
-    const base = lang.split('-')[0];
-    showToast(`Target Voice: ${lang} (Region: ${region || 'Generic'})`, 'info');
 }
 
 function getBestVoice(targetLang) {
     if (settings.manualVoiceURI) {
-        return availableVoices.find(v => v.voiceURI === settings.manualVoiceURI);
+        const found = availableVoices.find(v => v.voiceURI === settings.manualVoiceURI);
+        if (found) return found;
     }
     let match = availableVoices.find(v => v.lang === targetLang);
     if (match) return match;
     const baseLang = targetLang.split('-')[0];
     const baseMatches = availableVoices.filter(v => v.lang.startsWith(baseLang));
-    if (baseMatches.length > 0) return baseMatches[0];
-    return null; 
+    return baseMatches[0] || null;
 }
 
 // ============================================================
@@ -779,7 +744,7 @@ function getBestVoice(targetLang) {
 // ============================================================
 function setMicState(state) {
     micState = state;
-    micBtn.classList.remove('disabled','ready','listening','muted');
+    micBtn.classList.remove('disabled', 'ready', 'listening', 'muted');
     if (state === 'off') {
         micBtn.classList.add('disabled'); micBtn.disabled = true;
         muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
@@ -790,7 +755,7 @@ function setMicState(state) {
         hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap mic to speak</div>';
     } else if (state === 'listening') {
         micBtn.classList.add('listening'); micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn','active-mute'); muteBtn.title = 'Mute';
+        muteBtn.classList.remove('hidden-btn', 'active-mute'); muteBtn.title = 'Mute';
         liveText.textContent = 'Listening...';
         hintPills.innerHTML = '<div class="hint-pill">🟢 Mic ON</div>';
     } else if (state === 'muted') {
@@ -802,7 +767,7 @@ function setMicState(state) {
 }
 
 // ============================================================
-// SPEECH RECOGNITION - FIXED
+// SPEECH RECOGNITION
 // ============================================================
 function initSpeechRecognition() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -811,26 +776,25 @@ function initSpeechRecognition() {
         return;
     }
     recognition = new SR();
-    recognition.continuous = false; // FIX: Changed to false to prevent endless listening
-    recognition.interimResults = true; 
-    recognition.maxAlternatives = 1; 
-    
-    // FIX: Only restart if explicitly allowed
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
     recognition.onend = () => {
-        console.log('Recognition ended, shouldRestart:', shouldRestart, 'micState:', micState);
-        if (shouldRestart && micState === 'listening' && conn && conn.open) {
-            console.log('Auto-restarting recognition...');
-            setTimeout(() => {
-                try { 
-                    recognition.lang = langMeSelect.value; 
-                    recognition.start(); 
+        // FIX: Capture shouldRestart at moment of evaluation (inside setTimeout)
+        // to avoid stale closure issues when user toggles mute/stop quickly
+        setTimeout(() => {
+            if (shouldRestart && micState === 'listening' && conn && conn.open) {
+                try {
+                    recognition.lang = langMeSelect.value;
+                    recognition.start();
                 } catch(e) {
-                    console.log('Restart failed:', e);
+                    console.log('Auto-restart failed:', e);
                 }
-            }, 100);
-        }
+            }
+        }, 150);
     };
-    
+
     recognition.onresult = (event) => {
         if (micState !== 'listening') return;
         let interim = '', final = '';
@@ -843,27 +807,27 @@ function initSpeechRecognition() {
             }
         }
         if (interim) liveText.textContent = '🎤 ' + interim;
-        if (final) { 
-            liveText.textContent = 'Translating...'; 
-            handleVoiceInput(final); 
+        if (final) {
+            liveText.textContent = 'Translating...';
+            handleVoiceInput(final);
         }
     };
-    
+
     recognition.onerror = (e) => {
-        console.error("Speech Error", e.error);
-        if (e.error === 'not-allowed') { 
-            showToast("Mic permission denied. Check browser settings.", "error"); 
-            stopListening(); 
-        } else if (e.error === 'no-speech') {
-            // Ignore and continue
-        } else if (e.error === 'aborted') {
-            // Ignore - user stopped it
+        console.error("Speech Error:", e.error);
+        if (e.error === 'not-allowed') {
+            showToast("Mic permission denied. Check browser settings.", "error");
+            stopListening();
+        } else if (e.error === 'no-speech' || e.error === 'aborted') {
+            // Non-fatal — ignore silently
+        } else {
+            console.warn("Recognition error:", e.error);
         }
     };
 }
 
 // ============================================================
-// MIC CONTROLS - FIXED
+// MIC CONTROLS
 // ============================================================
 micBtn.addEventListener('click', () => {
     if (!conn || !conn.open) {
@@ -875,41 +839,47 @@ micBtn.addEventListener('click', () => {
 });
 
 muteBtn.addEventListener('click', () => {
+    // FIX: Guard against null recognition in case SR isn't supported
     if (!conn || !conn.open) return;
     if (micState === 'listening') {
-        shouldRestart = false; // FIX: Stop auto-restart
-        try { recognition.stop(); } catch(e) {}
-        setMicState('muted'); 
+        shouldRestart = false;
+        if (recognition) { try { recognition.stop(); } catch(e) {} }
+        setMicState('muted');
         addLog("🔇 Mic muted.", "system");
     } else if (micState === 'muted') {
-        startListening(); 
+        startListening();
         addLog("🎙️ Mic active.", "system");
     }
 });
 
 function startListening() {
-    shouldRestart = true; // FIX: Enable auto-restart
-    setMicState('listening'); 
-    // FIX: Don't cancel speech - partner might be speaking
-    try { 
-        recognition.lang = langMeSelect.value; 
-        recognition.start(); 
+    if (!recognition) {
+        showToast("Speech recognition not available", "error");
+        return;
+    }
+    shouldRestart = true;
+    setMicState('listening');
+    try {
+        recognition.lang = langMeSelect.value;
+        recognition.start();
     } catch(e) {
-        console.log('Start error:', e);
+        // May throw if already started — stop and retry once
         try { recognition.stop(); } catch(e2) {}
-        setTimeout(() => { 
-            try { 
-                recognition.lang = langMeSelect.value; 
-                recognition.start(); 
-            } catch(e3) {} 
-        }, 150);
+        setTimeout(() => {
+            if (shouldRestart) {
+                try {
+                    recognition.lang = langMeSelect.value;
+                    recognition.start();
+                } catch(e3) { console.log('Start retry failed:', e3); }
+            }
+        }, 200);
     }
 }
 
 function stopListening() {
-    shouldRestart = false; // FIX: Disable auto-restart
-    try { recognition.stop(); } catch(e) {}
-    setMicState('ready'); 
+    shouldRestart = false;
+    if (recognition) { try { recognition.stop(); } catch(e) {} }
+    setMicState('ready');
     liveText.textContent = '';
 }
 
@@ -917,45 +887,36 @@ function stopListening() {
 // TEXT PROCESSING
 // ============================================================
 function cleanInput(text) {
-    let clean = text.trim()
+    return text.trim()
         .replace(/\b(um|uh|ah|er|like|you know)\b/gi, "")
         .replace(/\s+/g, " ")
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/, ""); 
-    return clean;
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/, "")
+        .trim();
 }
 
 // ============================================================
-// VOICE → TRANSLATE → SEND - FIXED
+// VOICE → TRANSLATE → SEND
 // ============================================================
 async function handleVoiceInput(text) {
-    console.log("Heard:", text);
-    
     const cleaned = cleanInput(text);
-    if(!cleaned) {
-        console.log("Cleaned text empty, ignoring");
-        return;
-    }
-    
+    if (!cleaned) return;
+
     const sourceLang = langMeSelect.value;
     const targetLang = langGuestSelect.value;
-    
-    // FIX: Show ORIGINAL text on sender's side
+
     addLog(cleaned, "me");
-    
-    // Translate to partner's language
+
     const translation = await translateText(cleaned, sourceLang, targetLang);
-    
-    // Send translation to partner
+
     if (conn && conn.open) {
-        console.log("Sending to peer:", translation);
-        conn.send({ 
-            type: 'translation', 
-            text: translation, 
+        conn.send({
+            type: 'translation',
+            text: translation,
             lang: targetLang,
-            original: cleaned // FIX: Send original too for debugging
+            original: cleaned
         });
     } else {
-        console.log("Not connected - speaking locally for testing");
+        // Local preview (not connected)
         speak(translation, targetLang);
     }
 
@@ -965,7 +926,7 @@ async function handleVoiceInput(text) {
 async function translateText(text, from, to) {
     if (isOfflineMode) {
         const tCode = to.split('-')[0];
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
         if (offlineDictionary[clean]?.[tCode]) return offlineDictionary[clean][tCode];
         return text + " (No offline match)";
     }
@@ -974,28 +935,26 @@ async function translateText(text, from, to) {
     try {
         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sCode}|${tCode}`);
         const data = await res.json();
-        if(data.responseStatus === 200) return data.responseData.translatedText;
+        if (data.responseStatus === 200) return data.responseData.translatedText;
         throw new Error("API limit");
     } catch(e) {
         showToast("Using offline fallback", "error");
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-        if (offlineDictionary[clean]?.[tCode]) return offlineDictionary[clean][tCode];
-        return text; 
+        const tCode2 = to.split('-')[0];
+        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+        if (offlineDictionary[clean]?.[tCode2]) return offlineDictionary[clean][tCode2];
+        return text;
     }
 }
 
 function speak(text, lang) {
     if (!synth || !settings.autoSpeak) return;
-    synth.cancel(); // Cancel only MY pending speech
+    synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     const bestVoice = getBestVoice(lang);
-    if (bestVoice) {
-        u.voice = bestVoice;
-    }
-    u.rate = 1.0; 
+    if (bestVoice) u.voice = bestVoice;
+    u.rate = 1.0;
     u.pitch = 1.0;
-    console.log('Speaking:', text, 'in', lang);
     synth.speak(u);
 }
 
@@ -1003,10 +962,11 @@ function addLog(text, type) {
     const empty = chatLog.querySelector('.empty-state');
     if (empty) empty.remove();
     const div = document.createElement('div');
-    const time = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     div.className = `log-item ${type}`;
     const bubble = document.createElement('div');
-    bubble.className = 'bubble'; bubble.textContent = text;
+    bubble.className = 'bubble';
+    bubble.textContent = text;
     div.appendChild(bubble);
     if (type !== 'system') {
         const meta = document.createElement('div');
@@ -1019,88 +979,71 @@ function addLog(text, type) {
 }
 
 // ============================================================
-// PEER / CONNECTION - FIXED
+// PEER / CONNECTION
 // ============================================================
 function showStep(step) {
     document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-    if (step === '1') { 
-        document.getElementById('step1').classList.remove('hidden'); 
-        document.getElementById('setupModal').classList.add('active'); 
-    }
-    else if (step === 'host') { 
-        myRole = 'host'; 
-        document.getElementById('stepHost').classList.remove('hidden'); 
-        initPeer(); 
-    }
-    else if (step === 'guest') { 
-        myRole = 'guest'; 
-        document.getElementById('stepGuest').classList.remove('hidden'); 
+    if (step === '1') {
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('setupModal').classList.add('active');
+    } else if (step === 'host') {
+        myRole = 'host';
+        document.getElementById('stepHost').classList.remove('hidden');
+        initPeer();
+    } else if (step === 'guest') {
+        myRole = 'guest';
+        document.getElementById('stepGuest').classList.remove('hidden');
     }
 }
 
 function initPeer() {
-    const id = 'rafiki-' + Math.random().toString(36).substr(2,9);
-    peer = new Peer(id, { debug: 0 }); 
-    
+    const id = 'rafiki-' + Math.random().toString(36).substr(2, 9);
+    peer = new Peer(id, { debug: 0 });
+
     peer.on('open', (id) => {
-        console.log('Peer opened with ID:', id);
         document.getElementById('myPeerId').textContent = id;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { 
-            text: id, 
-            width: 175, 
-            height: 175, 
-            colorDark: "#004d40", 
-            colorLight: "#ffffff", 
-            correctLevel: QRCode.CorrectLevel.H 
+        new QRCode(document.getElementById("qrcode"), {
+            text: id, width: 175, height: 175,
+            colorDark: "#004d40", colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
         });
     });
-    
-    peer.on('connection', (c) => { 
-        console.log('Incoming connection from guest');
-        conn = c; 
-        setupConnectionListeners(); // FIX: Setup listeners immediately
+
+    peer.on('connection', (c) => {
+        conn = c;
+        setupConnectionListeners();
     });
-    
-    peer.on('error', (err) => { 
-        console.error('Peer error:', err);
-        showToast("Connection Error: " + err.type, "error"); 
+
+    peer.on('error', (err) => {
+        showToast("Connection Error: " + err.type, "error");
     });
 }
 
 function connectToHost(idInput = null) {
     const hostId = idInput || document.getElementById('hostIdInput').value.trim();
     if (!hostId) return showToast("Please enter a valid ID!", "error");
-    
+
     if (!peer) {
-        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2,9);
+        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2, 9);
         peer = new Peer(myId, { debug: 0 });
-        peer.on('open', () => {
-            console.log('Guest peer opened, connecting to:', hostId);
-            performConnect(hostId);
-        });
-        peer.on('error', (err) => {
-            console.error('Guest peer error:', err);
-            showToast("Peer error: " + err.type, "error");
-        });
-    } else { 
-        performConnect(hostId); 
+        peer.on('open', () => performConnect(hostId));
+        peer.on('error', (err) => showToast("Peer error: " + err.type, "error"));
+    } else {
+        performConnect(hostId);
     }
 }
 
 function performConnect(hostId) {
-    console.log('Performing connection to:', hostId);
     conn = peer.connect(hostId);
-    setupConnectionListeners(); // FIX: Setup listeners immediately
+    setupConnectionListeners();
 }
 
-// FIX: Separate function for setting up connection listeners
 function setupConnectionListeners() {
     if (!conn) return;
-    
+
     conn.on('open', () => {
-        console.log('Connection opened!');
-        statusBadge.classList.add('connected'); 
+        statusBadge.classList.add('connected');
         statusText.textContent = 'Connected';
         document.getElementById('setupModal').classList.remove('active');
         chatLog.innerHTML = '';
@@ -1108,22 +1051,24 @@ function setupConnectionListeners() {
         addLog("✅ Connected! Tap mic to speak.", "system");
         showToast("Partner Connected", "success");
     });
-    
-    // FIX: Proper data handler
+
+    // FIX: Added type safety — guard against non-object or wrongly-typed data payloads
     conn.on('data', (data) => {
-        console.log('Received data:', data);
-        if (data.type === 'translation') {
-            // FIX: Receiver speaks AND displays the translation
-            speak(data.text, data.lang); 
+        // Handle both object format and legacy plain-string format
+        if (data && typeof data === 'object' && data.type === 'translation') {
+            speak(data.text, data.lang);
             addLog(data.text, "guest");
+        } else if (typeof data === 'string' && data.trim()) {
+            // Legacy fallback: plain string sent without wrapper object
+            const fallbackLang = langMeSelect.value; // best guess
+            speak(data, fallbackLang);
+            addLog(data, "guest");
+        } else {
+            console.warn("Received unrecognised data format:", data);
         }
     });
-    
-    conn.on('close', () => {
-        console.log('Connection closed');
-        handleDisconnect();
-    });
-    
+
+    conn.on('close', () => handleDisconnect());
     conn.on('error', (err) => {
         console.error('Connection error:', err);
         handleDisconnect();
@@ -1131,75 +1076,67 @@ function setupConnectionListeners() {
 }
 
 function handleDisconnect() {
-    statusBadge.classList.remove('connected'); 
+    statusBadge.classList.remove('connected');
     statusText.textContent = 'Disconnected';
-    shouldRestart = false; // FIX: Stop auto-restart
-    try { recognition.stop(); } catch(e) {}
+    shouldRestart = false;
+    if (recognition) { try { recognition.stop(); } catch(e) {} }
     setMicState('off');
     addLog("❌ Partner disconnected.", "system");
     showToast("Partner Disconnected", "error");
 }
 
-function finishSetup() { 
-    if (myRole === 'host') {
-        document.getElementById('setupModal').classList.remove('active'); 
+// FIX: finishSetup now shows a waiting toast if guest hasn't connected yet (host scenario)
+function finishSetup() {
+    if (myRole === 'host' && (!conn || !conn.open)) {
+        // Modal stays open if no guest yet — just inform the host
+        showToast("Waiting for guest to connect…", "info");
+        return;
     }
+    document.getElementById('setupModal').classList.remove('active');
 }
 
 function copyId() {
     const t = document.getElementById('myPeerId').textContent;
     if (!t || t === 'Generating...') return;
-    navigator.clipboard ? navigator.clipboard.writeText(t).then(() => showToast("ID Copied!", "success"))
-    : (() => { 
-        const ta = document.createElement("textarea"); 
-        ta.value = t; 
-        ta.style.cssText = "position:fixed;left:-9999px"; 
-        document.body.appendChild(ta); 
-        ta.select(); 
-        try { 
-            document.execCommand('copy'); 
-            showToast("ID Copied!", "success"); 
-        } catch(e) {} 
-        document.body.removeChild(ta); 
-    })();
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(t).then(() => showToast("ID Copied!", "success"));
+    } else {
+        const ta = document.createElement("textarea");
+        ta.value = t;
+        ta.style.cssText = "position:fixed;left:-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast("ID Copied!", "success"); } catch(e) {}
+        document.body.removeChild(ta);
+    }
 }
 
 // ============================================================
-// QR SCANNER - FIXED
+// QR SCANNER
 // ============================================================
 async function startScanner() {
     document.getElementById('scanOverlay').classList.add('active');
-    
+
     if (html5QrCode) {
-        try {
-            await html5QrCode.stop();
-            await html5QrCode.clear();
-            html5QrCode = null;
-        } catch (err) {
-            console.log("Scanner cleanup warning:", err);
-            html5QrCode = null;
-        }
+        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {}
+        html5QrCode = null;
     }
 
     setTimeout(async () => {
         try {
             html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
             await html5QrCode.start(
-                { facingMode: "environment" }, 
-                config, 
-                (decodedText, decodedResult) => {
-                    console.log('QR Scanned:', decodedText);
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
                     stopScanner();
                     document.getElementById('hostIdInput').value = decodedText;
                     showToast("QR Code Scanned!", "success");
                     connectToHost(decodedText);
                 },
-                (errorMessage) => {}
+                () => {} // ignore frame errors
             );
-        } catch (err) {
-            console.error("Scanner start error", err);
+        } catch(err) {
             showToast("Camera Error: " + err, "error");
             stopScanner();
         }
@@ -1209,10 +1146,7 @@ async function startScanner() {
 async function stopScanner() {
     document.getElementById('scanOverlay').classList.remove('active');
     if (html5QrCode) {
-        try {
-            await html5QrCode.stop();
-            await html5QrCode.clear();
-        } catch (err) {}
+        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {}
         html5QrCode = null;
     }
 }
@@ -1221,46 +1155,43 @@ async function stopScanner() {
 // INIT
 // ============================================================
 function init() {
-    console.log('Initializing RAFIKI PRO...');
     languages.forEach(lang => {
         [langMeSelect, langGuestSelect].forEach(sel => {
             const opt = document.createElement('option');
-            opt.value = lang.code; 
-            opt.textContent = lang.name; 
+            opt.value = lang.code;
+            opt.textContent = lang.name;
             sel.appendChild(opt);
         });
     });
-    langMeSelect.value = "en-US"; 
+    langMeSelect.value = "en-US";
     langGuestSelect.value = "sw-TZ";
-    initSpeechRecognition(); 
-    setMicState('off'); 
+    initSpeechRecognition();
+    setMicState('off');
     loadSettings();
-    populateVoiceList(); 
-    console.log('Initialization complete');
+    populateVoiceList();
 }
 init();
 </script>
 
-<!-- ══ PWA: Service Worker Registration ══════════════════════════════════════ -->
 <script>
-  if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/RAFIKI-APP/sw.js', { scope: '/RAFIKI-APP/' })
-        .then(reg => {
-          console.log('[RAFIKI PRO] Service Worker registered ✅', reg.scope);
-          reg.update();
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                showToast('🔄 New version available — refresh to update!', 'info');
-              }
-            });
-          });
-        })
-        .catch(err => console.warn('[RAFIKI PRO] SW registration failed:', err));
+        navigator.serviceWorker.register('/RAFIKI-APP/sw.js', { scope: '/RAFIKI-APP/' })
+            .then(reg => {
+                console.log('[RAFIKI PRO] SW registered ✅', reg.scope);
+                reg.update();
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showToast('🔄 New version available — refresh to update!', 'info');
+                        }
+                    });
+                });
+            })
+            .catch(err => console.warn('[RAFIKI PRO] SW registration failed:', err));
     });
-  }
+}
 </script>
 
 </body>
