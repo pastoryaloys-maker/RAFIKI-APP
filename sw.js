@@ -1,144 +1,23 @@
-// ============================================================
-// RAFIKI PRO — Service Worker (sw.js)
-// Scope: /RAFIKI-APP/
-// Strategy: Cache-first for assets, network-first for API calls
-// ============================================================
-
-const CACHE_NAME = 'rafiki-pro-v2';
-const OFFLINE_PAGE = '/RAFIKI-APP/index.html';
-
-// Files to pre-cache on install
-const PRECACHE_ASSETS = [
-    '/RAFIKI-APP/',
-    '/RAFIKI-APP/index.html',
-    '/RAFIKI-APP/manifest.json',
-    '/RAFIKI-APP/icons/icon-152x152.png',
-    '/RAFIKI-APP/icons/icon-192x192.png',
-    '/RAFIKI-APP/icons/icon-512x512.png',
+const CACHE_NAME = 'rafiki-pro-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  'https://unpkg.com/html5-qrcode'
 ];
 
-// External CDN assets to cache on first use
-const CDN_HOSTS = [
-    'unpkg.com',
-    'cdnjs.cloudflare.com',
-    'fonts.googleapis.com',
-    'fonts.gstatic.com',
-];
-
-// ── INSTALL ──────────────────────────────────────────────────
-self.addEventListener('install', event => {
-    console.log('[RAFIKI SW] Installing v2...');
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('[RAFIKI SW] Pre-caching app shell');
-                // Add each asset individually so one missing icon doesn't fail all
-                return Promise.allSettled(
-                    PRECACHE_ASSETS.map(url =>
-                        cache.add(url).catch(err =>
-                            console.warn('[RAFIKI SW] Pre-cache skipped:', url, err.message)
-                        )
-                    )
-                );
-            })
-            .then(() => self.skipWaiting()) // activate immediately
-    );
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
 });
 
-// ── ACTIVATE ─────────────────────────────────────────────────
-self.addEventListener('activate', event => {
-    console.log('[RAFIKI SW] Activating...');
-    event.waitUntil(
-        caches.keys()
-            .then(keys => Promise.all(
-                keys
-                    .filter(key => key !== CACHE_NAME)
-                    .map(key => {
-                        console.log('[RAFIKI SW] Deleting old cache:', key);
-                        return caches.delete(key);
-                    })
-            ))
-            .then(() => self.clients.claim()) // take control of all open tabs
-    );
-});
-
-// ── FETCH ─────────────────────────────────────────────────────
-self.addEventListener('fetch', event => {
-    const { request } = event;
-    const url = new URL(request.url);
-
-    // Skip non-GET requests (PeerJS WebSocket, POST, etc.)
-    if (request.method !== 'GET') return;
-
-    // Skip PeerJS signalling server and translation API — always network
-    if (
-        url.hostname.includes('peerjs.com') ||
-        url.hostname.includes('0.peerjs.com') ||
-        url.hostname.includes('mymemory.translated.net') ||
-        url.protocol === 'chrome-extension:'
-    ) {
-        return;
-    }
-
-    // CDN assets (PeerJS lib, QRCode lib, fonts) — cache-first
-    if (CDN_HOSTS.some(host => url.hostname.includes(host))) {
-        event.respondWith(cacheFirst(request));
-        return;
-    }
-
-    // App shell & local assets — cache-first, fallback to network then offline page
-    if (url.pathname.startsWith('/RAFIKI-APP/')) {
-        event.respondWith(cacheFirstWithFallback(request));
-        return;
-    }
-});
-
-// ── STRATEGIES ───────────────────────────────────────────────
-
-// Cache-first: serve from cache, update cache in background
-async function cacheFirst(request) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-
-    try {
-        const response = await fetch(request);
-        if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(request, response.clone());
-        }
-        return response;
-    } catch (err) {
-        console.warn('[RAFIKI SW] Network failed for CDN asset:', request.url);
-        return new Response('Offline — resource unavailable', { status: 503 });
-    }
-}
-
-// Cache-first with offline fallback for app shell
-async function cacheFirstWithFallback(request) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-
-    try {
-        const response = await fetch(request);
-        if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(request, response.clone());
-        }
-        return response;
-    } catch (err) {
-        // Navigation request — return the cached app shell
-        if (request.mode === 'navigate') {
-            const fallback = await caches.match(OFFLINE_PAGE);
-            if (fallback) return fallback;
-        }
-        return new Response('Offline', { status: 503 });
-    }
-}
-
-// ── MESSAGE HANDLER ───────────────────────────────────────────
-// Allows the app to send commands to the SW (e.g. force refresh)
-self.addEventListener('message', event => {
-    if (event.data === 'SKIP_WAITING') {
-        self.skipWaiting();
-    }
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
 });
