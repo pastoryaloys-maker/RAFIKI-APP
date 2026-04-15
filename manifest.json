@@ -1,36 +1,20 @@
 {
-  "name": "RAFIKI PRO",
-  "short_name": "RAFIKI",
-  "description": "Real-time P2P voice translation. Speak your language, your partner hears theirs.",
-  "start_url": "/RAFIKI-APP/",
-  "scope": "/RAFIKI-APP/",
+  "name": "RAFIKI PRO Translator",
+  "short_name": "RAFIKI PRO",
+  "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#eef1f4",
+  "background_color": "#004d40",
   "theme_color": "#004d40",
-  "lang": "en",
-  "categories": ["utilities", "productivity"],
   "icons": [
     {
-      "src": "icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-192x192.png",
+      "src": "https://picsum.photos/192/192",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icons/icon-512x512.png",
+      "src": "https://picsum.photos/512/512",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ],
-  "screenshots": [],
-  "related_applications": [],
-  "prefer_related_applications": false
+  ]
 }
