@@ -13,13 +13,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RAFIKI PRO">
     
-    <!-- External Resources -->
+    <!-- EXTERNAL LIBRARIES -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
-    <!-- Icons (Replace these URLs with your own hosted files for production) -->
-    <!-- For now, using generic placeholders so the code doesn't break -->
+    <!-- ADSENSE GLOBAL CODE -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1215940501462468"
+         crossorigin="anonymous"></script>
+
+    <!-- GOOGLE ANALYTICS (Replace G-XXXXXXXXXX with your ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
     <link rel="icon" type="image/png" href="https://picsum.photos/192/192">
 
     <style>
@@ -113,11 +124,11 @@
         /* --- Main Content --- */
         main { flex: 1; overflow-y: auto; padding: 13px 13px 6px; display: flex; flex-direction: column; gap: 10px; position: relative; }
 
-        /* AdSense Placeholder (Hidden initially, shown when connected) */
+        /* AdSense Container */
         #ad-container {
-            display: none; /* Only show ads when user is active to maintain high UX score */
+            display: none; /* Hidden until user connects */
             width: 100%;
-            min-height: 50px;
+            min-height: 100px;
             background: rgba(0,0,0,0.03);
             border: 1px dashed var(--border);
             border-radius: 8px;
@@ -126,6 +137,7 @@
             justify-content: center;
             font-size: 0.75rem;
             color: var(--text-light);
+            overflow: hidden;
         }
         #ad-container.visible { display: flex; }
 
@@ -252,7 +264,7 @@
         }
         .drawer-tab.active { background: var(--primary); color: white; }
 
-        /* Legal Text Content (For AdSense) */
+        /* Legal Text Content */
         .legal-text { font-size: 0.85rem; color: var(--text-main); line-height: 1.6; }
         .legal-text h3 { font-size: 1rem; margin: 15px 0 8px; color: var(--primary); }
         .legal-text p { margin-bottom: 10px; color: var(--text-light); }
@@ -389,7 +401,7 @@
 
 <!-- MAIN -->
 <main>
-    <!-- ADSENSE PLACEHOLDER: Add your script here later -->
+    <!-- ADSENSE CONTAINER -->
     <div id="ad-container">
         <span>Advertisement Space</span>
     </div>
@@ -509,22 +521,15 @@
         </div>
     </div>
 
-    <!-- LEGAL TAB (For AdSense) -->
+    <!-- LEGAL TAB -->
     <div class="drawer-body hidden" id="legalBody">
         <div class="legal-text">
             <h3>About RAFIKI PRO</h3>
             <p>RAFIKI PRO is a cutting-edge, peer-to-peer (P2P) voice translation application designed to break down language barriers in real-time. Unlike traditional translation apps that rely on centralized servers, RAFIKI PRO connects two users directly via WebRTC, ensuring faster response times and enhanced privacy.</p>
             
-            <h3>How It Works</h3>
-            <p>1. <strong>Connect:</strong> One user acts as the Host and generates a QR code. The Guest scans this code to establish a secure P2P connection.</p>
-            <p>2. <strong>Speak:</strong> Users tap the microphone button to speak. The app uses the Web Speech API to transcribe audio into text.</p>
-            <p>3. <strong>Translate:</strong> The text is translated using the MyMemory Translation API. If the device is offline, a built-in dictionary provides basic translations.</p>
-            <p>4. <strong>Listen:</strong> The translated text is automatically read aloud using the browser's Text-to-Speech engine.</p>
-
             <h3>Privacy Policy</h3>
             <p><strong>Data Collection:</strong> RAFIKI PRO does not store your voice recordings on any server. Audio processing is performed locally by your browser or transiently during the P2P session.</p>
             <p><strong>Local Storage:</strong> We use local browser storage to save your preferences (language, theme, font size). No personal identifiable information (PII) is collected or transmitted to our servers.</p>
-            <p><strong>Third-Party Services:</strong> We use PeerJS for signaling and MyMemory for translation. Please refer to their respective privacy policies for details on how they handle data.</p>
             <p><strong>Cookies/Ads:</strong> This app may use cookies for advertising purposes (Google AdSense) to support our free service. You can disable cookies in your browser settings.</p>
 
             <h3>Terms of Service</h3>
@@ -635,7 +640,7 @@ function clearChat() {
     showToast("Chat history cleared", "info");
 }
 
-// Tab Switching for Settings/Legal
+// Tab Switching
 function switchTab(tab) {
     document.getElementById('settingsBody').classList.toggle('hidden', tab !== 'settings');
     document.getElementById('legalBody').classList.toggle('hidden', tab !== 'legal');
@@ -651,11 +656,6 @@ function openSettings() {
 function openLegal(type) {
     openSettings();
     switchTab('legal');
-    // Scroll to relevant section if needed
-    if(type === 'privacy') {
-        const el = document.getElementById('legalBody');
-        // Simple scroll to legal section
-    }
 }
 
 function closeSettings() {
@@ -699,13 +699,11 @@ function setMicState(state) {
         micBtn.classList.add('disabled'); micBtn.disabled = true;
         muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
         hintPills.innerHTML = '<div class="hint-pill">🔇 Connect first to use mic</div>';
-        // Hide ad when disconnected to improve UX score
         document.getElementById('ad-container').classList.remove('visible');
     } else if (state === 'ready') {
         micBtn.classList.add('ready'); micBtn.disabled = false;
         muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
         hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap mic to speak</div>';
-        // Show ad when connected (Active User)
         document.getElementById('ad-container').classList.add('visible');
     } else if (state === 'listening') {
         micBtn.classList.add('listening'); micBtn.disabled = false;
@@ -1066,7 +1064,6 @@ init();
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        // Try to register relative to current directory
         navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('SW registered'))
             .catch(err => console.log('SW failed', err));
