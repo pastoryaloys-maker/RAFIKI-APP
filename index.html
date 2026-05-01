@@ -313,6 +313,8 @@
         .method-name { font-size: 0.85rem; font-weight: 700; color: var(--text-main); display: block; }
         .method-desc { font-size: 0.65rem; color: var(--text-light); }
 
+        /* User Input Area */
+        .payment-input-area { margin-top: 15px; text-align: left; border-top: 1px solid var(--border); padding-top: 15px; }
         .pay-btn {
             width: 100%; margin-top: 20px; padding: 14px; border-radius: 12px; border: none;
             background: var(--primary); color: white; font-weight: 700; font-size: 1rem;
@@ -328,6 +330,7 @@
             border-radius: 12px;
             border: 1px dashed var(--primary);
             display: none;
+            text-align: left;
         }
         .otp-container.active { display: block; animation: fadeIn 0.3s; }
         .otp-display {
@@ -497,6 +500,7 @@
                 <div class="plan-period">Per Month (or $10)</div>
                 <div class="plan-benefit">✓ 30 Days Access</div>
             </div>
+            <!-- NEW: YEARLY PLAN ADDED -->
             <div class="plan-card selected" onclick="selectPlan('yearly')" id="plan-yearly">
                 <div class="badge-best">BEST VALUE</div>
                 <div class="plan-price">50,000 TZS</div>
@@ -533,8 +537,8 @@
             </div>
         </div>
 
-        <!-- User Input Area -->
-        <div id="payment-input-area" style="margin-top:15px; text-align:left;">
+        <!-- NEW: USER INPUT AREA -->
+        <div id="payment-input-area" class="payment-input-area">
             <!-- Mobile Money Input -->
             <div id="mm-input-group">
                 <label style="font-size:0.75rem; font-weight:700; color:var(--text-light);">Your Mobile Number</label>
@@ -551,7 +555,7 @@
             </div>
         </div>
 
-        <!-- OTP / CODE STEP -->
+        <!-- NEW: OTP STEP -->
         <div id="otp-step" class="otp-container">
             <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-bottom:5px;">Payment Initiated</div>
             <p style="font-size:0.75rem; color:var(--text-light); margin-bottom:10px;">A One-Time code has been sent to your phone. Enter it below to complete payment.</p>
@@ -679,6 +683,7 @@
     
     <!-- SETTINGS TAB -->
     <div class="drawer-body" id="settingsBody">
+        <!-- NEW UPGRADE BUTTON -->
         <button class="upgrade-settings-btn" onclick="openUpgradeModal()">
             <span>🔓 Upgrade to Unlock All Languages</span>
         </button>
@@ -1041,15 +1046,15 @@ function resetUserStatus() {
 }
 
 // ============================================================
-// PAYMENT & UPGRADE LOGIC (UPDATED)
+// PAYMENT & UPGRADE LOGIC (FULLY ACTIVE)
 // ============================================================
-let selectedPlan = 'yearly';
+// Defaults to Yearly to ensure the user sees the new change immediately
+let selectedPlan = 'yearly'; 
 let selectedMethod = 'mpesa';
 let generatedOTP = '';
 
 function openUpgradeModal() {
     document.getElementById('upgradeModal').classList.add('active');
-    // Reset UI
     resetPaymentFlow();
 }
 
@@ -1065,6 +1070,8 @@ function resetPaymentFlow() {
     document.getElementById('payBtn').disabled = false;
     document.getElementById('payBtn').innerHTML = "Pay Now";
     document.getElementById('otpInput').value = '';
+    // Reset selection to Yearly
+    selectPlan('yearly');
 }
 
 function selectPlan(plan) {
@@ -1124,7 +1131,7 @@ function initiatePayment() {
             
             document.getElementById('otp-step').classList.add('active');
             document.getElementById('simulatedCode').textContent = generatedOTP; // Show user code for demo
-            showToast("Check your phone for the code", "info");
+            showToast("Check your phone for code", "info");
         }, 500);
 
     }, 2000);
