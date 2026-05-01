@@ -1,1074 +1,1204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAFIKI PRO - Live Voice Translation</title>
-    
-    <!-- PWA & SEO Meta Tags -->
-    <meta name="description" content="RAFIKI PRO — Real-time P2P voice translation. Speak your language, your partner hears theirs. Free, secure, and easy to use.">
-    <meta name="theme-color" content="#004d40">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RAFIKI PRO">
-    
-    <!-- EXTERNAL LIBRARIES -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
-    <!-- ADSENSE GLOBAL CODE -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1215940501462468"
-         crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RAFIKI PRO - Live Voice Translation</title>
+<meta name="theme-color" content="#004d40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#004d40;--pri-l:#00796b;--pri-g:rgba(0,77,64,.25);
+  --acc:#ffab00;--acc-g:rgba(255,171,0,.3);
+  --dan:#d50000;--ok:#00c853;--pro:#7c4dff;--pro-g:rgba(124,77,255,.28);
+  --bg:#eef1f4;--sur:#fff;--sur2:#f7f9fb;
+  --tx:#1a2530;--txl:#5a7184;--bdr:rgba(0,0,0,.07);
+  --sh1:0 2px 8px rgba(0,0,0,.06);--sh2:0 6px 24px rgba(0,0,0,.09);--sh3:0 12px 40px rgba(0,0,0,.14);
+  --r:20px;--bfs:14px;
+}
+body.dark{--bg:#0d1117;--sur:#161b22;--sur2:#21262d;--tx:#e6edf3;--txl:#8b949e;--bdr:rgba(255,255,255,.08);--sh1:0 2px 8px rgba(0,0,0,.3);--sh2:0 6px 24px rgba(0,0,0,.4);--sh3:0 12px 40px rgba(0,0,0,.5);}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);height:100dvh;display:flex;flex-direction:column;overflow:hidden;transition:background .3s,color .3s}
 
-    <!-- GOOGLE ANALYTICS (Replace G-XXXXXXXXXX with your ID) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
-    </script>
+/* ── HEADER ── */
+header{background:var(--sur);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bdr);z-index:10;flex-shrink:0;gap:8px}
+.brand{font-weight:900;font-size:1.22rem;color:var(--pri);letter-spacing:-.5px;cursor:pointer;user-select:none;flex-shrink:0}
+.brand span{color:var(--acc)}
+.hdr-mid{flex:1;display:flex;justify-content:center;overflow:hidden}
+.hdr-r{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.plan-badge{font-size:.64rem;padding:3px 8px;border-radius:20px;font-weight:800;border:1.5px solid;white-space:nowrap;transition:all .3s}
+.plan-badge.free{background:var(--sur2);color:var(--txl);border-color:var(--bdr)}
+.plan-badge.trial{background:rgba(255,171,0,.12);color:#e65100;border-color:rgba(255,171,0,.4);animation:tpulse 2s infinite}
+.plan-badge.pro{background:linear-gradient(135deg,#7c4dff,#9c6fff);color:#fff;border-color:#7c4dff;box-shadow:0 2px 8px var(--pro-g)}
+@keyframes tpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,171,0,.3)}50%{box-shadow:0 0 0 4px rgba(255,171,0,0)}}
+.timer{font-size:.67rem;font-weight:700;color:#e65100;font-family:'DM Mono',monospace;display:none;white-space:nowrap}
+.timer.on{display:block}
+.sbadge{font-size:.69rem;padding:5px 9px;border-radius:20px;background:var(--sur2);color:var(--txl);font-weight:700;display:flex;align-items:center;gap:5px;border:1px solid var(--bdr);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#ccc;transition:.4s}
+.sbadge.conn{background:#e6f7ef;color:#00874a;border-color:#b2e6cb}
+body.dark .sbadge.conn{background:rgba(0,200,83,.12);color:#4caf50;border-color:rgba(76,175,80,.28)}
+.sbadge.conn .dot{background:var(--ok);box-shadow:0 0 7px var(--ok)}
+.ibtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--bdr);background:var(--sur2);color:var(--txl);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.ibtn:active{transform:scale(.88)}
 
-    <link rel="icon" type="image/png" href="https://picsum.photos/192/192">
+/* ── MAIN ── */
+main{flex:1;overflow-y:auto;padding:11px 11px 6px;display:flex;flex-direction:column;gap:9px}
+.card{background:var(--sur);border-radius:var(--r);padding:14px;box-shadow:var(--sh1);border:1px solid var(--bdr)}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lg label{display:block;font-size:.62rem;font-weight:700;color:var(--txl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.sw{position:relative}
+select{width:100%;padding:10px 26px 10px 10px;border:1.5px solid var(--bdr);border-radius:10px;background:var(--sur2);font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--tx);font-weight:500;appearance:none;background-image:url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='292' height='292'%3E%3Cpath fill='%2300796b' d='M287 69a18 18 0 00-13-5H18a18 18 0 00-13 5 18 18 0 000 26l128 128a18 18 0 0026 0L287 95a18 18 0 000-26z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:8px auto;cursor:pointer}
+select:focus{border-color:var(--pri-l)}
+.lk{position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:.7rem;pointer-events:none}
+.off-row{margin-top:11px;padding-top:11px;border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.off-lbl{font-size:.79rem;color:var(--txl);font-weight:600}
+.switch{position:relative;display:inline-block;width:42px;height:23px}
+.switch input{opacity:0;width:0;height:0}
+.sl{position:absolute;cursor:pointer;inset:0;background:#d0d5dd;border-radius:23px;transition:.3s}
+.sl:before{position:absolute;content:"";height:17px;width:17px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+input:checked+.sl{background:var(--pri-l)}
+input:checked+.sl:before{transform:translateX(19px)}
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+/* ── CHAT ── */
+.chat-log{display:flex;flex-direction:column;gap:10px}
+.empty{text-align:center;padding:24px 20px;color:var(--txl)}
+.empty .ei{font-size:2rem;margin-bottom:8px;opacity:.4}
+.empty p{font-size:.82rem;line-height:1.6}
+.msg{display:flex;flex-direction:column;max-width:82%}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.them{align-self:flex-start;align-items:flex-start}
+.msg.sys{align-self:center;align-items:center;max-width:100%}
+.bbl{padding:10px 15px;border-radius:18px;font-size:var(--bfs);line-height:1.5;font-family:'DM Sans',sans-serif}
+.me .bbl{background:var(--pri);color:#fff}
+.them .bbl{background:#e8edf0;color:var(--tx)}
+body.dark .them .bbl{background:#2d333b;color:#e6edf3}
+.sys .bbl{background:#fff8e1;color:#7a5800;font-size:.75rem;border-radius:10px;padding:6px 13px;border:1px solid #ffe082}
+body.dark .sys .bbl{background:rgba(255,171,0,.09);color:#ffd54f;border-color:rgba(255,171,0,.22)}
+.mt{font-size:.65rem;color:#a0aab4;margin-top:3px;font-weight:500}
 
-        :root {
-            --primary: #004d40;
-            --primary-light: #00796b;
-            --primary-glow: rgba(0,77,64,0.25);
-            --accent: #ffab00;
-            --accent-glow: rgba(255,171,0,0.3);
-            --danger: #d50000;
-            --danger-glow: rgba(213,0,0,0.3);
-            --success: #00c853;
-            --bg: #eef1f4;
-            --surface: #ffffff;
-            --surface-2: #f7f9fb;
-            --text-main: #1a2530;
-            --text-light: #5a7184;
-            --border: rgba(0,0,0,0.07);
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-            --shadow-md: 0 6px 24px rgba(0,0,0,0.09);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
-            --radius: 20px;
-            --bubble-fs: 14px;
-            --bubble-fw: 400;
-            --bubble-lh: 1.5;
-            --my-bubble-bg: #004d40;
-            --my-bubble-text: #ffffff;
-            --their-bubble-bg: #e8edf0;
-            --their-bubble-text: #1a2530;
-            --chat-font: 'DM Sans', sans-serif;
-            --bubble-radius: 18px;
-        }
+/* ── CONTROLS ── */
+.ctl{background:var(--sur);padding:14px 20px 22px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.live{font-size:.77rem;color:var(--txl);font-style:italic;min-height:18px}
+.mic-row{display:flex;align-items:center;gap:20px}
+.mic-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.mic-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid transparent;pointer-events:none}
+.mic-btn{width:68px;height:68px;border-radius:50%;border:none;background:#d0d7de;color:#6b7b8a;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);position:relative;z-index:1}
+.mic-btn:active{transform:scale(.9)!important}
+.mic-btn.dis{background:#e4e8ec;color:#b0bec5;cursor:not-allowed}
+.mic-btn.dis:active{transform:none!important}
+.mic-btn.rdy{background:var(--sur2);color:var(--pri);border:2px solid var(--pri);box-shadow:0 4px 16px var(--pri-g)}
+.mic-btn.rdy:hover{background:var(--pri);color:#fff}
+.mic-btn.lst{background:var(--pri);color:#fff;box-shadow:0 6px 24px var(--pri-g);transform:scale(1.05)}
+.mic-btn.lst~.mic-ring{border-color:var(--pri);animation:rp 2s infinite}
+.mic-btn.muted{background:var(--acc);color:#fff;box-shadow:0 6px 20px var(--acc-g)}
+.side{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txl);display:flex;justify-content:center;align-items:center;cursor:pointer;transition:all .25s;box-shadow:var(--sh1)}
+.side:active{transform:scale(.88)}
+.side.am{background:var(--acc);color:#fff;border-color:var(--acc);box-shadow:0 4px 14px var(--acc-g)}
+.side.hid{opacity:0;pointer-events:none}
+.pills{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.pill{background:var(--sur2);border:1px solid var(--bdr);border-radius:20px;padding:4px 10px;font-size:.69rem;font-weight:600;color:var(--txl)}
+@keyframes rp{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.45);opacity:0}100%{transform:scale(1.45);opacity:0}}
 
-        body.dark {
-            --bg: #0d1117;
-            --surface: #161b22;
-            --surface-2: #21262d;
-            --text-main: #e6edf3;
-            --text-light: #8b949e;
-            --border: rgba(255,255,255,0.08);
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-            --shadow-md: 0 6px 24px rgba(0,0,0,0.4);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
-            --their-bubble-bg: #2d333b;
-            --their-bubble-text: #e6edf3;
-        }
+/* ── OVERLAYS / MODALS ── */
+.ov{position:fixed;inset:0;background:rgba(10,18,28,.88);backdrop-filter:blur(10px);z-index:100;display:flex;justify-content:center;align-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.ov.on{opacity:1;pointer-events:all}
+.modal{background:var(--sur);width:100%;max-width:390px;border-radius:24px;padding:24px 22px;text-align:center;box-shadow:var(--sh3);max-height:92dvh;overflow-y:auto}
+.mtitle{font-size:1.12rem;font-weight:800;color:var(--tx);margin-bottom:5px}
+.mdesc{font-size:.82rem;color:var(--txl);line-height:1.5;margin-bottom:16px}
+.rbtn{display:flex;align-items:center;gap:11px;width:100%;padding:13px 15px;border:1.5px solid var(--bdr);background:var(--sur2);border-radius:15px;margin-bottom:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;color:var(--tx);cursor:pointer;transition:all .2s;text-align:left}
+.rbtn:active{transform:scale(.98)}
+.rbtn .ri{font-size:1.25rem}
+.rbtn .rd small{display:block;font-size:.68rem;color:var(--txl);font-weight:500;margin-top:1px}
+.rbtn.grn{background:var(--pri);color:#fff;border-color:var(--pri);box-shadow:0 4px 18px var(--pri-g)}
+.rbtn.grn small{color:rgba(255,255,255,.6)}
+.rbtn.amb{background:var(--acc);color:#fff;border-color:var(--acc);box-shadow:0 4px 18px var(--acc-g)}
+.rbtn.amb small{color:rgba(255,255,255,.7)}
+.id-box{background:var(--sur2);padding:12px;border-radius:10px;font-family:'DM Mono',monospace;font-size:.85rem;letter-spacing:1px;margin:12px 0;border:1.5px dashed #ccc;word-break:break-all;color:var(--pri);user-select:all}
+#qrcode{display:flex;justify-content:center;margin:12px 0;padding:10px;background:#fff;border:1px solid #eee;border-radius:12px}
+.ti{width:100%;padding:12px;border:1.5px solid var(--bdr);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:10px;text-align:center;background:var(--sur2);color:var(--tx)}
+.ti:focus{border-color:var(--pri-l);outline:none}
+.bl{background:transparent;border:none;color:var(--txl);text-decoration:underline;cursor:pointer;margin-top:9px;font-family:'DM Sans',sans-serif;font-size:.8rem}
+.cbar{background:rgba(0,77,64,.08);border:1px solid rgba(0,77,64,.2);border-radius:10px;padding:10px 13px;margin:10px 0;font-size:.8rem;color:var(--pri);font-weight:600;display:none;align-items:center;gap:8px}
+.cbar.on{display:flex}
+.spin{width:14px;height:14px;border:2px solid rgba(0,77,64,.2);border-top-color:var(--pri);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+/* ── QR SCANNER ── */
+.scan-ov{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center}
+.scan-ov.on{display:flex}
+.scan-wrap{position:relative;width:88%;max-width:360px}
+.scan-box{border-radius:18px;overflow:hidden;background:#111;aspect-ratio:1;position:relative}
+#scanCanvas{width:100%;height:100%;object-fit:cover;display:block}
+.scan-frame{position:absolute;inset:12%;pointer-events:none}
+.scan-frame::before,.scan-frame::after,.scan-frame .c1,.scan-frame .c2{content:'';position:absolute;width:28px;height:28px;border-color:var(--acc);border-style:solid}
+.scan-frame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:6px 0 0}
+.scan-frame::after{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 6px 0}
+.scan-frame .c1{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 6px}
+.scan-frame .c2{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 6px}
+.scan-line{position:absolute;left:12%;right:12%;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:sl 1.8s ease-in-out infinite}
+@keyframes sl{0%{top:13%}100%{top:87%}}
+.scan-hint{color:rgba(255,255,255,.8);font-size:.85rem;margin-top:16px;text-align:center;font-family:'DM Sans',sans-serif}
+.scan-sub{color:rgba(255,255,255,.5);font-size:.73rem;margin-top:5px;font-family:'DM Mono',monospace}
+.scan-close{position:absolute;top:-50px;right:0;width:40px;height:40px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text-main);
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: background 0.3s, color 0.3s;
-        }
+/* ── PAYMENT MODAL ── */
+.pay-inner{background:var(--sur);width:100%;max-width:420px;border-radius:26px;box-shadow:var(--sh3);max-height:94dvh;overflow-y:auto}
+.pay-hero{background:linear-gradient(135deg,#1a0533,#3d1a7a,#7c4dff);padding:24px 22px 18px;border-radius:26px 26px 0 0;text-align:center}
+.pay-crown{font-size:2.4rem;display:block;margin-bottom:6px}
+.pay-title{font-size:1.4rem;font-weight:900;color:#fff;letter-spacing:-.3px}
+.pay-sub{font-size:.8rem;color:rgba(255,255,255,.75);margin-top:3px}
+.pay-body{padding:18px}
 
-        /* --- Header --- */
-        header {
-            background: var(--surface); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
-        }
-        .header-left { display: flex; align-items: center; gap: 10px; }
-        .brand-text { font-weight: 800; font-size: 1.28rem; color: var(--primary); letter-spacing: -0.5px; line-height: 1; }
-        .brand-text span { color: var(--accent); }
-        .header-right { display: flex; align-items: center; gap: 7px; }
+/* Plan grid */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.pc{border:2px solid var(--bdr);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;background:var(--sur2);position:relative}
+.pc.sel{border-color:var(--pro);background:rgba(124,77,255,.07)}
+.pc:active{transform:scale(.97)}
+.pc .pbadge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;font-size:.55rem;font-weight:800;padding:2px 6px;border-radius:8px;white-space:nowrap}
+.pc .pp{font-size:.65rem;font-weight:700;text-transform:uppercase;color:var(--txl);margin-bottom:3px}
+.pc .pv{font-size:1.15rem;font-weight:900;color:var(--tx);line-height:1}
+.pc .pv sub{font-size:.62rem;font-weight:600;color:var(--txl)}
+.pc .pa{font-size:.62rem;color:var(--txl);margin-top:2px;font-weight:600}
 
-        .status-badge {
-            font-size: 0.69rem; padding: 5px 10px; border-radius: 20px;
-            background: var(--surface-2); color: var(--text-light);
-            font-weight: 700; display: flex; align-items: center; gap: 6px;
-            border: 1px solid var(--border); transition: all 0.4s;
-        }
-        .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; transition: 0.4s; }
-        .status-badge.connected { background: #e6f7ef; color: #00874a; border-color: #b2e6cb; }
-        body.dark .status-badge.connected { background: rgba(0,200,83,0.12); color: #4caf50; border-color: rgba(76,175,80,0.28); }
-        .status-badge.connected .dot { background: var(--success); box-shadow: 0 0 7px var(--success); }
+/* Amount pill */
+.amt-pill{background:linear-gradient(135deg,var(--pro),#b388ff);color:#fff;border-radius:10px;padding:10px 14px;text-align:center;margin-bottom:12px}
+.amt-main{font-size:1.25rem;font-weight:900;letter-spacing:-.3px}
+.amt-sub{font-size:.72rem;opacity:.85;margin-top:1px}
 
-        .icon-btn {
-            width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-2);
-            color: var(--text-light); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
-        }
-        .icon-btn:active { transform: scale(0.88); }
-        .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+/* Payment tabs */
+.ptabs{display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--bdr)}
+.ptab{flex:1;padding:9px 4px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:700;color:var(--txl);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.ptab.on{color:var(--pro);border-bottom-color:var(--pro)}
+.ptb{display:none}
+.ptb.on{display:block}
 
-        /* --- Main Content --- */
-        main { flex: 1; overflow-y: auto; padding: 13px 13px 6px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+/* Pay cards */
+.pay-card{background:var(--sur2);border:1.5px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
+.pct{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--txl);margin-bottom:10px}
+.pr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pr:last-child{margin-bottom:0}
+.pi2{font-size:1.5rem;flex-shrink:0}
+.pii{flex:1;min-width:0}
+.pii strong{display:block;font-size:.84rem;font-weight:700;color:var(--tx)}
+.pii small{font-size:.71rem;color:var(--txl)}
+.pnum{font-family:'DM Mono',monospace;font-size:.8rem;font-weight:700;color:var(--pri);background:rgba(0,77,64,.08);padding:3px 8px;border-radius:6px;flex-shrink:0}
+.cpbtn{padding:5px 10px;border-radius:8px;border:1.5px solid var(--pri);background:transparent;color:var(--pri);font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s}
+.cpbtn:active{background:var(--pri);color:#fff}
 
-        /* AdSense Container */
-        #ad-container {
-            display: none; /* Hidden until user connects */
-            width: 100%;
-            min-height: 100px;
-            background: rgba(0,0,0,0.03);
-            border: 1px dashed var(--border);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: var(--text-light);
-            overflow: hidden;
-        }
-        #ad-container.visible { display: flex; }
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:7px;margin-bottom:13px;counter-reset:st}
+.step{display:flex;align-items:flex-start;gap:9px;font-size:.79rem;color:var(--txl);line-height:1.5;counter-increment:st}
+.step::before{content:counter(st);background:var(--pro);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:800;flex-shrink:0;margin-top:1px}
 
-        .card {
-            background: var(--surface); border-radius: var(--radius); padding: 15px;
-            box-shadow: var(--shadow-sm); border: 1px solid var(--border);
-            transition: background 0.3s, border-color 0.3s;
-        }
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .lang-group label { display: block; font-size: 0.63rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-        select {
-            width: 100%; padding: 10px 28px 10px 10px; border: 1.5px solid var(--border); border-radius: 10px;
-            background: var(--surface-2); font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-            color: var(--text-main); font-weight: 500; appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300796b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat; background-position: right 8px top 50%; background-size: 8px auto;
-            cursor: pointer; transition: border-color 0.2s, background 0.3s, color 0.3s;
-        }
-        select:focus { border-color: var(--primary-light); }
-        .offline-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .offline-label { font-size: 0.79rem; color: var(--text-light); font-weight: 600; }
+/* Buttons */
+.wa-btn{width:100%;padding:13px;border-radius:13px;border:none;background:#25D366;color:#fff;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:all .2s}
+.wa-btn:active{opacity:.9;transform:scale(.97)}
+.act-btn{width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#7c4dff,#b388ff);color:#fff;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px var(--pro-g);margin-bottom:8px}
+.act-btn:active{transform:scale(.97)}
+.divider{display:flex;align-items:center;gap:10px;margin:12px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.divider span{font-size:.67rem;font-weight:700;color:var(--txl);letter-spacing:1px}
 
-        .switch { position: relative; display: inline-block; width: 42px; height: 23px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background: #d0d5dd; border-radius: 23px; transition: .3s; }
-        .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background: var(--primary-light); }
-        input:checked + .slider:before { transform: translateX(19px); }
+/* Code entry */
+.code-area{background:rgba(124,77,255,.05);border:1.5px solid rgba(124,77,255,.25);border-radius:14px;padding:14px;margin-bottom:12px}
+.code-in{width:100%;padding:13px;border:2px solid rgba(124,77,255,.3);border-radius:10px;font-family:'DM Mono',monospace;font-size:.95rem;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:2px;background:var(--sur);color:var(--tx);margin-bottom:10px}
+.code-in:focus{border-color:var(--pro);outline:none}
+.trial-btn{width:100%;padding:12px;border-radius:12px;border:2px dashed rgba(255,171,0,.5);background:rgba(255,171,0,.06);color:#e65100;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:800;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.trial-btn.used{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+.close-pay{width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--bdr);background:transparent;color:var(--txl);font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer}
 
-        /* Chat */
-        .chat-log { display: flex; flex-direction: column; gap: 10px; }
-        .empty-state { text-align: center; padding: 26px 20px; color: var(--text-light); }
-        .empty-state .icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
-        .empty-state p { font-size: 0.82rem; line-height: 1.6; }
+/* Bank account grid */
+.bank-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.bitem{background:rgba(0,77,64,.06);border-radius:8px;padding:9px}
+.bitem-lbl{font-size:.58rem;font-weight:800;color:var(--txl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.bitem-val{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:700;color:var(--pri)}
 
-        .log-item { display: flex; flex-direction: column; max-width: 82%; }
-        .log-item.me { align-self: flex-end; align-items: flex-end; }
-        .log-item.guest { align-self: flex-start; align-items: flex-start; }
-        .log-item.system { align-self: center; align-items: center; max-width: 100%; }
+/* Card form */
+.cf{display:flex;flex-direction:column;gap:8px}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cf-lbl{font-size:.66rem;font-weight:700;color:var(--txl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;display:block}
+.cf-in{width:100%;padding:11px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-family:'DM Mono',monospace;font-size:.87rem;background:var(--sur2);color:var(--tx)}
+.cf-in:focus{border-color:var(--pro);outline:none}
+.card-logos{display:flex;gap:5px;margin-bottom:10px;align-items:center}
+.clogo{height:20px;border-radius:4px;padding:2px 6px;font-size:.62rem;font-weight:800;display:flex;align-items:center}
+.sec-note{font-size:.67rem;color:var(--txl);display:flex;align-items:center;gap:4px;margin-top:5px}
 
-        .bubble {
-            padding: 10px 15px; border-radius: var(--bubble-radius); font-size: var(--bubble-fs);
-            font-weight: var(--bubble-fw); line-height: var(--bubble-lh); font-family: var(--chat-font);
-            transition: font-size 0.2s, border-radius 0.2s, font-weight 0.2s, line-height 0.2s;
-        }
-        .me .bubble { background: var(--my-bubble-bg); color: var(--my-bubble-text); }
-        .guest .bubble { background: var(--their-bubble-bg); color: var(--their-bubble-text); }
-        .system .bubble { background: #fff8e1; color: #7a5800; font-size: 0.75rem; border-radius: 10px; padding: 6px 13px; border: 1px solid #ffe082; }
-        body.dark .system .bubble { background: rgba(255,171,0,0.09); color: #ffd54f; border-color: rgba(255,171,0,0.22); }
-        .meta { font-size: 0.65rem; color: #a0aab4; margin-top: 3px; font-weight: 500; }
-        body.dark .meta { color: #484f58; }
+/* ── SETTINGS DRAWER ── */
+.bkdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(5px);z-index:90;opacity:0;pointer-events:none;transition:opacity .3s}
+.bkdrop.on{opacity:1;pointer-events:all}
+.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--sur);border-radius:26px 26px 0 0;z-index:95;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,.72,0,1);max-height:88dvh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,.18)}
+.drawer.on{transform:translateY(0)}
+.drw-handle{width:38px;height:4px;background:var(--bdr);border-radius:4px;margin:11px auto 0;flex-shrink:0}
+.drw-hdr{padding:13px 20px 11px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.dtabs{display:flex;gap:7px}
+.dtab{flex:1;padding:7px;border-radius:8px;background:var(--sur2);border:none;color:var(--txl);font-weight:700;font-size:.8rem;cursor:pointer;text-align:center;font-family:'DM Sans',sans-serif}
+.dtab.on{background:var(--pri);color:#fff}
+.drw-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--sur2);color:var(--txl);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.drw-body{overflow-y:auto;padding:14px 20px 36px;display:flex;flex-direction:column;gap:18px}
+.sec-t{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--pri);padding-bottom:7px;border-bottom:1px solid var(--bdr)}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px}
+.set-lbl{display:flex;flex-direction:column;gap:2px;flex:1}
+.set-lbl strong{font-size:.85rem;font-weight:600;color:var(--tx)}
+.set-lbl small{font-size:.69rem;color:var(--txl)}
+.pro-card-s{background:linear-gradient(135deg,#1a0533,#3d1a7a);border-radius:16px;padding:16px;color:#fff}
+.pcs-t{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.65;margin-bottom:3px}
+.pcs-p{font-size:1.05rem;font-weight:900}
+.pcs-e{font-size:.72rem;opacity:.7;font-family:'DM Mono',monospace;margin-top:2px}
+.pcs-btn{margin-top:12px;padding:8px 14px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;width:100%}
 
-        /* Controls */
-        .controls-area {
-            background: var(--surface); padding: 16px 20px 24px; border-top: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; gap: 11px; flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
-        }
-        .live-text { font-size: 0.77rem; color: var(--text-light); font-style: italic; min-height: 18px; }
-        .mic-controls { display: flex; align-items: center; gap: 20px; }
-        .mic-btn-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
-        .mic-ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid transparent; pointer-events: none; }
-        .mic-btn {
-            width: 68px; height: 68px; border-radius: 50%; border: none; background: #d0d7de; color: #6b7b8a;
-            display: flex; justify-content: center; align-items: center; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative; z-index: 1;
-        }
-        .mic-btn:active { transform: scale(0.9) !important; }
-        .mic-btn.disabled { background: #e4e8ec; color: #b0bec5; cursor: not-allowed; }
-        .mic-btn.disabled:active { transform: none !important; }
-        .mic-btn.ready { background: var(--surface-2); color: var(--primary); border: 2px solid var(--primary); box-shadow: 0 4px 16px var(--primary-glow); }
-        .mic-btn.ready:hover { background: var(--primary); color: white; }
-        .mic-btn.listening { background: var(--primary); color: white; box-shadow: 0 6px 24px var(--primary-glow); transform: scale(1.05); }
-        .mic-btn.listening ~ .mic-ring { border-color: var(--primary); animation: ring-pulse 2s infinite; }
-        .mic-btn.muted { background: var(--accent); color: white; box-shadow: 0 6px 20px var(--accent-glow); }
-        .mute-side-btn {
-            width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--surface-2);
-            color: var(--text-light); display: flex; justify-content: center; align-items: center; cursor: pointer;
-            transition: all 0.25s; box-shadow: var(--shadow-sm);
-        }
-        .mute-side-btn:active { transform: scale(0.88); }
-        .mute-side-btn.active-mute { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 14px var(--accent-glow); }
-        .mute-side-btn.hidden-btn { opacity: 0; pointer-events: none; }
-        .hint-pills { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-        .hint-pill { background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 0.69rem; font-weight: 600; color: var(--text-light); }
+/* ── ADMIN ── */
+.admin-ov{position:fixed;inset:0;background:rgba(0,0,0,.97);backdrop-filter:blur(12px);z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.admin-ov.on{display:flex}
+.adm-box{background:#1a1a2e;border:1px solid rgba(124,77,255,.3);border-radius:20px;padding:24px;width:100%;max-width:340px;max-height:90dvh;overflow-y:auto;text-align:center}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin:14px 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(124,77,255,.4);background:transparent;transition:all .2s}
+.pin-dot.on{background:var(--pro);border-color:var(--pro)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:195px;margin:0 auto}
+.pkey{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.07);color:#fff;font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
+.pkey:active{transform:scale(.9);background:rgba(124,77,255,.3)}
+.apbtn{width:100%;padding:13px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-family:'DM Sans',sans-serif;font-size:.87rem;font-weight:700;cursor:pointer;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center}
+.apbtn:hover{background:rgba(124,77,255,.2);border-color:rgba(124,77,255,.5)}
+.apbtn span{font-size:.68rem;color:rgba(255,255,255,.4);font-weight:500}
+.gen-res{background:rgba(0,200,83,.1);border:1.5px solid rgba(0,200,83,.3);border-radius:12px;padding:14px;margin-top:12px;display:none}
+.gen-res.on{display:block}
+.gen-code{font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:700;color:#4caf50;letter-spacing:2px;text-align:center;padding:10px;background:rgba(0,0,0,.3);border-radius:8px;margin:8px 0;cursor:pointer;word-break:break-all}
+.gen-inf{font-size:.69rem;color:rgba(255,255,255,.4);text-align:center}
+.pin-err{color:#ff5252;font-size:.75rem;margin-top:8px;min-height:18px}
 
-        @keyframes ring-pulse { 0% { transform: scale(1); opacity: 0.7; } 70% { transform: scale(1.45); opacity: 0; } 100% { transform: scale(1.45); opacity: 0; } }
-
-        /* Settings Drawer */
-        .settings-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 90;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        .settings-backdrop.open { opacity: 1; pointer-events: all; }
-
-        .settings-drawer {
-            position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-radius: 26px 26px 0 0;
-            z-index: 95; transform: translateY(100%); transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
-            max-height: 88dvh; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
-        }
-        .settings-drawer.open { transform: translateY(0); }
-
-        .drawer-handle { width: 38px; height: 4px; background: var(--border); border-radius: 4px; margin: 11px auto 0; flex-shrink: 0; }
-        .drawer-header { padding: 13px 20px 11px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .drawer-title { font-size: 1.05rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.2px; }
-        .drawer-close {
-            width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--surface-2); color: var(--text-light);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;
-        }
-        .drawer-close:hover { background: var(--danger); color: white; }
-        .drawer-body { overflow-y: auto; padding: 14px 20px 36px; display: flex; flex-direction: column; gap: 20px; }
-
-        .setting-section { display: flex; flex-direction: column; gap: 13px; }
-        .section-title { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--primary); padding-bottom: 7px; border-bottom: 1px solid var(--border); }
-        .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; }
-        .setting-label { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-        .setting-label strong { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        .setting-label small { font-size: 0.69rem; color: var(--text-light); }
-
-        /* Tabs for Legal/Settings */
-        .drawer-tabs { display: flex; gap: 10px; margin-bottom: 10px; }
-        .drawer-tab {
-            flex: 1; padding: 8px; border-radius: 8px; background: var(--surface-2); border: none; color: var(--text-light);
-            font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: center;
-        }
-        .drawer-tab.active { background: var(--primary); color: white; }
-
-        /* Legal Text Content */
-        .legal-text { font-size: 0.85rem; color: var(--text-main); line-height: 1.6; }
-        .legal-text h3 { font-size: 1rem; margin: 15px 0 8px; color: var(--primary); }
-        .legal-text p { margin-bottom: 10px; color: var(--text-light); }
-        .legal-text ul { padding-left: 20px; margin-bottom: 10px; color: var(--text-light); }
-
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(10,18,28,0.88); backdrop-filter: blur(10px); z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content { background: var(--surface); width: 100%; max-width: 385px; border-radius: 24px; padding: 24px 22px; text-align: center; box-shadow: var(--shadow-lg); max-height: 92dvh; overflow-y: auto; }
-        
-        .role-btn { display: flex; align-items: center; gap: 11px; width: 100%; padding: 13px 15px; border: 1.5px solid var(--border); background: var(--surface-2); border-radius: 15px; margin-bottom: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; text-align: left; }
-        .role-btn:active { transform: scale(0.98); }
-        .role-btn .role-icon { font-size: 1.25rem; }
-        .role-btn .role-info small { display: block; font-size: 0.68rem; color: var(--text-light); font-weight: 500; margin-top: 1px; }
-        .role-btn.primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 18px var(--primary-glow); }
-        .role-btn.primary small { color: rgba(255,255,255,0.6); }
-        .role-btn.accent { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 18px var(--accent-glow); }
-        .role-btn.accent small { color: rgba(255,255,255,0.7); }
-        
-        .id-display { background: var(--surface-2); padding: 12px; border-radius: 10px; font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; margin: 12px 0; border: 1.5px dashed #ccc; word-break: break-all; color: var(--primary); user-select: all; }
-        #qrcode { display: flex; justify-content: center; margin: 13px 0; padding: 10px; background: white; border: 1px solid #eee; border-radius: 12px; }
-        input[type="text"] { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; margin-bottom: 10px; text-align: center; background: var(--surface-2); color: var(--text-main); }
-        input[type="text"]:focus { border-color: var(--primary-light); }
-        .btn-text { background: transparent; border: none; color: var(--text-light); text-decoration: underline; cursor: pointer; margin-top: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; }
-
-        .scan-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .scan-overlay.active { display: flex; }
-        .scan-container { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 10px; position: relative; overflow: hidden; }
-        .close-scan { position: absolute; top: -50px; right: 0; color: white; font-size: 2rem; cursor: pointer; background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; z-index: 10; }
-        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; min-height: 250px; }
-        #qr-reader video { object-fit: cover; border-radius: 12px; }
-        .hidden { display: none !important; }
-
-        #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 350px; pointer-events: none; }
-        .toast {
-            background: var(--surface); color: var(--text-main); padding: 12px 16px; border-radius: 12px;
-            box-shadow: var(--shadow-lg); border: 1px solid var(--border); font-size: 0.85rem; font-weight: 600;
-            display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(-20px); transition: all 0.3s; pointer-events: all;
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.error { border-left: 4px solid var(--danger); }
-        .toast.success { border-left: 4px solid var(--success); }
-        .toast.info { border-left: 4px solid var(--primary); }
-    </style>
+/* ── TOASTS ── */
+#toasts{position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;width:92%;max-width:340px;pointer-events:none}
+.toast{background:var(--sur);color:var(--tx);padding:11px 14px;border-radius:12px;box-shadow:var(--sh3);border:1px solid var(--bdr);font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-16px);transition:all .3s;pointer-events:all}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast.err{border-left:4px solid var(--dan)}
+.toast.ok{border-left:4px solid var(--ok)}
+.toast.inf{border-left:4px solid var(--pri)}
+.toast.pro{border-left:4px solid var(--pro)}
+.hidden{display:none!important}
+input[type=range]{width:100%;accent-color:var(--pri)}
+</style>
 </head>
 <body>
 
-<div id="toast-container"></div>
+<div id="toasts"></div>
 
-<!-- SETUP MODAL -->
-<div id="setupModal" class="modal-overlay active">
-    <div class="modal-content" id="step1">
-        <div style="margin: 0 auto 20px auto;">
-            <svg width="160" height="48" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
-                <text x="0" y="46" font-family="Arial" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
-                <text x="147" y="46" font-family="Arial" font-weight="800" font-size="40" fill="#ffab00" letter-spacing="-1">pro</text>
-                <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
-            </svg>
-        </div>
-        <p class="modal-desc" style="margin-bottom: 25px;">Live conversation translator.<br>Choose a role to begin.</p>
-        <button class="role-btn primary" onclick="showStep('host')">
-            <span class="role-icon">🟢</span>
-            <span class="role-info">Start as Host <small>Generate QR code &amp; wait for guest</small></span>
-        </button>
-        <button class="role-btn accent" onclick="showStep('guest')">
-            <span class="role-icon">🟠</span>
-            <span class="role-info">Join as Guest <small>Scan QR code or enter Host ID</small></span>
-        </button>
-        <div style="margin-top:20px; font-size:0.75rem; color: #888;">
-            By using this app, you agree to our <a href="#" onclick="openLegal('privacy')" style="color:var(--primary)">Privacy Policy</a>.
-        </div>
+<!-- ════════════════════════════════
+     SETUP MODAL
+════════════════════════════════ -->
+<div id="setupMod" class="ov on">
+  <!-- Step 1: Role chooser -->
+  <div class="modal" id="s1">
+    <div style="margin:0 auto 14px">
+      <svg width="150" height="42" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="46" font-family="Arial" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
+        <text x="147" y="46" font-family="Arial" font-weight="800" font-size="40" fill="#ffab00" letter-spacing="-1">pro</text>
+        <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
+      </svg>
     </div>
+    <p class="mdesc">Real-time voice translation. Choose your role.</p>
+    <button class="rbtn grn" onclick="showStep('host')"><span class="ri">🟢</span><span class="rd">Start as Host<small>Generate QR code &amp; wait for guest</small></span></button>
+    <button class="rbtn amb" onclick="showStep('guest')"><span class="ri">🟠</span><span class="rd">Join as Guest<small>Scan QR code or enter Host ID</small></span></button>
+    <div style="margin-top:14px;font-size:.72rem;color:#999">By using this app you agree to our <a href="#" onclick="openLegal();return false" style="color:var(--pri)">Privacy Policy</a></div>
+  </div>
 
-    <div class="modal-content hidden" id="stepHost">
-        <div class="modal-title">Your Connection Code</div>
-        <p class="modal-desc">Share this QR or ID with your guest.</p>
-        <div id="qrcode"></div>
-        <div class="id-display" id="myPeerId">Generating...</div>
-        <button class="role-btn primary" onclick="copyId()">
-            <span class="role-icon">📋</span>
-            <span class="role-info">Copy ID</span>
-        </button>
-        <button class="role-btn" style="margin-top:10px; border-color:var(--primary); color:var(--primary); background:transparent" onclick="finishSetup()">
-            <span class="role-icon">✓</span>
-            <span class="role-info">Enter Chat Room</span>
-        </button>
-        <button class="btn-text" onclick="showStep('1')">← Back</button>
-    </div>
+  <!-- Step: Host -->
+  <div class="modal hidden" id="sHost">
+    <div class="mtitle">Your Connection Code</div>
+    <p class="mdesc">Share this QR or ID with your guest.</p>
+    <div id="qrcode"></div>
+    <div class="id-box" id="myId">Generating…</div>
+    <div class="cbar on" id="waitBar"><div class="spin"></div><span>Waiting for guest to connect…</span></div>
+    <button class="rbtn grn" onclick="copyId()"><span class="ri">📋</span><span class="rd">Copy ID to Share</span></button>
+    <button class="rbtn" style="border-color:var(--pri);color:var(--pri);background:transparent;margin-top:4px" onclick="finishSetup()"><span class="ri">✓</span><span class="rd">Wait in the chat room</span></button>
+    <button class="bl" onclick="showStep('1')">← Back</button>
+  </div>
 
-    <div class="modal-content hidden" id="stepGuest">
-        <div class="modal-title">Join a Session</div>
-        <p class="modal-desc">Scan Host's QR code or enter their ID.</p>
-        <button class="role-btn accent" onclick="startScanner()" style="border-style:dashed;background:rgba(255,171,0,0.08)">
-            <span class="role-icon">📸</span>
-            <span class="role-info">Scan QR Code <small>Point camera at Host's screen</small></span>
-        </button>
-        <div style="margin:10px 0;font-weight:700;color:#bbb;font-size:0.72rem;letter-spacing:1px;">— OR —</div>
-        <input type="text" id="hostIdInput" placeholder="Paste or type Host ID">
-        <button class="role-btn primary" onclick="connectToHost()">
-            <span class="role-icon">🔗</span>
-            <span class="role-info">Connect via ID</span>
-        </button>
-        <button class="btn-text" onclick="showStep('1')">← Back</button>
-    </div>
+  <!-- Step: Guest -->
+  <div class="modal hidden" id="sGuest">
+    <div class="mtitle">Join a Session</div>
+    <p class="mdesc">Scan the Host's QR code or type their ID below.</p>
+    <button class="rbtn amb" onclick="startScan()" style="border-style:dashed;background:rgba(255,171,0,.08)"><span class="ri">📷</span><span class="rd">Scan QR Code<small>Point camera at Host's screen</small></span></button>
+    <div style="margin:8px 0;font-weight:700;color:#bbb;font-size:.69rem;letter-spacing:1px">— OR ENTER HOST ID —</div>
+    <input class="ti" id="hostInput" placeholder="Paste or type Host ID here" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')doConnect()">
+    <div class="cbar" id="connBar"><div class="spin"></div><span id="connMsg">Connecting…</span></div>
+    <button class="rbtn grn" id="connBtn" onclick="doConnect()"><span class="ri">🔗</span><span class="rd">Connect to Host</span></button>
+    <button class="bl" onclick="showStep('1')">← Back</button>
+  </div>
 </div>
 
-<!-- SCANNER OVERLAY -->
-<div id="scanOverlay" class="scan-overlay">
-    <button class="close-scan" onclick="stopScanner()">×</button>
-    <div class="scan-container">
-        <div id="qr-reader"></div>
+<!-- ════════════════════════════════
+     QR SCANNER (jsQR + getUserMedia)
+════════════════════════════════ -->
+<div id="scanOv" class="scan-ov">
+  <div class="scan-wrap">
+    <button class="scan-close" onclick="stopScan()">×</button>
+    <div class="scan-box">
+      <canvas id="scanCanvas"></canvas>
+      <div class="scan-frame">
+        <div class="c1"></div><div class="c2"></div>
+      </div>
+      <div class="scan-line"></div>
     </div>
-    <p style="color:rgba(255,255,255,0.9);margin-top:20px;font-size:0.9rem;font-family:'DM Sans',sans-serif;text-align:center;padding:0 20px;">Align QR code within the frame</p>
+  </div>
+  <div class="scan-hint">Align the Host's QR code inside the frame</div>
+  <div class="scan-sub" id="scanSub">Starting camera…</div>
 </div>
 
-<!-- HEADER -->
+<!-- ════════════════════════════════
+     PAYMENT / UPGRADE MODAL
+════════════════════════════════ -->
+<div id="payMod" class="ov">
+  <div class="pay-inner">
+    <div class="pay-hero">
+      <span class="pay-crown">👑</span>
+      <div class="pay-title">RAFIKI PRO</div>
+      <div class="pay-sub">Unlock all 18 languages &amp; premium features</div>
+    </div>
+    <div class="pay-body">
+
+      <!-- Plan selector -->
+      <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--txl);margin-bottom:8px">Choose a Plan</div>
+      <div class="plan-grid">
+        <div class="pc" id="pc_D" onclick="selPlan('D')">
+          <div class="pp">Daily</div>
+          <div class="pv">$0.50<sub>/day</sub></div>
+          <div class="pa">TSh 500</div>
+        </div>
+        <div class="pc" id="pc_M" onclick="selPlan('M')" style="position:relative">
+          <div class="pbadge">BEST VALUE</div>
+          <div class="pp">Monthly</div>
+          <div class="pv">$10<sub>/mo</sub></div>
+          <div class="pa">TSh 12,000</div>
+        </div>
+      </div>
+
+      <!-- Dynamic amount pill -->
+      <div class="amt-pill">
+        <div class="amt-main" id="amtMain">TSh 500 / $0.50</div>
+        <div class="amt-sub" id="amtSub">Daily — 24hr access, all 18 languages</div>
+      </div>
+
+      <!-- One-time trial -->
+      <button class="trial-btn" id="trialBtn" onclick="startTrial()">⏱️ Try FREE for 12 Hours — no payment needed</button>
+
+      <!-- Payment method tabs -->
+      <div class="ptabs">
+        <button class="ptab on" id="pt_mm" onclick="selPTab('mm')">📱 Mobile Money</button>
+        <button class="ptab" id="pt_bank" onclick="selPTab('bank')">🏦 Bank / Card</button>
+        <button class="ptab" id="pt_code" onclick="selPTab('code')">🔑 Enter Code</button>
+      </div>
+
+      <!-- ── MOBILE MONEY ── -->
+      <div class="ptb on" id="pb_mm">
+        <div class="steps">
+          <div class="step">Send the amount above to the mobile number below (M-Pesa, Airtel, Yas — all accepted)</div>
+          <div class="step">Screenshot your payment confirmation from your phone</div>
+          <div class="step">Tap WhatsApp below, attach the screenshot — receive your code within minutes</div>
+        </div>
+        <div class="pay-card">
+          <div class="pct">Send Payment To</div>
+          <div class="pr">
+            <span class="pi2">📱</span>
+            <div class="pii"><strong>M-Pesa / Airtel / Yas</strong><small>All networks accepted · Tanzania</small></div>
+            <span class="pnum">+255 788 714 307</span>
+            <button class="cpbtn" onclick="cp('+255788714307','Number copied!')">Copy</button>
+          </div>
+          <div class="pr" style="margin-bottom:0">
+            <span class="pi2">💬</span>
+            <div class="pii"><strong>Reference / Reason</strong><small>Add this note when sending</small></div>
+            <span class="pnum">RAFIKI PRO</span>
+            <button class="cpbtn" onclick="cp('RAFIKI PRO','Reference copied!')">Copy</button>
+          </div>
+        </div>
+        <button class="wa-btn" onclick="sendWA()">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Send Payment Proof via WhatsApp
+        </button>
+      </div>
+
+      <!-- ── BANK / CARD ── -->
+      <div class="ptb" id="pb_bank">
+        <div class="steps">
+          <div class="step">Transfer to the bank account below, OR fill in your card details to process via WhatsApp</div>
+          <div class="step">Send your proof screenshot via WhatsApp and receive your code</div>
+        </div>
+        <!-- Bank transfer -->
+        <div class="pay-card" style="margin-bottom:12px">
+          <div class="pct">Bank Transfer — CRDB Bank Tanzania</div>
+          <div class="pr" style="margin-bottom:8px">
+            <span class="pi2">🏦</span>
+            <div class="pii"><strong>Account Name</strong><small>Rafiki Pro Ltd</small></div>
+          </div>
+          <div class="bank-grid">
+            <div class="bitem">
+              <div class="bitem-lbl">Account No.</div>
+              <div class="bitem-val">0150788714307</div>
+              <button class="cpbtn" style="margin-top:5px;font-size:.62rem;padding:3px 7px" onclick="cp('0150788714307','Account number copied!')">Copy</button>
+            </div>
+            <div class="bitem">
+              <div class="bitem-lbl">SWIFT / BIC</div>
+              <div class="bitem-val">CORUTZTZ</div>
+              <button class="cpbtn" style="margin-top:5px;font-size:.62rem;padding:3px 7px" onclick="cp('CORUTZTZ','SWIFT copied!')">Copy</button>
+            </div>
+          </div>
+        </div>
+        <!-- Card form -->
+        <div class="pay-card">
+          <div class="pct">Pay by Debit / Credit Card</div>
+          <div class="card-logos">
+            <div class="clogo" style="background:#1a1f71;color:#fff">VISA</div>
+            <div class="clogo" style="background:#eb001b;color:#fff">MC</div>
+            <div class="clogo" style="background:#2557D6;color:#fff">AMEX</div>
+            <div class="clogo" style="background:#f5f5f5;color:#333">MAESTRO</div>
+          </div>
+          <div class="cf">
+            <div>
+              <label class="cf-lbl">Card Number</label>
+              <input class="cf-in" id="cNum" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" inputmode="numeric" autocomplete="cc-number">
+            </div>
+            <div>
+              <label class="cf-lbl">Name on Card</label>
+              <input class="cf-in" id="cName" placeholder="Full name" autocomplete="cc-name">
+            </div>
+            <div class="cf-row">
+              <div><label class="cf-lbl">Expiry</label><input class="cf-in" id="cExp" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)" inputmode="numeric" autocomplete="cc-exp"></div>
+              <div><label class="cf-lbl">CVV</label><input class="cf-in" id="cCvv" placeholder="123" maxlength="4" type="password" inputmode="numeric" autocomplete="cc-csc"></div>
+            </div>
+          </div>
+          <div class="sec-note">🔒 <span>Sent securely via WhatsApp for manual processing</span></div>
+          <button class="act-btn" style="margin-top:12px;margin-bottom:0" onclick="submitCard()">Pay Now — Send Details to Process</button>
+        </div>
+        <button class="wa-btn" onclick="sendWA()">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Already transferred? Send proof via WhatsApp
+        </button>
+      </div>
+
+      <!-- ── CODE ENTRY ── -->
+      <div class="ptb" id="pb_code">
+        <p style="font-size:.79rem;color:var(--txl);margin-bottom:12px;line-height:1.55">After paying, you'll receive an activation code. Enter it below to unlock PRO instantly — no internet required for verification.</p>
+        <div class="code-area">
+          <div style="font-size:.75rem;font-weight:700;color:var(--tx);margin-bottom:9px">🔑 Activation Code</div>
+          <input class="code-in" id="payCodeIn" placeholder="RPXD-XXXX-XXXX-XXX" maxlength="19" oninput="fmtCode(this)" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="act-btn" style="margin-bottom:0" onclick="doActivate('payCodeIn')">Activate PRO Access</button>
+        </div>
+      </div>
+
+      <button class="close-pay" onclick="closePayMod()">Not now — continue with Free</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     ADMIN PANEL (7× brand tap → PIN)
+════════════════════════════════ -->
+<div id="adminOv" class="admin-ov">
+  <div id="adminPin" class="adm-box">
+    <div style="color:rgba(255,255,255,.35);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Admin Access</div>
+    <div style="color:#fff;font-size:.9rem;font-weight:700">Enter PIN</div>
+    <div class="pin-dots"><div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div><div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div></div>
+    <div class="pin-pad">
+      <button class="pkey" onclick="pk('1')">1</button><button class="pkey" onclick="pk('2')">2</button><button class="pkey" onclick="pk('3')">3</button>
+      <button class="pkey" onclick="pk('4')">4</button><button class="pkey" onclick="pk('5')">5</button><button class="pkey" onclick="pk('6')">6</button>
+      <button class="pkey" onclick="pk('7')">7</button><button class="pkey" onclick="pk('8')">8</button><button class="pkey" onclick="pk('9')">9</button>
+      <button class="pkey" onclick="closeAdmin()" style="font-size:.72rem;color:rgba(255,255,255,.3)">×</button>
+      <button class="pkey" onclick="pk('0')">0</button>
+      <button class="pkey" onclick="pdel()">⌫</button>
+    </div>
+    <div class="pin-err" id="pinErr"></div>
+  </div>
+  <div id="adminGen" class="adm-box hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div><div style="color:#fff;font-weight:800;font-size:.93rem">🔑 Code Generator</div><div style="color:rgba(255,255,255,.35);font-size:.68rem;margin-top:2px">Generate activation codes for customers</div></div>
+      <button onclick="closeAdmin()" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer">×</button>
+    </div>
+    <button class="apbtn" onclick="genCode('D')">Daily Code<span>1 day · $0.50 / TSh 500</span></button>
+    <button class="apbtn" onclick="genCode('M')">Monthly Code<span>30 days · $10 / TSh 12,000</span></button>
+    <button class="apbtn" onclick="genCode('T')">Trial Code<span>12-hour override</span></button>
+    <div id="genRes" class="gen-res">
+      <div style="color:rgba(255,255,255,.45);font-size:.68rem;margin-bottom:3px">Generated code (tap to copy):</div>
+      <div class="gen-code" id="genTxt" onclick="cpGenCode()"></div>
+      <div class="gen-inf" id="genInf"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     HEADER
+════════════════════════════════ -->
 <header>
-    <div class="header-left">
-        <div class="brand-text">RAFIKI<span>PRO</span></div>
-    </div>
-    <div class="header-right">
-        <div class="status-badge" id="connStatus">
-            <div class="dot"></div>
-            <span id="statusText">Offline</span>
-        </div>
-        <button class="icon-btn" onclick="openSettings()" title="Settings" aria-label="Settings">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-        </button>
-    </div>
+  <div class="brand" id="brandEl" onclick="brandTap()">RAFIKI<span>PRO</span></div>
+  <div class="hdr-mid"><span class="timer" id="timerEl"></span></div>
+  <div class="hdr-r">
+    <div class="plan-badge free" id="planBadge">FREE</div>
+    <div class="sbadge" id="sBadge"><div class="dot"></div><span id="sTxt">Offline</span></div>
+    <button class="ibtn" onclick="openSettings()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+  </div>
 </header>
 
-<!-- MAIN -->
+<!-- ════════════════════════════════
+     MAIN
+════════════════════════════════ -->
 <main>
-    <!-- ADSENSE CONTAINER -->
-    <div id="ad-container">
-        <span>Advertisement Space</span>
+  <div class="card">
+    <div class="lang-grid">
+      <div class="lg"><label>My Language</label><div class="sw"><select id="langMe"></select></div></div>
+      <div class="lg"><label>Their Language</label><div class="sw"><select id="langThem"></select><span class="lk" id="lkIcon"></span></div></div>
     </div>
-
-    <div class="card">
-        <div class="lang-grid">
-            <div class="lang-group">
-                <label>My Language</label>
-                <select id="langMe"></select>
-            </div>
-            <div class="lang-group">
-                <label>Their Language</label>
-                <select id="langGuest"></select>
-            </div>
-        </div>
-        <div class="offline-row">
-            <span class="offline-label">📖 Offline Dictionary</span>
-            <label class="switch"><input type="checkbox" id="offlineToggle"><span class="slider"></span></label>
-        </div>
+    <div class="off-row">
+      <span class="off-lbl">📖 Offline Dictionary</span>
+      <label class="switch"><input type="checkbox" id="offTog"><span class="sl"></span></label>
     </div>
-    <div class="chat-log" id="chatLog">
-        <div class="empty-state">
-            <div class="icon">💬</div>
-            <p>Connect with a partner to start.<br>Tap the mic when you want to speak.</p>
-        </div>
-    </div>
+  </div>
+  <div class="chat-log" id="chatLog">
+    <div class="empty"><div class="ei">💬</div><p>Connect with a partner to start.<br>Tap the mic when ready to speak.</p></div>
+  </div>
 </main>
 
-<!-- CONTROLS -->
-<div class="controls-area">
-    <div class="live-text" id="liveText"></div>
-    <div class="mic-controls">
-        <button class="mute-side-btn hidden-btn" id="muteBtn" title="Mute / Unmute">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-                <line x1="12" y1="19" x2="12" y2="23"></line>
-                <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-        </button>
-        <div class="mic-btn-wrap">
-            <button id="micBtn" class="mic-btn disabled">
-                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-            </button>
-            <div class="mic-ring" id="micRing"></div>
-        </div>
-        <div style="width:44px;height:44px;"></div>
+<!-- ════════════════════════════════
+     CONTROLS
+════════════════════════════════ -->
+<div class="ctl">
+  <div class="live" id="liveEl"></div>
+  <div class="mic-row">
+    <button class="side hid" id="muteBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </button>
+    <div class="mic-wrap">
+      <button id="micBtn" class="mic-btn dis">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <div class="mic-ring" id="micRing"></div>
     </div>
-    <div class="hint-pills" id="hintPills">
-        <div class="hint-pill">🔇 Connect first to use mic</div>
-    </div>
+    <div style="width:44px;height:44px"></div>
+  </div>
+  <div class="pills" id="pillsEl"><div class="pill">🔇 Connect first to use mic</div></div>
 </div>
 
-<!-- SETTINGS BACKDROP -->
-<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
-
-<!-- SETTINGS DRAWER -->
-<div class="settings-drawer" id="settingsDrawer">
-    <div class="drawer-handle"></div>
-    <div class="drawer-header">
-        <div class="drawer-tabs">
-            <button class="drawer-tab active" id="tabSettings" onclick="switchTab('settings')">Settings</button>
-            <button class="drawer-tab" id="tabLegal" onclick="switchTab('legal')">About & Legal</button>
-        </div>
-        <button class="drawer-close" onclick="closeSettings()">×</button>
+<!-- ════════════════════════════════
+     SETTINGS DRAWER
+════════════════════════════════ -->
+<div class="bkdrop" id="bkdrop" onclick="closeSettings()"></div>
+<div class="drawer" id="drawer">
+  <div class="drw-handle"></div>
+  <div class="drw-hdr">
+    <div class="dtabs">
+      <button class="dtab on" id="dt_s" onclick="dTab('s')">Settings</button>
+      <button class="dtab" id="dt_p" onclick="dTab('p')">My Plan</button>
+      <button class="dtab" id="dt_a" onclick="dTab('a')">About</button>
     </div>
-    
-    <!-- SETTINGS TAB -->
-    <div class="drawer-body" id="settingsBody">
-        <!-- AUDIO SETTINGS -->
-        <div class="setting-section">
-            <div class="section-title">🎙️ Audio Precision</div>
-            <div class="setting-row">
-                <div class="setting-label"><strong>🔊 Auto-Speak Translation</strong><small>Read translations aloud automatically</small></div>
-                <label class="switch"><input type="checkbox" id="s_autoSpeak" checked onchange="settings.autoSpeak=this.checked;saveSettings()"><span class="slider"></span></label>
-            </div>
-            <div class="setting-row">
-                <div class="setting-label"><strong>🔇 Noise Suppression</strong><small>Use system noise filters</small></div>
-                <label class="switch"><input type="checkbox" id="s_noiseSupp" checked onchange="settings.noiseSupp=this.checked;saveSettings()"><span class="slider"></span></label>
-            </div>
-        </div>
-
-        <!-- APPEARANCE -->
-        <div class="setting-section">
-            <div class="section-title">🎨 Appearance</div>
-            <div class="setting-row">
-                <div class="setting-label">
-                    <strong>🌙 Dark Mode</strong>
-                    <small>Switch to dark theme</small>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="s_darkMode" onchange="applyDarkMode(this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-             <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
-                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
-                    <div><strong>🔤 Font Size</strong></div>
-                    <span class="range-val" id="fontSizeVal" style="min-width:36px;text-align:right">14px</span>
-                </div>
-                <div class="range-wrap">
-                    <input type="range" id="s_fontSize" min="11" max="22" step="1" value="14" oninput="setFontSizeSlider(this)">
-                </div>
-            </div>
-        </div>
-
-        <div class="setting-section">
-            <button class="role-btn" style="justify-content:center; padding:10px; color:var(--danger); border-color:var(--danger)" onclick="clearChat()">
-                🗑️ Clear Chat History
-            </button>
-        </div>
+    <button class="drw-close" onclick="closeSettings()">×</button>
+  </div>
+  <!-- Settings tab -->
+  <div class="drw-body" id="db_s">
+    <div><div class="sec-t">🎙️ Audio</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+        <div class="set-row"><div class="set-lbl"><strong>🔊 Auto-Speak Translations</strong><small>Read translations aloud automatically</small></div><label class="switch"><input type="checkbox" id="s_speak" checked onchange="cfg.speak=this.checked;saveCfg()"><span class="sl"></span></label></div>
+        <div class="set-row"><div class="set-lbl"><strong>🔇 Noise Suppression</strong><small>Filter background noise</small></div><label class="switch"><input type="checkbox" id="s_noise" checked onchange="cfg.noise=this.checked;saveCfg()"><span class="sl"></span></label></div>
+      </div>
     </div>
-
-    <!-- LEGAL TAB -->
-    <div class="drawer-body hidden" id="legalBody">
-        <div class="legal-text">
-            <h3>About RAFIKI PRO</h3>
-            <p>RAFIKI PRO is a cutting-edge, peer-to-peer (P2P) voice translation application designed to break down language barriers in real-time. Unlike traditional translation apps that rely on centralized servers, RAFIKI PRO connects two users directly via WebRTC, ensuring faster response times and enhanced privacy.</p>
-            
-            <h3>Privacy Policy</h3>
-            <p><strong>Data Collection:</strong> RAFIKI PRO does not store your voice recordings on any server. Audio processing is performed locally by your browser or transiently during the P2P session.</p>
-            <p><strong>Local Storage:</strong> We use local browser storage to save your preferences (language, theme, font size). No personal identifiable information (PII) is collected or transmitted to our servers.</p>
-            <p><strong>Cookies/Ads:</strong> This app may use cookies for advertising purposes (Google AdSense) to support our free service. You can disable cookies in your browser settings.</p>
-
-            <h3>Terms of Service</h3>
-            <p>By using RAFIKI PRO, you agree to use this tool for lawful purposes only. You agree not to use the app for harassment, hate speech, or any illegal activities. The translation service is provided "as is" without warranty of any kind.</p>
+    <div><div class="sec-t">🎨 Appearance</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+        <div class="set-row"><div class="set-lbl"><strong>🌙 Dark Mode</strong><small>Switch to dark theme</small></div><label class="switch"><input type="checkbox" id="s_dark" onchange="applyDark(this.checked)"><span class="sl"></span></label></div>
+        <div class="set-row" style="flex-direction:column;align-items:stretch;gap:6px">
+          <div style="display:flex;justify-content:space-between"><strong style="font-size:.85rem;font-weight:600">🔤 Font Size</strong><span id="fsLbl" style="font-size:.74rem;color:var(--txl);font-weight:700">14px</span></div>
+          <input type="range" id="s_fs" min="11" max="22" value="14" oninput="setFs(this)">
         </div>
+      </div>
     </div>
+    <button class="rbtn" style="justify-content:center;padding:10px;color:var(--dan);border-color:var(--dan)" onclick="clearChat()">🗑️ Clear Chat History</button>
+  </div>
+  <!-- Plan tab -->
+  <div class="drw-body hidden" id="db_p">
+    <div class="pro-card-s" id="proCardS">
+      <div class="pcs-t">Current Plan</div>
+      <div class="pcs-p" id="pcsPlan">Free Plan</div>
+      <div class="pcs-e" id="pcsExp">English &amp; Swahili only</div>
+      <button class="pcs-btn" onclick="closeSettings();openPayMod()">Upgrade to PRO →</button>
+    </div>
+    <div><div class="sec-t">🔑 Activate a Code</div>
+      <div style="margin-top:10px">
+        <input class="code-in" id="settCodeIn" placeholder="RPXD-XXXX-XXXX-XXX" maxlength="19" oninput="fmtCode(this)" autocomplete="off" autocorrect="off" spellcheck="false" style="width:100%;margin-bottom:8px">
+        <button class="act-btn" style="margin-bottom:0" onclick="doActivate('settCodeIn')">Activate Code</button>
+      </div>
+    </div>
+    <div><div class="sec-t">📋 Plan Limits</div>
+      <div style="font-size:.82rem;color:var(--txl);line-height:1.9;margin-top:8px">✅ English (US &amp; UK)<br>✅ Swahili (Tanzania &amp; Kenya)<br>🔒 16 more languages — PRO only<br>🔒 12-hour free trial (once per device)</div>
+    </div>
+  </div>
+  <!-- About tab -->
+  <div class="drw-body hidden" id="db_a">
+    <div style="font-size:.84rem;line-height:1.6">
+      <h3 style="color:var(--pri);margin-bottom:6px;font-size:.95rem">About RAFIKI PRO</h3>
+      <p style="color:var(--txl);margin-bottom:12px">P2P real-time voice translation. Two users connect directly via WebRTC — no conversation data is ever stored on any server.</p>
+      <h3 style="color:var(--pri);margin-bottom:6px;font-size:.95rem">Pricing &amp; Support</h3>
+      <p style="color:var(--txl);margin-bottom:12px">Daily: $0.50 (TSh 500) · Monthly: $10 (TSh 12,000). Codes are non-refundable once activated.<br>Support: WhatsApp +255 788 714 307</p>
+      <h3 style="color:var(--pri);margin-bottom:6px;font-size:.95rem">Privacy</h3>
+      <p style="color:var(--txl)">Voice is processed locally. No recordings stored. Preferences saved only in your browser's local storage. Sessions are end-to-end P2P.</p>
+    </div>
+  </div>
 </div>
 
+<!-- ════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════ -->
 <script>
-// ============================================================
-// TOAST SYSTEM
-// ============================================================
-function showToast(msg, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    const icons = { success: '✅', error: '⚠️', info: 'ℹ️' };
-    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
-    container.appendChild(toast);
-    toast.offsetHeight; // force reflow
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+// ─── TOAST ───────────────────────────────────────────
+function toast(msg,t='inf'){
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className=`toast ${t}`;
+  el.innerHTML=`<span>${{ok:'✅',err:'⚠️',inf:'ℹ️',pro:'👑'}[t]||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('on'));
+  setTimeout(()=>{el.classList.remove('on');setTimeout(()=>el.remove(),320);},3500);
 }
 
-// ============================================================
-// LANGUAGES
-// ============================================================
-const languages = [
-    { code:"en-US", name:"English (US)" }, { code:"en-GB", name:"English (UK)" },
-    { code:"sw-TZ", name:"Swahili (Tanzania)" }, { code:"sw-KE", name:"Swahili (Kenya)" },
-    { code:"fr-FR", name:"French (France)" }, { code:"es-ES", name:"Spanish (Spain)" },
-    { code:"de-DE", name:"German (Germany)" }, { code:"it-IT", name:"Italian (Italy)" },
-    { code:"pt-PT", name:"Portuguese (Portugal)" }, { code:"ru-RU", name:"Russian (Russia)" },
-    { code:"zh-CN", name:"Chinese (Simp)" }, { code:"ja-JP", name:"Japanese (Japan)" },
-    { code:"ko-KR", name:"Korean (S. Korea)" }, { code:"ar-SA", name:"Arabic (Saudi)" },
-    { code:"hi-IN", name:"Hindi (India)" }, { code:"tr-TR", name:"Turkish (Turkey)" },
-    { code:"pl-PL", name:"Polish (Poland)" }, { code:"nl-NL", name:"Dutch (Netherlands)" }
+// ─── LANGUAGES ────────────────────────────────────────
+const FREE=['en-US','en-GB','sw-TZ','sw-KE'];
+const LANGS=[
+  {c:'en-US',n:'English (US)'},{c:'en-GB',n:'English (UK)'},
+  {c:'sw-TZ',n:'Swahili (Tanzania)'},{c:'sw-KE',n:'Swahili (Kenya)'},
+  {c:'fr-FR',n:'French (France)'},{c:'es-ES',n:'Spanish (Spain)'},
+  {c:'de-DE',n:'German (Germany)'},{c:'it-IT',n:'Italian (Italy)'},
+  {c:'pt-PT',n:'Portuguese (Portugal)'},{c:'ru-RU',n:'Russian (Russia)'},
+  {c:'zh-CN',n:'Chinese (Simplified)'},{c:'ja-JP',n:'Japanese (Japan)'},
+  {c:'ko-KR',n:'Korean (S. Korea)'},{c:'ar-SA',n:'Arabic (Saudi)'},
+  {c:'hi-IN',n:'Hindi (India)'},{c:'tr-TR',n:'Turkish (Turkey)'},
+  {c:'pl-PL',n:'Polish (Poland)'},{c:'nl-NL',n:'Dutch (Netherlands)'}
 ];
-
-// ============================================================
-// OFFLINE DICTIONARY
-// ============================================================
-const offlineDictionary = {
-    "hello":        { en:"Hello", sw:"Habari", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo" },
-    "yes":          { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja" },
-    "no":           { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee" },
-    "thanks":       { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt" },
-    "please":       { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft" },
-    "good morning": { en:"Good morning", sw:"Habari za asubuhi", fr:"Bonjour", es:"Buenos días", de:"Guten Morgen", it:"Buongiorno", pt:"Bom dia", ru:"Доброе утро", zh:"早上好", ja:"おはよう", ko:"좋은 아침", ar:"صباح الخير", hi:"सुप्रभात", tr:"Günaydın", pl:"Dzień dobry", nl:"Goedemorgen" },
-    "goodbye":      { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens" }
+const DICT={
+  "hello":{en:"Hello",sw:"Habari",fr:"Bonjour",es:"Hola",de:"Hallo",it:"Ciao",pt:"Olá",ru:"Привет",zh:"你好",ja:"こんにちは",ko:"안녕하세요",ar:"مرحبا",hi:"नमस्ते",tr:"Merhaba",pl:"Cześć",nl:"Hallo"},
+  "yes":{en:"Yes",sw:"Ndiyo",fr:"Oui",es:"Sí",de:"Ja",it:"Sì",pt:"Sim",ru:"Да",zh:"是",ja:"はい",ko:"예",ar:"نعم",hi:"हाँ",tr:"Evet",pl:"Tak",nl:"Ja"},
+  "no":{en:"No",sw:"Hapana",fr:"Non",es:"No",de:"Nein",it:"No",pt:"Não",ru:"Нет",zh:"不",ja:"いいえ",ko:"아니요",ar:"لا",hi:"नहीं",tr:"Hayır",pl:"Nie",nl:"Nee"},
+  "thanks":{en:"Thanks",sw:"Asante",fr:"Merci",es:"Gracias",de:"Danke",it:"Grazie",pt:"Obrigado",ru:"Спасибо",zh:"谢谢",ja:"ありがとう",ko:"감사합니다",ar:"شكرا",hi:"धन्यवाद",tr:"Teşekkürler",pl:"Dziękuję",nl:"Bedankt"},
+  "please":{en:"Please",sw:"Tafadhali",fr:"S'il vous plaît",es:"Por favor",de:"Bitte",it:"Per favore",pt:"Por favor",ru:"Пожалуйста",zh:"请",ja:"お願いします",ko:"제발",ar:"من فضلك",hi:"कृपया",tr:"Lütfen",pl:"Proszę",nl:"Alsjeblieft"},
+  "goodbye":{en:"Goodbye",sw:"Kwaheri",fr:"Au revoir",es:"Adiós",de:"Auf Wiedersehen",it:"Arrivederci",pt:"Adeus",ru:"До свидания",zh:"再见",ja:"さようなら",ko:"안녕히 가세요",ar:"وداعاً",hi:"अलविदा",tr:"Güle güle",pl:"Do widzenia",nl:"Tot ziens"}
 };
 
-// ============================================================
-// SETTINGS
-// ============================================================
-const DEFAULT_SETTINGS = {
-    darkMode: false,
-    fontSize: 14,
-    bubbleBg: '#004d40',
-    bubbleText: '#ffffff',
-    noiseSupp: true,
-    autoSpeak: true,
-    manualVoiceURI: null,
-};
-let settings = { ...DEFAULT_SETTINGS };
-
-function loadSettings() {
-    try {
-        const saved = localStorage.getItem('rafiki_pro_settings');
-        if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-    } catch(e) {}
-    applyAllSettings();
+// ─── CODE SYSTEM ─────────────────────────────────────
+const SEC='RAFIKI_PRO_2025_TZ';
+const APIN='7364';
+function hsh(s){let x=5381;for(let i=0;i<s.length;i++){x=((x<<5)+x)^s.charCodeAt(i);x=x>>>0;}return x.toString(36).toUpperCase().padStart(7,'0');}
+function makeCode(plan){
+  const dur={D:86400,M:2592000,T:43200}[plan]||86400;
+  const exp=Math.floor(Date.now()/1000)+dur;
+  const pay=plan+exp.toString(36).toUpperCase();
+  return 'RPX'+pay+hsh(pay+SEC).slice(0,5);
+}
+function checkCode(raw){
+  const c=raw.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  if(!c.startsWith('RPX')||c.length<12)return{bad:true};
+  const body=c.slice(3),cs=body.slice(-5),pay=body.slice(0,-5);
+  if(!'DMT'.includes(pay[0]))return{bad:true};
+  if(hsh(pay+SEC).slice(0,5)!==cs)return{bad:true};
+  const exp=parseInt(pay.slice(1),36)*1000;
+  if(isNaN(exp))return{bad:true};
+  if(exp<Date.now())return{old:true,plan:pay[0]};
+  return{ok:true,plan:pay[0],expiry:exp};
+}
+function fmtCode(inp){
+  const r=inp.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,15);
+  let o='';for(let i=0;i<r.length;i++){if(i&&i%4===0)o+='-';o+=r[i];}inp.value=o;
 }
 
-function saveSettings() {
-    try { localStorage.setItem('rafiki_pro_settings', JSON.stringify(settings)); } catch(e) {}
+// ─── PRO STATE ───────────────────────────────────────
+let PRO={on:false,type:null,plan:null,exp:null};
+let trialUsed=false,usedCodes=[],timerIv=null;
+
+function loadPro(){
+  try{
+    const s=localStorage.getItem('rp2_pro');
+    if(s){const d=JSON.parse(s);if(d.exp&&d.exp>Date.now())PRO=d;else localStorage.removeItem('rp2_pro');}
+    if(localStorage.getItem('rp2_trial'))trialUsed=true;
+    const uc=localStorage.getItem('rp2_codes');if(uc)usedCodes=JSON.parse(uc);
+  }catch(e){}
+  refreshPro();
+}
+function savePro(){
+  try{
+    if(PRO.on)localStorage.setItem('rp2_pro',JSON.stringify(PRO));
+    else localStorage.removeItem('rp2_pro');
+    localStorage.setItem('rp2_codes',JSON.stringify(usedCodes));
+  }catch(e){}
+}
+function isPro(){if(!PRO.on||!PRO.exp)return false;if(PRO.exp<Date.now()){PRO={on:false,type:null,plan:null,exp:null};return false;}return true;}
+function langOK(c){return isPro()||FREE.includes(c);}
+
+function activatePro(plan,exp,type){
+  PRO={on:true,type,plan,exp};
+  savePro();refreshPro();
+  if(type==='trial')startTimer();
+  buildLangs();
+}
+function refreshPro(){
+  const b=document.getElementById('planBadge'),t=document.getElementById('timerEl');
+  if(isPro()){
+    b.className='plan-badge '+(PRO.type==='trial'?'trial':'pro');
+    b.textContent=PRO.type==='trial'?'⏱️ TRIAL':'👑 PRO';
+    if(PRO.type==='trial'){t.classList.add('on');tickTimer();}else t.classList.remove('on');
+  }else{b.className='plan-badge free';b.textContent='FREE';t.classList.remove('on');}
+  refreshProCard();updateLock();
+  const tb=document.getElementById('trialBtn');
+  if(trialUsed){tb.classList.add('used');tb.disabled=true;tb.textContent='⏱️ Trial already used';}
+  else{tb.classList.remove('used');tb.disabled=false;tb.textContent='⏱️ Try FREE for 12 Hours — no payment needed';}
+}
+function tickTimer(){
+  if(!isPro()){document.getElementById('timerEl').textContent='Trial expired';return;}
+  const r=PRO.exp-Date.now();
+  const h=Math.floor(r/3600000),m=Math.floor((r%3600000)/60000),s=Math.floor((r%60000)/1000);
+  document.getElementById('timerEl').textContent=`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} left`;
+}
+function startTimer(){
+  if(timerIv)clearInterval(timerIv);
+  timerIv=setInterval(()=>{
+    if(!isPro()){
+      clearInterval(timerIv);
+      toast('Trial expired. Upgrade to continue.','inf');
+      refreshPro();buildLangs();
+      if(!FREE.includes(langMe.value))langMe.value='en-US';
+      if(!FREE.includes(langThem.value))langThem.value='sw-TZ';
+    }else tickTimer();
+  },1000);
+}
+function refreshProCard(){
+  const pp=document.getElementById('pcsPlan'),pe=document.getElementById('pcsExp'),pb=document.querySelector('.pcs-btn');
+  if(!pp)return;
+  if(isPro()){
+    if(PRO.type==='trial'){pp.textContent='⏱️ Free Trial';pe.textContent=`~${Math.ceil((PRO.exp-Date.now())/3600000)}h remaining`;}
+    else{const pl={D:'Daily',M:'Monthly'};pp.textContent='👑 PRO — '+(pl[PRO.plan]||'Active');pe.textContent='Expires: '+new Date(PRO.exp).toLocaleDateString();}
+    pb.textContent='Extend / Renew →';
+  }else{pp.textContent='Free Plan';pe.textContent='English & Swahili only';pb.textContent='Upgrade to PRO →';}
+}
+function updateLock(){
+  const lk=document.getElementById('lkIcon');
+  if(lk)lk.textContent=(!isPro()&&!FREE.includes(langThem.value))?'🔒':'';
 }
 
-function applyAllSettings() {
-    const root = document.documentElement;
-    document.body.classList.toggle('dark', settings.darkMode);
-    document.getElementById('s_darkMode').checked = settings.darkMode;
-    root.style.setProperty('--bubble-fs', settings.fontSize + 'px');
-    document.getElementById('s_fontSize').value = settings.fontSize;
-    document.getElementById('fontSizeVal').textContent = settings.fontSize + 'px';
-    document.getElementById('s_noiseSupp').checked = settings.noiseSupp;
-    document.getElementById('s_autoSpeak').checked = settings.autoSpeak;
+// ─── LANGUAGE DROPDOWNS ──────────────────────────────
+function buildLangs(){
+  [langMe,langThem].forEach(sel=>{
+    const prev=sel.value;sel.innerHTML='';
+    const fg=document.createElement('optgroup');fg.label='✅ Free Languages';
+    LANGS.filter(l=>FREE.includes(l.c)).forEach(l=>{const o=document.createElement('option');o.value=l.c;o.textContent=l.n;fg.appendChild(o);});
+    sel.appendChild(fg);
+    const pg=document.createElement('optgroup');pg.label=isPro()?'👑 PRO Languages':'🔒 PRO — Upgrade to unlock';
+    LANGS.filter(l=>!FREE.includes(l.c)).forEach(l=>{const o=document.createElement('option');o.value=l.c;o.textContent=l.n;if(!isPro())o.style.color='#aaa';pg.appendChild(o);});
+    sel.appendChild(pg);
+    if(prev&&LANGS.find(l=>l.c===prev))sel.value=prev;
+    else sel.value=FREE[0];
+    if(!isPro()&&!FREE.includes(sel.value))sel.value=FREE[0];
+    sel.dataset.prev=sel.value;
+  });
+  updateLock();
+}
+function onLangChange(sel){
+  if(!langOK(sel.value)){sel.value=sel.dataset.prev||FREE[0];setTimeout(openPayMod,50);return;}
+  sel.dataset.prev=sel.value;updateLock();
 }
 
-function applyDarkMode(val) {
-    settings.darkMode = val;
-    document.body.classList.toggle('dark', val);
-    saveSettings();
+// ─── CONFIG / SETTINGS ───────────────────────────────
+let cfg={dark:false,fs:14,speak:true,noise:true};
+function loadCfg(){try{const s=localStorage.getItem('rp2_cfg');if(s)cfg={...cfg,...JSON.parse(s)};}catch(e){}applyCfg();}
+function saveCfg(){try{localStorage.setItem('rp2_cfg',JSON.stringify(cfg));}catch(e){}}
+function applyCfg(){
+  document.body.classList.toggle('dark',cfg.dark);
+  document.getElementById('s_dark').checked=cfg.dark;
+  document.documentElement.style.setProperty('--bfs',cfg.fs+'px');
+  document.getElementById('s_fs').value=cfg.fs;document.getElementById('fsLbl').textContent=cfg.fs+'px';
+  document.getElementById('s_speak').checked=cfg.speak;
+  document.getElementById('s_noise').checked=cfg.noise;
 }
-
-function setFontSizeSlider(input) {
-    settings.fontSize = parseInt(input.value);
-    document.getElementById('fontSizeVal').textContent = settings.fontSize + 'px';
-    document.documentElement.style.setProperty('--bubble-fs', settings.fontSize + 'px');
-    saveSettings();
+function applyDark(v){cfg.dark=v;document.body.classList.toggle('dark',v);saveCfg();}
+function setFs(i){cfg.fs=+i.value;document.getElementById('fsLbl').textContent=cfg.fs+'px';document.documentElement.style.setProperty('--bfs',cfg.fs+'px');saveCfg();}
+function clearChat(){chatLog.innerHTML='<div class="empty"><div class="ei">🗑️</div><p>Chat cleared.</p></div>';toast('Chat cleared','inf');}
+function dTab(k){
+  ['s','p','a'].forEach(t=>{
+    document.getElementById('db_'+t).classList.toggle('hidden',t!==k);
+    document.getElementById('dt_'+t).classList.toggle('on',t===k);
+  });
 }
+function openSettings(){document.getElementById('drawer').classList.add('on');document.getElementById('bkdrop').classList.add('on');refreshProCard();}
+function closeSettings(){document.getElementById('drawer').classList.remove('on');document.getElementById('bkdrop').classList.remove('on');}
+function openLegal(){openSettings();dTab('a');}
 
-function clearChat() {
-    chatLog.innerHTML = '<div class="empty-state"><div class="icon">🗑️</div><p>Chat cleared.</p></div>';
-    showToast("Chat history cleared", "info");
+// ─── APP STATE ───────────────────────────────────────
+let peer=null,conn=null,myRole='guest',rec=null;
+let offline=false,micSt='off',srRestart=false;
+const synth=window.speechSynthesis;
+const langMe=document.getElementById('langMe');
+const langThem=document.getElementById('langThem');
+const micBtn=document.getElementById('micBtn');
+const muteBtn=document.getElementById('muteBtn');
+const liveEl=document.getElementById('liveEl');
+const sBadge=document.getElementById('sBadge');
+const sTxt=document.getElementById('sTxt');
+const chatLog=document.getElementById('chatLog');
+langMe.addEventListener('change',()=>onLangChange(langMe));
+langThem.addEventListener('change',()=>onLangChange(langThem));
+document.getElementById('offTog').addEventListener('change',e=>{offline=e.target.checked;addMsg(offline?'📖 Offline Dictionary ON':'🌐 Online Translation ON','sys');});
+
+// ─── MIC STATE MACHINE ───────────────────────────────
+function setMic(s){
+  micSt=s;micBtn.classList.remove('dis','rdy','lst','muted');
+  const pills=document.getElementById('pillsEl');
+  if(s==='off'){micBtn.classList.add('dis');micBtn.disabled=true;muteBtn.classList.add('hid');liveEl.textContent='';pills.innerHTML='<div class="pill">🔇 Connect first to use mic</div>';}
+  else if(s==='rdy'){micBtn.classList.add('rdy');micBtn.disabled=false;muteBtn.classList.add('hid');liveEl.textContent='';pills.innerHTML='<div class="pill">🎙️ Tap mic to speak</div>';}
+  else if(s==='lst'){micBtn.classList.add('lst');micBtn.disabled=false;muteBtn.classList.remove('hid','am');liveEl.textContent='Listening…';pills.innerHTML='<div class="pill">🟢 Mic ON</div>';}
+  else if(s==='mut'){micBtn.classList.add('muted');micBtn.disabled=false;muteBtn.classList.remove('hid');muteBtn.classList.add('am');liveEl.textContent='Muted';pills.innerHTML='<div class="pill">🔇 Muted</div>';}
 }
-
-// Tab Switching
-function switchTab(tab) {
-    document.getElementById('settingsBody').classList.toggle('hidden', tab !== 'settings');
-    document.getElementById('legalBody').classList.toggle('hidden', tab !== 'legal');
-    document.getElementById('tabSettings').classList.toggle('active', tab === 'settings');
-    document.getElementById('tabLegal').classList.toggle('active', tab === 'legal');
-}
-
-function openSettings() {
-    document.getElementById('settingsDrawer').classList.add('open');
-    document.getElementById('settingsBackdrop').classList.add('open');
-}
-
-function openLegal(type) {
-    openSettings();
-    switchTab('legal');
-}
-
-function closeSettings() {
-    document.getElementById('settingsDrawer').classList.remove('open');
-    document.getElementById('settingsBackdrop').classList.remove('open');
-}
-
-// ============================================================
-// APP STATE
-// ============================================================
-let peer = null, conn = null, myRole = 'guest';
-let recognition = null, html5QrCode = null;
-let isOfflineMode = false, micState = 'off';
-let synth = window.speechSynthesis;
-let availableVoices = [];
-let shouldRestart = false;
-
-const langMeSelect    = document.getElementById('langMe');
-const langGuestSelect = document.getElementById('langGuest');
-const micBtn          = document.getElementById('micBtn');
-const muteBtn         = document.getElementById('muteBtn');
-const liveText        = document.getElementById('liveText');
-const statusBadge     = document.getElementById('connStatus');
-const statusText      = document.getElementById('statusText');
-const chatLog         = document.getElementById('chatLog');
-const offlineToggle   = document.getElementById('offlineToggle');
-const hintPills       = document.getElementById('hintPills');
-
-offlineToggle.addEventListener('change', e => {
-    isOfflineMode = e.target.checked;
-    addLog(isOfflineMode ? "📖 Offline Dictionary ON" : "🌐 Online Translation ON", "system");
+micBtn.addEventListener('click',()=>{
+  if(!conn||!conn.open){toast('Connect to a partner first','err');return;}
+  if(micSt==='rdy')startListen();
+  else if(micSt==='lst'||micSt==='mut')stopListen();
+});
+muteBtn.addEventListener('click',()=>{
+  if(!conn||!conn.open)return;
+  if(micSt==='lst'){srRestart=false;try{rec&&rec.stop();}catch(e){}setMic('mut');addMsg('🔇 Mic muted.','sys');}
+  else if(micSt==='mut'){startListen();addMsg('🎙️ Mic active.','sys');}
 });
 
-// ============================================================
-// MIC STATE MACHINE
-// ============================================================
-function setMicState(state) {
-    micState = state;
-    micBtn.classList.remove('disabled', 'ready', 'listening', 'muted');
-    if (state === 'off') {
-        micBtn.classList.add('disabled'); micBtn.disabled = true;
-        muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
-        hintPills.innerHTML = '<div class="hint-pill">🔇 Connect first to use mic</div>';
-        document.getElementById('ad-container').classList.remove('visible');
-    } else if (state === 'ready') {
-        micBtn.classList.add('ready'); micBtn.disabled = false;
-        muteBtn.classList.add('hidden-btn'); liveText.textContent = '';
-        hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap mic to speak</div>';
-        document.getElementById('ad-container').classList.add('visible');
-    } else if (state === 'listening') {
-        micBtn.classList.add('listening'); micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn', 'active-mute'); muteBtn.title = 'Mute';
-        liveText.textContent = 'Listening...';
-        hintPills.innerHTML = '<div class="hint-pill">🟢 Mic ON</div>';
-    } else if (state === 'muted') {
-        micBtn.classList.add('muted'); micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn'); muteBtn.classList.add('active-mute'); muteBtn.title = 'Unmute';
-        liveText.textContent = 'Muted';
-        hintPills.innerHTML = '<div class="hint-pill">🔇 Muted</div>';
-    }
+// ─── SPEECH RECOGNITION ──────────────────────────────
+function initSR(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Speech recognition not supported on this browser.','err');return;}
+  rec=new SR();rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=1;
+  rec.onend=()=>{setTimeout(()=>{if(srRestart&&micSt==='lst'&&conn&&conn.open){try{rec.lang=langMe.value;rec.start();}catch(e){}}},200);};
+  rec.onresult=ev=>{
+    if(micSt!=='lst')return;
+    let intr='',fin='';
+    for(let i=ev.resultIndex;i<ev.results.length;i++){if(ev.results[i].isFinal)fin+=ev.results[i][0].transcript;else intr+=ev.results[i][0].transcript;}
+    if(intr)liveEl.textContent='🎤 '+intr;
+    if(fin){liveEl.textContent='Translating…';doTranslate(fin);}
+  };
+  rec.onerror=e=>{
+    if(['not-allowed','service-not-allowed'].includes(e.error)){toast('Mic permission denied.','err');stopListen();}
+    else if(e.error==='audio-capture'){toast('Microphone not found or in use.','err');stopListen();}
+    else if(e.error==='network')toast('Network error in speech recognition.','err');
+    // no-speech, aborted → ignore
+  };
+}
+function startListen(){
+  if(!rec)return;srRestart=true;setMic('lst');
+  try{rec.lang=langMe.value;rec.start();}catch(e){try{rec.stop();}catch(e2){}setTimeout(()=>{if(srRestart){try{rec.lang=langMe.value;rec.start();}catch(e3){}}},250);}
+}
+function stopListen(){srRestart=false;try{rec&&rec.stop();}catch(e){}setMic('rdy');liveEl.textContent='';}
+
+// ─── TRANSLATION ─────────────────────────────────────
+function cln(t){return t.trim().replace(/\b(um|uh|ah|er|like|you know)\b/gi,'').replace(/\s+/g,' ').replace(/[.,!?]+$/,'').trim();}
+async function doTranslate(text){
+  const c=cln(text);if(!c)return;
+  addMsg(c,'me');
+  const tr=await xlate(c,langMe.value,langThem.value);
+  if(conn&&conn.open)conn.send({type:'tr',text:tr,lang:langThem.value});
+  else spk(tr,langThem.value);
+  if(micSt==='lst')liveEl.textContent='Listening…';
+}
+async function xlate(text,from,to){
+  if(offline){const tc=to.split('-')[0],k=text.toLowerCase().trim().replace(/[.,!?]/g,'');return DICT[k]?.[tc]||text+' (no offline match)';}
+  const sc=from.split('-')[0],tc=to.split('-')[0];
+  if(sc===tc)return text;
+  try{
+    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sc}|${tc}`);
+    const d=await r.json();if(d.responseStatus===200)return d.responseData.translatedText;throw 0;
+  }catch(e){
+    toast('Translation limit — using offline fallback','err');
+    const tc2=to.split('-')[0],k=text.toLowerCase().trim().replace(/[.,!?]/g,'');
+    return DICT[k]?.[tc2]||text;
+  }
+}
+function spk(text,lang){
+  if(!synth||!cfg.speak)return;synth.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=1;u.pitch=1;synth.speak(u);
+}
+function addMsg(text,who){
+  const em=chatLog.querySelector('.empty');if(em)em.remove();
+  const d=document.createElement('div');d.className=`msg ${who}`;
+  const b=document.createElement('div');b.className='bbl';b.textContent=text;d.appendChild(b);
+  if(who!=='sys'){const m=document.createElement('div');m.className='mt';m.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});d.appendChild(m);}
+  chatLog.appendChild(d);chatLog.scrollTop=chatLog.scrollHeight;
 }
 
-// ============================================================
-// SPEECH RECOGNITION
-// ============================================================
-function initSpeechRecognition() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-        showToast("Speech recognition not supported.", "error");
-        return;
-    }
-    recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
+// ─── PEER / CONNECTION ───────────────────────────────
+function showStep(step){
+  document.querySelectorAll('.modal').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('setupMod').classList.add('on');
+  if(step==='1')document.getElementById('s1').classList.remove('hidden');
+  else if(step==='host'){myRole='host';document.getElementById('sHost').classList.remove('hidden');initHost();}
+  else if(step==='guest'){myRole='guest';document.getElementById('sGuest').classList.remove('hidden');document.getElementById('connBar').classList.remove('on');}
+}
+function killPeer(){if(conn){try{conn.close();}catch(e){}conn=null;}if(peer){try{peer.destroy();}catch(e){}peer=null;}}
 
-    recognition.onend = () => {
-        setTimeout(() => {
-            if (shouldRestart && micState === 'listening' && conn && conn.open) {
-                try {
-                    recognition.lang = langMeSelect.value;
-                    recognition.start();
-                } catch(e) { console.log('Auto-restart failed:', e); }
-            }
-        }, 150);
-    };
+const ICE={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}};
 
-    recognition.onresult = (event) => {
-        if (micState !== 'listening') return;
-        let interim = '', final = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            const result = event.results[i];
-            if (result.isFinal) {
-                final += result[0].transcript;
-            } else {
-                interim += result[0].transcript;
-            }
+function initHost(){
+  killPeer();
+  document.getElementById('myId').textContent='Generating…';
+  document.getElementById('qrcode').innerHTML='';
+  document.getElementById('waitBar').classList.add('on');
+  const pid='rafiki-'+Math.random().toString(36).substr(2,9);
+  peer=new Peer(pid,{debug:0,...ICE});
+  peer.on('open',id=>{
+    document.getElementById('myId').textContent=id;
+    document.getElementById('qrcode').innerHTML='';
+    new QRCode(document.getElementById('qrcode'),{text:id,width:170,height:170,colorDark:'#004d40',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  });
+  peer.on('connection',c=>{
+    if(conn&&conn.open){c.close();return;}
+    conn=c;wireConn();
+  });
+  peer.on('error',err=>{
+    toast({network:'Network error — check connection.',unavailable:'ID not found.',disconnected:'Server disconnected.'}[err.type]||'Error: '+err.type,'err');
+  });
+}
+
+function doConnect(overrideId){
+  const id=(overrideId||document.getElementById('hostInput').value||'').trim();
+  if(!id){toast('Please enter the Host ID','err');return;}
+  document.getElementById('connBar').classList.add('on');
+  document.getElementById('connMsg').textContent='Creating connection…';
+  document.getElementById('connBtn').disabled=true;
+  killPeer();
+  const myId='rafiki-g-'+Math.random().toString(36).substr(2,9);
+  peer=new Peer(myId,{debug:0,...ICE});
+  let opened=false;
+  const timeout=setTimeout(()=>{if(!conn||!conn.open)connFail('Timed out. Check the ID and try again.');},15000);
+  peer.on('open',()=>{
+    if(opened)return;opened=true;
+    document.getElementById('connMsg').textContent='Reaching host…';
+    try{conn=peer.connect(id,{reliable:true});wireConn();}
+    catch(e){clearTimeout(timeout);connFail('Could not reach host.');}
+  });
+  peer.on('error',err=>{
+    clearTimeout(timeout);
+    connFail({'peer-unavailable':'Host not found. Make sure they are on the Host screen.','network':'Network error — check your internet.'}[err.type]||'Error: '+err.type);
+  });
+}
+
+function connFail(msg){
+  toast(msg,'err');
+  document.getElementById('connBar').classList.remove('on');
+  document.getElementById('connBtn').disabled=false;
+  killPeer();
+}
+
+function wireConn(){
+  if(!conn)return;
+  conn.on('open',()=>{
+    sBadge.classList.add('conn');sTxt.textContent='Connected';
+    document.getElementById('setupMod').classList.remove('on');
+    document.getElementById('connBar').classList.remove('on');
+    document.getElementById('connBtn').disabled=false;
+    chatLog.innerHTML='';setMic('rdy');
+    addMsg('✅ Connected! Tap the mic to speak.','sys');
+    toast('Partner Connected','ok');
+  });
+  conn.on('data',d=>{if(d&&d.type==='tr'){spk(d.text,d.lang);addMsg(d.text,'them');}});
+  conn.on('close',onDisconn);conn.on('error',onDisconn);
+}
+function onDisconn(){
+  sBadge.classList.remove('conn');sTxt.textContent='Disconnected';
+  srRestart=false;try{rec&&rec.stop();}catch(e){}
+  setMic('off');addMsg('❌ Partner disconnected.','sys');
+  toast('Partner Disconnected','err');conn=null;
+}
+function finishSetup(){
+  if(myRole==='host'&&(!conn||!conn.open)){toast('Still waiting for guest to connect…','inf');return;}
+  document.getElementById('setupMod').classList.remove('on');
+}
+function copyId(){const t=document.getElementById('myId').textContent;if(!t||t.includes('…'))return;cp(t,'Host ID copied!');}
+
+// ─── QR SCANNER (jsQR + getUserMedia) ────────────────
+let scanStream=null,scanAF=null,scanRunning=false;
+
+async function startScan(){
+  if(scanRunning)return;
+  scanRunning=true;
+  document.getElementById('scanSub').textContent='Requesting camera permission…';
+  document.getElementById('scanOv').classList.add('on');
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+  }catch(err){
+    scanRunning=false;document.getElementById('scanOv').classList.remove('on');
+    if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError')toast('Camera permission denied. Allow camera access in your browser settings.','err');
+    else if(err.name==='NotFoundError')toast('No camera found on this device.','err');
+    else toast('Camera error: '+err.message,'err');
+    return;
+  }
+  const vid=document.createElement('video');
+  vid.srcObject=scanStream;vid.playsInline=true;vid.muted=true;
+  await vid.play();
+  const canvas=document.getElementById('scanCanvas');
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  document.getElementById('scanSub').textContent='Scanning… point at QR code';
+  function tick(){
+    if(!scanRunning)return;
+    if(vid.readyState>=vid.HAVE_ENOUGH_DATA){
+      canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
+      ctx.drawImage(vid,0,0);
+      try{
+        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+        const res=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'});
+        if(res&&res.data&&res.data.trim()){
+          stopScan();
+          const scanned=res.data.trim();
+          document.getElementById('hostInput').value=scanned;
+          toast('✅ QR Code scanned!','ok');
+          doConnect(scanned);
+          return;
         }
-        if (interim) liveText.textContent = '🎤 ' + interim;
-        if (final) {
-            liveText.textContent = 'Translating...';
-            handleVoiceInput(final);
-        }
-    };
-
-    recognition.onerror = (e) => {
-        console.error("Speech Error:", e.error);
-        if (e.error === 'not-allowed') {
-            showToast("Mic permission denied.", "error");
-            stopListening();
-        }
-    };
-}
-
-// ============================================================
-// MIC CONTROLS
-// ============================================================
-micBtn.addEventListener('click', () => {
-    if (!conn || !conn.open) {
-        showToast("Connect to a partner first", "error");
-        return;
+      }catch(e){}
     }
-    if (micState === 'ready') startListening();
-    else if (micState === 'listening' || micState === 'muted') stopListening();
-});
+    scanAF=requestAnimationFrame(tick);
+  }
+  scanAF=requestAnimationFrame(tick);
+}
 
-muteBtn.addEventListener('click', () => {
-    if (!conn || !conn.open) return;
-    if (micState === 'listening') {
-        shouldRestart = false;
-        if (recognition) { try { recognition.stop(); } catch(e) {} }
-        setMicState('muted');
-        addLog("🔇 Mic muted.", "system");
-    } else if (micState === 'muted') {
-        startListening();
-        addLog("🎙️ Mic active.", "system");
+function stopScan(){
+  scanRunning=false;
+  if(scanAF){cancelAnimationFrame(scanAF);scanAF=null;}
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  document.getElementById('scanOv').classList.remove('on');
+  const canvas=document.getElementById('scanCanvas');
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+}
+
+// ─── PAYMENT MODAL ───────────────────────────────────
+let curPlan='D';
+function openPayMod(){document.getElementById('payMod').classList.add('on');selPlan('D');selPTab('mm');refreshPro();}
+function closePayMod(){document.getElementById('payMod').classList.remove('on');}
+function selPlan(k){
+  curPlan=k;['D','M'].forEach(p=>document.getElementById('pc_'+p).classList.toggle('sel',p===k));
+  const info={D:{m:'TSh 500  ·  $0.50',s:'Daily — 24-hour access, all 18 languages'},M:{m:'TSh 12,000  ·  $10',s:'Monthly — 30 days of PRO access'}};
+  document.getElementById('amtMain').textContent=info[k].m;
+  document.getElementById('amtSub').textContent=info[k].s;
+}
+function selPTab(t){
+  ['mm','bank','code'].forEach(k=>{
+    document.getElementById('pb_'+k).classList.toggle('on',k===t);
+    document.getElementById('pt_'+k).classList.toggle('on',k===t);
+  });
+}
+function sendWA(){
+  const plan={D:'Daily ($0.50 / TSh 500)',M:'Monthly ($10 / TSh 12,000)'}[curPlan]||'Daily';
+  window.open('https://wa.me/255788714307?text='+encodeURIComponent(`Hi! I want to pay for RAFIKI PRO — ${plan}.\nPlease send me my activation code.\n[Attach payment screenshot]`),'_blank');
+}
+function submitCard(){
+  const num=document.getElementById('cNum').value.replace(/\s/g,'');
+  const name=document.getElementById('cName').value.trim();
+  const exp=document.getElementById('cExp').value.trim();
+  const cvv=document.getElementById('cCvv').value.trim();
+  if(num.length<15||!name||exp.length<4||cvv.length<3){toast('Please fill in all card fields','err');return;}
+  const plan={D:'Daily ($0.50 / TSh 500)',M:'Monthly ($10 / TSh 12,000)'}[curPlan];
+  window.open('https://wa.me/255788714307?text='+encodeURIComponent(`RAFIKI PRO Payment\nPlan: ${plan}\nCard: ****${num.slice(-4)}\nName: ${name}\nExpiry: ${exp}\nPlease process and send activation code.`),'_blank');
+  toast('Details sent — await your code on WhatsApp','ok');
+}
+function startTrial(){
+  if(trialUsed){toast('Trial already used. Please purchase a plan.','err');return;}
+  trialUsed=true;try{localStorage.setItem('rp2_trial','1');}catch(e){}
+  activatePro('T',Date.now()+12*3600000,'trial');
+  closePayMod();
+  toast('⏱️ 12-hour trial activated! All languages unlocked.','pro');
+  addMsg('⏱️ Free trial started — 12 hours of PRO access!','sys');
+}
+function doActivate(inputId){
+  const inp=document.getElementById(inputId);
+  const raw=(inp.value||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  if(!raw){toast('Please enter a code','err');return;}
+  if(usedCodes.includes(raw)){toast('This code has already been used','err');return;}
+  const r=checkCode(raw);
+  if(r.bad){toast('Invalid code — double-check and try again','err');return;}
+  if(r.old){toast('This code has expired','err');return;}
+  usedCodes.push(raw);
+  const dur={D:86400,M:2592000,T:43200}[r.plan]||86400;
+  activatePro(r.plan,Date.now()+dur*1000,'paid');
+  savePro();closePayMod();closeSettings();
+  const pl={D:'Daily (24h)',M:'Monthly (30 days)',T:'Trial (12h)'};
+  toast('👑 PRO unlocked! '+pl[r.plan],'pro');
+  addMsg('✅ PRO activated — '+pl[r.plan]+'!','sys');
+  inp.value='';
+}
+
+// ─── CARD INPUT FORMAT ───────────────────────────────
+function fmtCard(inp){let v=inp.value.replace(/\D/g,'').slice(0,16),o='';for(let i=0;i<v.length;i++){if(i&&i%4===0)o+=' ';o+=v[i];}inp.value=o;}
+function fmtExp(inp){let v=inp.value.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+' / '+v.slice(2);inp.value=v;}
+
+// ─── COPY UTILITY ────────────────────────────────────
+function cp(text,msg){
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>toast(msg,'ok')).catch(()=>cpFall(text,msg));}
+  else cpFall(text,msg);
+}
+function cpFall(text,msg){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast(msg,'ok');}catch(e){toast('Copy failed — please copy manually','err');}
+  document.body.removeChild(ta);
+}
+
+// ─── ADMIN PANEL ─────────────────────────────────────
+let btaps=0,btimer=null,pinBuf='';
+function brandTap(){
+  btaps++;if(btimer)clearTimeout(btimer);
+  btimer=setTimeout(()=>btaps=0,1500);
+  if(btaps>=7){btaps=0;openAdmin();}
+}
+function openAdmin(){
+  pinBuf='';updPinDots();document.getElementById('pinErr').textContent='';
+  document.getElementById('adminPin').classList.remove('hidden');
+  document.getElementById('adminGen').classList.add('hidden');
+  document.getElementById('adminOv').classList.add('on');
+}
+function closeAdmin(){document.getElementById('adminOv').classList.remove('on');pinBuf='';}
+function pk(k){
+  if(pinBuf.length>=4)return;
+  pinBuf+=k;updPinDots();
+  if(pinBuf.length===4){
+    setTimeout(()=>{
+      if(pinBuf===APIN){document.getElementById('adminPin').classList.add('hidden');document.getElementById('adminGen').classList.remove('hidden');document.getElementById('genRes').classList.remove('on');}
+      else{document.getElementById('pinErr').textContent='Incorrect PIN';pinBuf='';updPinDots();}
+    },200);
+  }
+}
+function pdel(){pinBuf=pinBuf.slice(0,-1);updPinDots();}
+function updPinDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('on',i<pinBuf.length);}
+function genCode(plan){
+  const code=makeCode(plan);
+  const fmt=code.replace(/(.{4})/g,'$1-').replace(/-$/,'');
+  document.getElementById('genTxt').textContent=fmt;
+  const dur={D:86400,M:2592000,T:43200}[plan]||86400;
+  const exp=new Date(Date.now()+dur*1000);
+  const lbl={D:'1 Day',M:'30 Days',T:'12 Hours'};
+  document.getElementById('genInf').textContent=lbl[plan]+' · Expires: '+exp.toLocaleString();
+  document.getElementById('genRes').classList.add('on');
+  return code;
+}
+function cpGenCode(){cp(document.getElementById('genTxt').textContent.replace(/-/g,''),'Code copied!');}
+
+// ─── INIT ────────────────────────────────────────────
+function init(){
+  loadCfg();loadPro();buildLangs();
+  langMe.value='en-US';langMe.dataset.prev='en-US';
+  langThem.value='sw-TZ';langThem.dataset.prev='sw-TZ';
+  initSR();setMic('off');
+  if(isPro()&&PRO.type==='trial')startTimer();
+  // Periodic expiry check for paid plans
+  setInterval(()=>{
+    if(PRO.on&&!isPro()){
+      refreshPro();buildLangs();
+      if(!FREE.includes(langMe.value))langMe.value='en-US';
+      if(!FREE.includes(langThem.value))langThem.value='sw-TZ';
+      toast('PRO access expired. Please renew.','inf');
     }
-});
-
-function startListening() {
-    if (!recognition) return;
-    shouldRestart = true;
-    setMicState('listening');
-    try {
-        recognition.lang = langMeSelect.value;
-        recognition.start();
-    } catch(e) {
-        try { recognition.stop(); } catch(e2) {}
-        setTimeout(() => {
-            if (shouldRestart) {
-                try {
-                    recognition.lang = langMeSelect.value;
-                    recognition.start();
-                } catch(e3) { console.log('Start retry failed:', e3); }
-            }
-        }, 200);
-    }
-}
-
-function stopListening() {
-    shouldRestart = false;
-    if (recognition) { try { recognition.stop(); } catch(e) {} }
-    setMicState('ready');
-    liveText.textContent = '';
-}
-
-// ============================================================
-// TEXT PROCESSING & TRANSLATION
-// ============================================================
-function cleanInput(text) {
-    return text.trim().replace(/\b(um|uh|ah|er|like|you know)\b/gi, "").replace(/\s+/g, " ").replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/, "").trim();
-}
-
-async function handleVoiceInput(text) {
-    const cleaned = cleanInput(text);
-    if (!cleaned) return;
-    const sourceLang = langMeSelect.value;
-    const targetLang = langGuestSelect.value;
-    addLog(cleaned, "me");
-    const translation = await translateText(cleaned, sourceLang, targetLang);
-    if (conn && conn.open) {
-        conn.send({ type: 'translation', text: translation, lang: targetLang, original: cleaned });
-    } else {
-        speak(translation, targetLang);
-    }
-    if (micState === 'listening') liveText.textContent = 'Listening...';
-}
-
-async function translateText(text, from, to) {
-    if (isOfflineMode) {
-        const tCode = to.split('-')[0];
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-        if (offlineDictionary[clean]?.[tCode]) return offlineDictionary[clean][tCode];
-        return text + " (No offline match)";
-    }
-    const sCode = from.split('-')[0], tCode = to.split('-')[0];
-    if (sCode === tCode) return text;
-    try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sCode}|${tCode}`);
-        const data = await res.json();
-        if (data.responseStatus === 200) return data.responseData.translatedText;
-        throw new Error("API limit");
-    } catch(e) {
-        showToast("Using offline fallback", "error");
-        const tCode2 = to.split('-')[0];
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-        if (offlineDictionary[clean]?.[tCode2]) return offlineDictionary[clean][tCode2];
-        return text;
-    }
-}
-
-function speak(text, lang) {
-    if (!synth || !settings.autoSpeak) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang;
-    u.rate = 1.0; u.pitch = 1.0;
-    synth.speak(u);
-}
-
-function addLog(text, type) {
-    const empty = chatLog.querySelector('.empty-state');
-    if (empty) empty.remove();
-    const div = document.createElement('div');
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    div.className = `log-item ${type}`;
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = text;
-    div.appendChild(bubble);
-    if (type !== 'system') {
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.textContent = time;
-        div.appendChild(meta);
-    }
-    chatLog.appendChild(div);
-    chatLog.scrollTop = chatLog.scrollHeight;
-}
-
-// ============================================================
-// PEER / CONNECTION
-// ============================================================
-function showStep(step) {
-    document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-    if (step === '1') {
-        document.getElementById('step1').classList.remove('hidden');
-        document.getElementById('setupModal').classList.add('active');
-    } else if (step === 'host') {
-        myRole = 'host';
-        document.getElementById('stepHost').classList.remove('hidden');
-        initPeer();
-    } else if (step === 'guest') {
-        myRole = 'guest';
-        document.getElementById('stepGuest').classList.remove('hidden');
-    }
-}
-
-function initPeer() {
-    const id = 'rafiki-' + Math.random().toString(36).substr(2, 9);
-    peer = new Peer(id, { debug: 0 });
-    peer.on('open', (id) => {
-        document.getElementById('myPeerId').textContent = id;
-        document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), {
-            text: id, width: 175, height: 175,
-            colorDark: "#004d40", colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    });
-    peer.on('connection', (c) => {
-        conn = c;
-        setupConnectionListeners();
-    });
-    peer.on('error', (err) => showToast("Connection Error: " + err.type, "error"));
-}
-
-function connectToHost(idInput = null) {
-    const hostId = idInput || document.getElementById('hostIdInput').value.trim();
-    if (!hostId) return showToast("Please enter a valid ID!", "error");
-    if (!peer) {
-        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2, 9);
-        peer = new Peer(myId, { debug: 0 });
-        peer.on('open', () => performConnect(hostId));
-        peer.on('error', (err) => showToast("Peer error: " + err.type, "error"));
-    } else {
-        performConnect(hostId);
-    }
-}
-
-function performConnect(hostId) {
-    conn = peer.connect(hostId);
-    setupConnectionListeners();
-}
-
-function setupConnectionListeners() {
-    if (!conn) return;
-    conn.on('open', () => {
-        statusBadge.classList.add('connected');
-        statusText.textContent = 'Connected';
-        document.getElementById('setupModal').classList.remove('active');
-        chatLog.innerHTML = '';
-        setMicState('ready');
-        addLog("✅ Connected! Tap mic to speak.", "system");
-        showToast("Partner Connected", "success");
-    });
-    conn.on('data', (data) => {
-        if (data && typeof data === 'object' && data.type === 'translation') {
-            speak(data.text, data.lang);
-            addLog(data.text, "guest");
-        }
-    });
-    conn.on('close', () => handleDisconnect());
-    conn.on('error', () => handleDisconnect());
-}
-
-function handleDisconnect() {
-    statusBadge.classList.remove('connected');
-    statusText.textContent = 'Disconnected';
-    shouldRestart = false;
-    if (recognition) { try { recognition.stop(); } catch(e) {} }
-    setMicState('off');
-    addLog("❌ Partner disconnected.", "system");
-    showToast("Partner Disconnected", "error");
-}
-
-function finishSetup() {
-    if (myRole === 'host' && (!conn || !conn.open)) {
-        showToast("Waiting for guest to connect…", "info");
-        return;
-    }
-    document.getElementById('setupModal').classList.remove('active');
-}
-
-function copyId() {
-    const t = document.getElementById('myPeerId').textContent;
-    if (!t || t === 'Generating...') return;
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(t).then(() => showToast("ID Copied!", "success"));
-    } else {
-        const ta = document.createElement("textarea");
-        ta.value = t; ta.style.cssText = "position:fixed;left:-9999px";
-        document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); showToast("ID Copied!", "success"); } catch(e) {}
-        document.body.removeChild(ta);
-    }
-}
-
-// ============================================================
-// QR SCANNER
-// ============================================================
-async function startScanner() {
-    document.getElementById('scanOverlay').classList.add('active');
-    if (html5QrCode) {
-        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {}
-        html5QrCode = null;
-    }
-    setTimeout(async () => {
-        try {
-            html5QrCode = new Html5Qrcode("qr-reader");
-            await html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    stopScanner();
-                    document.getElementById('hostIdInput').value = decodedText;
-                    showToast("QR Code Scanned!", "success");
-                    connectToHost(decodedText);
-                },
-                () => {}
-            );
-        } catch(err) {
-            showToast("Camera Error: " + err, "error");
-            stopScanner();
-        }
-    }, 100);
-}
-
-async function stopScanner() {
-    document.getElementById('scanOverlay').classList.remove('active');
-    if (html5QrCode) {
-        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {}
-        html5QrCode = null;
-    }
-}
-
-// ============================================================
-// INIT
-// ============================================================
-function init() {
-    languages.forEach(lang => {
-        [langMeSelect, langGuestSelect].forEach(sel => {
-            const opt = document.createElement('option');
-            opt.value = lang.code; opt.textContent = lang.name;
-            sel.appendChild(opt);
-        });
-    });
-    langMeSelect.value = "en-US";
-    langGuestSelect.value = "sw-TZ";
-    initSpeechRecognition();
-    setMicState('off');
-    loadSettings();
+  },30000);
 }
 init();
-
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('SW registered'))
-            .catch(err => console.log('SW failed', err));
-    });
-}
 </script>
 </body>
 </html>
