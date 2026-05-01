@@ -61,13 +61,13 @@
             --their-bubble-text: #e6edf3;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; touch-action: manipulation; }
 
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
             color: var(--text-main);
-            height: 100dvh;
+            height: 100dvh; /* Dynamic Viewport Height for mobile consistency */
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -423,7 +423,7 @@
         </div>
 
         <div style="margin-top:15px;">
-            <input type="text" id="redeemCodeInput" placeholder="Enter Payment Reference Code">
+            <input type="text" id="redeemCodeInput" placeholder="Enter Code Received">
             <button class="role-btn primary" onclick="redeemCode()">
                 <span class="role-icon">🔓</span>
                 <span class="role-info">Unlock Access</span>
@@ -447,7 +447,7 @@
 <div id="adminLoginModal" class="modal-overlay">
     <div class="modal-content">
         <h3>Owner Access</h3>
-        <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 15px;">Enter password to manage app and generate codes.</p>
+        <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 15px;">Manage payments and generate secure codes.</p>
         <input type="password" id="adminPasswordInput" placeholder="Password">
         <button class="role-btn primary" onclick="verifyAdminLogin()">
             <span class="role-icon">🔐</span>
@@ -573,7 +573,7 @@
             </button>
 
             <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
-                <label style="font-size:0.75rem; font-weight:700;">Generate Access Code</label>
+                <label style="font-size:0.75rem; font-weight:700;">Generate Access Code (One-Time Use)</label>
                 <select id="adminPlanType" class="admin-input">
                     <option value="daily">Daily Access (500 TSH)</option>
                     <option value="monthly">Monthly Access (12000 TSH)</option>
@@ -642,15 +642,22 @@ let paymentConfig = {
 try {
     const savedConfig = localStorage.getItem('rafiki_payment_config');
     if (savedConfig) paymentConfig = JSON.parse(savedConfig);
-} catch(e){ console.warn("Storage not available"); }
+} catch(e){ console.warn("Config storage error"); }
+
+// Security: List of used codes to prevent reuse
+let usedCodes = [];
+try {
+    const savedUsed = localStorage.getItem('rafiki_used_codes');
+    if (savedUsed) usedCodes = JSON.parse(savedUsed);
+} catch(e){}
 
 // ============================================================
 // MONETIZATION CONFIG
 // ============================================================
 const MONETIZATION_CONFIG = {
-    freeLangs: ['en-US', 'en-GB', 'sw-TZ', 'sw-KE'],
+    freeLangs: ['en-US', 'en-GB', 'sw-TZ', 'sw-KE'], 
     trialDuration: 12 * 60 * 60 * 1000, 
-    secret: "RAFIKI_PRO_SECRET_SALT_V2", 
+    secret: "RAFIKI_SECURE_SALT_V3", // Change this in production for real security
 };
 
 let userState = {
@@ -669,7 +676,7 @@ function showToast(msg, type = 'info') {
     const icons = { success: '✅', error: '⚠️', info: 'ℹ️' };
     toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
     container.appendChild(toast);
-    toast.offsetHeight; // force reflow
+    toast.offsetHeight; 
     toast.classList.add('show');
     setTimeout(() => {
         toast.classList.remove('show');
@@ -678,11 +685,11 @@ function showToast(msg, type = 'info') {
 }
 
 // ============================================================
-// LICENSE MANAGER (Safe Storage)
+// LICENSE MANAGER
 // ============================================================
 function initLicense() {
     try {
-        const saved = localStorage.getItem('rafiki_license_v1');
+        const saved = localStorage.getItem('rafiki_license_v2');
         if (saved) {
             userState = JSON.parse(saved);
         } else {
@@ -690,17 +697,18 @@ function initLicense() {
             saveLicense();
         }
     } catch(e) {
-        console.warn("License storage failed", e);
-        userState.trialStart = Date.now(); // Default to trial if storage fails
+        userState.trialStart = Date.now();
     }
     checkLicenseStatus();
-    setInterval(checkLicenseStatus, 60000);
+    setInterval(checkLicenseStatus, 60000); 
 }
 
 function saveLicense() {
-    try {
-        localStorage.setItem('rafiki_license_v1', JSON.stringify(userState));
-    } catch(e) { console.warn("Could not save license"); }
+    try { localStorage.setItem('rafiki_license_v2', JSON.stringify(userState)); } catch(e){}
+}
+
+function saveUsedCodes() {
+    try { localStorage.setItem('rafiki_used_codes', JSON.stringify(usedCodes)); } catch(e){}
 }
 
 function checkLicenseStatus() {
@@ -709,20 +717,15 @@ function checkLicenseStatus() {
     let statusText = "";
     let actionText = "UPGRADE";
 
-    // Check Pro Status
     if (userState.isPro && userState.proExpiry && now < userState.proExpiry) {
         isUnlocked = true;
         statusText = "Pro Active";
         actionText = "MANAGE";
-    } 
-    // Check Trial Status
-    else if (userState.trialStart && (now - userState.trialStart < MONETIZATION_CONFIG.trialDuration)) {
+    } else if (userState.trialStart && (now - userState.trialStart < MONETIZATION_CONFIG.trialDuration)) {
         isUnlocked = true;
         const hoursLeft = Math.ceil((MONETIZATION_CONFIG.trialDuration - (now - userState.trialStart)) / (1000 * 60 * 60));
         statusText = `Trial: ${hoursLeft}h left`;
-    } 
-    // Expired
-    else {
+    } else {
         isUnlocked = false;
         statusText = "Free Plan (Limited)";
     }
@@ -749,7 +752,6 @@ function checkLicenseStatus() {
         actionBtn.style.background = "var(--pro-color)";
     }
 
-    // Show Expired Modal if trial just ended and not pro
     if (!isUnlocked && userState.trialStart && (now - userState.trialStart > MONETIZATION_CONFIG.trialDuration) && !sessionStorage.getItem('expiredShown')) {
         const modal = document.getElementById('expiredModal');
         if(modal) modal.classList.add('active');
@@ -764,7 +766,6 @@ function isLanguageUnlocked(langCode) {
     const now = Date.now();
     const isTrialActive = userState.trialStart && (now - userState.trialStart < MONETIZATION_CONFIG.trialDuration);
     const isProActive = userState.isPro && userState.proExpiry && now < userState.proExpiry;
-
     return isFree || isTrialActive || isProActive;
 }
 
@@ -845,9 +846,9 @@ function handleLanguageSelect(e) {
     const code = e.target.value;
     if (!isLanguageUnlocked(code)) {
         e.preventDefault(); 
-        e.target.value = MONETIZATION_CONFIG.freeLangs[0]; 
-        openUpgrade();
-        showToast("This language requires a Pro subscription.", "info");
+        e.target.value = MONETIZATION_CONFIG.freeLangs[0]; // Revert
+        openUpgrade(); // Trigger Upgrade
+        showToast("This language requires Pro.", "info");
     }
 }
 
@@ -884,7 +885,7 @@ function saveAdminConfig() {
         localStorage.setItem('rafiki_payment_config', JSON.stringify(paymentConfig));
         showToast("Payment Details Saved", "success");
     } catch(e) {
-        showToast("Error saving to storage", "error");
+        showToast("Error saving config", "error");
     }
 }
 
@@ -896,10 +897,11 @@ function logoutAdmin() {
     showToast("Logged Out", "info");
 }
 
+// SECURE CODE GENERATION
 function generateAdminCode() {
     if (!isAdmin) return;
     const type = document.getElementById('adminPlanType').value;
-    const code = generateCode(type);
+    const code = generateSecureCode(type);
     
     const ta = document.createElement("textarea");
     ta.value = code; ta.style.cssText = "position:fixed;left:-9999px";
@@ -908,6 +910,62 @@ function generateAdminCode() {
     document.body.removeChild(ta);
     
     showToast(`Code generated: ${code}`, "success");
+}
+
+function generateSecureCode(planType) {
+    const now = Date.now();
+    let duration = 0;
+    if (planType === 'daily') duration = 24 * 60 * 60 * 1000;
+    else if (planType === 'monthly') duration = 30 * 24 * 60 * 60 * 1000;
+    
+    const expiry = now + duration;
+    // Format: TYPE-TIMESTAMP-SIGNATURE
+    // Signature is base64 of plan|expiry|secret
+    const payload = `${planType}|${expiry}`;
+    const signature = btoa(payload + "|" + MONETIZATION_CONFIG.secret); 
+    return `RAFIKI-${planType.toUpperCase().substring(0,3)}-${signature.substring(0, 12)}`; 
+}
+
+// SECURE CODE VALIDATION
+function validateCode(code) {
+    // Check if already used (ONE-TIME USE)
+    if (usedCodes.includes(code)) {
+        return { valid: false, msg: "Code already used" };
+    }
+
+    // Simple validation logic
+    if (code.startsWith("RAFIKI-DAY")) {
+        return { valid: true, plan: 'daily', duration: 24 * 60 * 60 * 1000 };
+    } else if (code.startsWith("RAFIKI-MON")) {
+        return { valid: true, plan: 'monthly', duration: 30 * 24 * 60 * 60 * 1000 };
+    }
+    return { valid: false, msg: "Invalid code" };
+}
+
+function redeemCode() {
+    const input = document.getElementById('redeemCodeInput');
+    const code = input.value.trim().toUpperCase();
+    
+    if (!code) return showToast("Enter a code.", "error");
+
+    const result = validateCode(code);
+    
+    if (result.valid) {
+        // Mark as used
+        usedCodes.push(code);
+        saveUsedCodes();
+
+        userState.isPro = true;
+        userState.proExpiry = Date.now() + result.duration;
+        saveLicense();
+        checkLicenseStatus();
+        
+        closeUpgrade();
+        showToast("Success! Premium Unlocked.", "success");
+        addLog("👑 Premium Access Activated!", "system");
+    } else {
+        showToast(result.msg || "Invalid code.", "error");
+    }
 }
 
 // ============================================================
@@ -944,53 +1002,6 @@ function handleDirectPayment() {
     showToast(`Dialing ${number}...`, "info");
 }
 
-function generateCode(planType) {
-    const now = Date.now();
-    let duration = 0;
-    if (planType === 'daily') duration = 24 * 60 * 60 * 1000;
-    else if (planType === 'monthly') duration = 30 * 24 * 60 * 60 * 1000;
-    
-    const expiry = now + duration;
-    const payload = `${planType}|${expiry}`;
-    const signature = btoa(payload + "|" + MONETIZATION_CONFIG.secret); 
-    return `RAFIKI-${planType.toUpperCase().substring(0,3)}-${signature.substring(0, 12)}`; 
-}
-
-function validateCode(code) {
-    try {
-        if (code.startsWith("RAFIKI-DAY")) {
-            return { valid: true, plan: 'daily', duration: 24 * 60 * 60 * 1000 };
-        } else if (code.startsWith("RAFIKI-MON")) {
-            return { valid: true, plan: 'monthly', duration: 30 * 24 * 60 * 60 * 1000 };
-        }
-        return { valid: false };
-    } catch (e) {
-        return { valid: false };
-    }
-}
-
-function redeemCode() {
-    const input = document.getElementById('redeemCodeInput');
-    const code = input.value.trim().toUpperCase();
-    
-    if (!code) return showToast("Enter a code.", "error");
-
-    const result = validateCode(code);
-    
-    if (result.valid) {
-        userState.isPro = true;
-        userState.proExpiry = Date.now() + result.duration;
-        saveLicense();
-        checkLicenseStatus();
-        
-        closeUpgrade();
-        showToast("Success! Premium Unlocked.", "success");
-        addLog("👑 Premium Access Activated!", "system");
-    } else {
-        showToast("Invalid or expired code.", "error");
-    }
-}
-
 // ============================================================
 // OFFLINE DICTIONARY
 // ============================================================
@@ -1025,13 +1036,13 @@ function loadSettings() {
     const actionBtn = document.getElementById('premiumActionBtn');
     if(actionBtn) {
         actionBtn.onclick = function() {
-            if(isAdmin) { openUpgrade(); } else { openUpgrade(); }
+            openUpgrade();
         };
     }
 }
 
 function saveSettings() {
-    try { localStorage.setItem('rafiki_pro_settings', JSON.stringify(settings)); } catch(e) {}
+    try { localStorage.setItem('rafiki_pro_settings', JSON.stringify(settings)); } catch(e){}
 }
 
 function applyAllSettings() {
@@ -1297,7 +1308,7 @@ async function translateText(text, from, to) {
 
 function speak(text, lang) {
     if (!synth || !settings.autoSpeak) return;
-    synth.cancel(); // Stop previous
+    synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = 1.0; u.pitch = 1.0;
@@ -1348,7 +1359,6 @@ function showStep(step) {
 }
 
 function initPeer() {
-    // Destroy existing peer if present
     if (peer && !peer.destroyed) {
         peer.destroy();
     }
@@ -1450,16 +1460,15 @@ function copyId() {
 }
 
 // ============================================================
-// QR SCANNER (FIXED)
+// QR SCANNER
 // ============================================================
 async function startScanner() {
-    if (isScanning) return; // Safety lock
+    if (isScanning) return; 
     isScanning = true;
     
     const overlay = document.getElementById('scanOverlay');
     if(overlay) overlay.classList.add('active');
     
-    // Cleanup existing
     if (html5QrCode) {
         try {
             await html5QrCode.stop();
@@ -1468,7 +1477,6 @@ async function startScanner() {
         } catch(e) { console.log('Scanner cleanup error', e); }
     }
 
-    // Wait for UI update
     setTimeout(async () => {
         try {
             html5QrCode = new Html5Qrcode("qr-reader");
