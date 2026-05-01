@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAFIKI PRO - Live Voice Translation</title>
+    <title>RAFIKI PRO</title>
     
-    <!-- EXTERNAL LIBRARIES -->
+    <!-- LIBRARIES -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -18,13 +18,9 @@
         :root {
             --primary: #004d40;
             --primary-light: #00796b;
-            --primary-glow: rgba(0,77,64,0.25);
             --accent: #ffab00;
-            --accent-glow: rgba(255,171,0,0.3);
             --pro-color: #9c27b0;
-            --pro-glow: rgba(156, 39, 176, 0.3);
             --danger: #d50000;
-            --danger-glow: rgba(213,0,0,0.3);
             --success: #00c853;
             --bg: #eef1f4;
             --surface: #ffffff;
@@ -32,19 +28,8 @@
             --text-main: #1a2530;
             --text-light: #5a7184;
             --border: rgba(0,0,0,0.07);
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-            --shadow-md: 0 6px 24px rgba(0,0,0,0.09);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.14);
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
             --radius: 20px;
-            --bubble-fs: 14px;
-            --bubble-fw: 400;
-            --bubble-lh: 1.5;
-            --my-bubble-bg: #004d40;
-            --my-bubble-text: #ffffff;
-            --their-bubble-bg: #e8edf0;
-            --their-bubble-text: #1a2530;
-            --chat-font: 'DM Sans', sans-serif;
-            --bubble-radius: 18px;
         }
 
         body.dark {
@@ -54,1488 +39,844 @@
             --text-main: #e6edf3;
             --text-light: #8b949e;
             --border: rgba(255,255,255,0.08);
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-            --shadow-md: 0 6px 24px rgba(0,0,0,0.4);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
-            --their-bubble-bg: #2d333b;
-            --their-bubble-text: #e6edf3;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; touch-action: manipulation; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
+            background: var(--bg); /* Outer background for desktop */
             color: var(--text-main);
-            height: 100dvh; /* Dynamic Viewport Height for mobile consistency */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* APP CONTAINER: Makes Desktop look exactly like Mobile */
+        #app-container {
+            background: var(--bg);
+            width: 100%;
+            height: 100%;
+            max-width: 480px; /* Mobile width constraint */
             display: flex;
             flex-direction: column;
+            position: relative;
             overflow: hidden;
-            transition: background 0.3s, color 0.3s;
         }
 
         /* --- Header --- */
         header {
-            background: var(--surface); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
+            background: var(--surface); padding: 15px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0;
         }
-        .header-left { display: flex; align-items: center; gap: 10px; position: relative; }
-        .brand-text { font-weight: 800; font-size: 1.28rem; color: var(--primary); letter-spacing: -0.5px; line-height: 1; }
+        .brand-text { font-weight: 800; font-size: 1.4rem; color: var(--primary); letter-spacing: -1px; }
         .brand-text span { color: var(--accent); }
+        
         .pro-badge {
-            background: linear-gradient(135deg, #9c27b0, #e040fb);
-            color: white; font-size: 0.6rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;
-            margin-left: 5px; letter-spacing: 0.5px; display: none; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--pro-color); color: white; font-size: 0.6rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;
+            margin-left: 8px; display: none;
         }
-        .pro-badge.visible { display: inline-block; }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-        .header-right { display: flex; align-items: center; gap: 7px; }
+        .pro-badge.visible { display: inline-block; animation: popIn 0.3s; }
+        @keyframes popIn { from{transform:scale(0);} to{transform:scale(1);} }
 
         .status-badge {
-            font-size: 0.69rem; padding: 5px 10px; border-radius: 20px;
-            background: var(--surface-2); color: var(--text-light);
-            font-weight: 700; display: flex; align-items: center; gap: 6px;
-            border: 1px solid var(--border); transition: all 0.4s;
+            font-size: 0.7rem; padding: 4px 10px; border-radius: 12px;
+            background: var(--surface-2); color: var(--text-light); font-weight: 700;
+            display: flex; align-items: center; gap: 5px; border: 1px solid var(--border);
         }
-        .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; transition: 0.4s; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #ccc; }
         .status-badge.connected { background: #e6f7ef; color: #00874a; border-color: #b2e6cb; }
-        body.dark .status-badge.connected { background: rgba(0,200,83,0.12); color: #4caf50; border-color: rgba(76,175,80,0.28); }
-        .status-badge.connected .dot { background: var(--success); box-shadow: 0 0 7px var(--success); }
+        .status-badge.connected .dot { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
         .icon-btn {
             width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-2);
-            color: var(--text-light); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+            color: var(--text-light); display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        .icon-btn:active { transform: scale(0.88); }
-        .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-        /* --- Main Content --- */
-        main { flex: 1; overflow-y: auto; padding: 13px 13px 6px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+        /* --- Main --- */
+        main { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
         .card {
-            background: var(--surface); border-radius: var(--radius); padding: 15px;
-            box-shadow: var(--shadow-sm); border: 1px solid var(--border);
-            transition: background 0.3s, border-color 0.3s;
+            background: var(--surface); border-radius: var(--radius); padding: 18px;
+            box-shadow: var(--shadow); border: 1px solid var(--border);
         }
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .lang-group label { display: block; font-size: 0.63rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+
+        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .lang-group label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-light); margin-bottom: 6px; text-transform: uppercase; }
         
         select {
-            width: 100%; padding: 10px 28px 10px 10px; border: 1.5px solid var(--border); border-radius: 10px;
-            background: var(--surface-2); font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-            color: var(--text-main); font-weight: 500; appearance: none;
+            width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px;
+            background: var(--surface-2); font-family: 'DM Sans'; font-size: 1rem; color: var(--text-main);
+            appearance: none;
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300796b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%0%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat; background-position: right 8px top 50%; background-size: 8px auto;
-            cursor: pointer; transition: border-color 0.2s, background 0.3s, color 0.3s;
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 10px auto;
         }
-        select:focus { border-color: var(--primary-light); }
         select option { font-weight: 500; }
-        select option:disabled { color: #999; font-style: italic; }
-
-        .offline-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .offline-label { font-size: 0.79rem; color: var(--text-light); font-weight: 600; }
-
-        .switch { position: relative; display: inline-block; width: 42px; height: 23px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background: #d0d5dd; border-radius: 23px; transition: .3s; }
-        .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background: var(--primary-light); }
-        input:checked + .slider:before { transform: translateX(19px); }
-
-        /* Chat */
-        .chat-log { display: flex; flex-direction: column; gap: 10px; }
-        .empty-state { text-align: center; padding: 26px 20px; color: var(--text-light); }
-        .empty-state .icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
-        .empty-state p { font-size: 0.82rem; line-height: 1.6; }
-
-        .log-item { display: flex; flex-direction: column; max-width: 82%; }
-        .log-item.me { align-self: flex-end; align-items: flex-end; }
-        .log-item.guest { align-self: flex-start; align-items: flex-start; }
-        .log-item.system { align-self: center; align-items: center; max-width: 100%; }
-
-        .bubble {
-            padding: 10px 15px; border-radius: var(--bubble-radius); font-size: var(--bubble-fs);
-            font-weight: var(--bubble-fw); line-height: var(--bubble-lh); font-family: var(--chat-font);
-            transition: font-size 0.2s, border-radius 0.2s, font-weight 0.2s, line-height 0.2s;
-        }
-        .me .bubble { background: var(--my-bubble-bg); color: var(--my-bubble-text); }
-        .guest .bubble { background: var(--their-bubble-bg); color: var(--their-bubble-text); }
-        .system .bubble { background: #fff8e1; color: #7a5800; font-size: 0.75rem; border-radius: 10px; padding: 6px 13px; border: 1px solid #ffe082; }
-        body.dark .system .bubble { background: rgba(255,171,0,0.09); color: #ffd54f; border-color: rgba(255,171,0,0.22); }
-        .meta { font-size: 0.65rem; color: #a0aab4; margin-top: 3px; font-weight: 500; }
-        body.dark .meta { color: #484f58; }
+        select option:disabled { color: #aaa; font-style: italic; }
 
         /* Controls */
         .controls-area {
-            background: var(--surface); padding: 16px 20px 24px; border-top: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; gap: 11px; flex-shrink: 0; transition: background 0.3s, border-color 0.3s;
+            background: var(--surface); padding: 20px; border-top: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; gap: 15px; flex-shrink: 0;
         }
-        .live-text { font-size: 0.77rem; color: var(--text-light); font-style: italic; min-height: 18px; }
-        .mic-controls { display: flex; align-items: center; gap: 20px; }
-        .mic-btn-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
-        .mic-ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid transparent; pointer-events: none; }
         .mic-btn {
-            width: 68px; height: 68px; border-radius: 50%; border: none; background: #d0d7de; color: #6b7b8a;
+            width: 75px; height: 75px; border-radius: 50%; border: none; background: var(--surface-2); color: var(--text-light);
             display: flex; justify-content: center; align-items: center; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative; z-index: 1;
+            transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .mic-btn:active { transform: scale(0.9) !important; }
-        .mic-btn.disabled { background: #e4e8ec; color: #b0bec5; cursor: not-allowed; }
-        .mic-btn.disabled:active { transform: none !important; }
-        .mic-btn.ready { background: var(--surface-2); color: var(--primary); border: 2px solid var(--primary); box-shadow: 0 4px 16px var(--primary-glow); }
-        .mic-btn.ready:hover { background: var(--primary); color: white; }
-        .mic-btn.listening { background: var(--primary); color: white; box-shadow: 0 6px 24px var(--primary-glow); transform: scale(1.05); }
-        .mic-btn.listening ~ .mic-ring { border-color: var(--primary); animation: ring-pulse 2s infinite; }
-        .mic-btn.muted { background: var(--accent); color: white; box-shadow: 0 6px 20px var(--accent-glow); }
-        .mute-side-btn {
-            width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--surface-2);
-            color: var(--text-light); display: flex; justify-content: center; align-items: center; cursor: pointer;
-            transition: all 0.25s; box-shadow: var(--shadow-sm);
+        .mic-btn.ready { border: 3px solid var(--primary); color: var(--primary); }
+        .mic-btn.listening { background: var(--primary); color: white; transform: scale(1.1); box-shadow: 0 0 20px rgba(0,77,64,0.3); }
+        .mic-btn.muted { background: var(--accent); color: white; }
+
+        .mic-ring {
+            position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--primary);
+            opacity: 0; animation: pulse 2s infinite;
         }
-        .mute-side-btn:active { transform: scale(0.88); }
-        .mute-side-btn.active-mute { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 14px var(--accent-glow); }
-        .mute-side-btn.hidden-btn { opacity: 0; pointer-events: none; }
-        .hint-pills { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-        .hint-pill { background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 0.69rem; font-weight: 600; color: var(--text-light); }
+        @keyframes pulse { 0%{opacity:0.6; transform:scale(1);} 100%{opacity:0; transform:scale(1.4);} }
 
-        @keyframes ring-pulse { 0% { transform: scale(1); opacity: 0.7; } 70% { transform: scale(1.45); opacity: 0; } 100% { transform: scale(1.45); opacity: 0; } }
-
-        /* Settings Drawer */
-        .settings-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 90;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        /* Chat */
+        .chat-log { display: flex; flex-direction: column; gap: 12px; flex: 1; overflow-y: auto; }
+        .log-item { display: flex; flex-direction: column; max-width: 80%; }
+        .log-item.me { align-self: flex-end; align-items: flex-end; }
+        .log-item.guest { align-self: flex-start; align-items: flex-start; }
+        .bubble {
+            padding: 12px 16px; border-radius: 18px; font-size: 1rem; line-height: 1.5;
         }
-        .settings-backdrop.open { opacity: 1; pointer-events: all; }
+        .me .bubble { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .guest .bubble { background: var(--surface-2); color: var(--text-main); border-bottom-left-radius: 4px; }
+        .meta { font-size: 0.65rem; color: var(--text-light); margin-top: 4px; }
 
+        /* Modals & Drawer */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: var(--surface); width: 100%; max-width: 400px; border-radius: 24px; padding: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; }
+        
         .settings-drawer {
-            position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-radius: 26px 26px 0 0;
-            z-index: 95; transform: translateY(100%); transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
-            max-height: 88dvh; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+            position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-radius: 24px 24px 0 0;
+            z-index: 150; transform: translateY(100%); transition: transform 0.3s; max-height: 90%; overflow-y: auto;
+            padding-bottom: 30px;
         }
         .settings-drawer.open { transform: translateY(0); }
-
-        .drawer-handle { width: 38px; height: 4px; background: var(--border); border-radius: 4px; margin: 11px auto 0; flex-shrink: 0; }
-        .drawer-header { padding: 13px 20px 11px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .drawer-title { font-size: 1.05rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.2px; }
-        .drawer-close {
-            width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--surface-2); color: var(--text-light);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;
+        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn-upgrade {
+            background: linear-gradient(135deg, var(--pro-color), #d81b60); color: white; border: none; padding: 8px 16px;
+            border-radius: 20px; font-weight: 700; cursor: pointer; width: 100%;
         }
-        .drawer-close:hover { background: var(--danger); color: white; }
-        .drawer-body { overflow-y: auto; padding: 14px 20px 36px; display: flex; flex-direction: column; gap: 20px; }
 
-        .setting-section { display: flex; flex-direction: column; gap: 13px; }
-        .section-title { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--primary); padding-bottom: 7px; border-bottom: 1px solid var(--border); }
-        .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; }
-        .setting-label { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-        .setting-label strong { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        .setting-label small { font-size: 0.69rem; color: var(--text-light); }
-
-        /* Premium Status in Settings */
-        .premium-status {
-            background: linear-gradient(135deg, rgba(156,39,176,0.1), rgba(255,171,0,0.1));
-            border: 1px solid rgba(156,39,176,0.2);
-            padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+        /* Premium Box in Settings */
+        .premium-box {
+            background: rgba(156, 39, 176, 0.1); border: 1px solid var(--pro-color);
+            padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: center;
         }
-        .premium-info h4 { color: var(--pro-color); font-size: 0.9rem; margin-bottom: 2px; }
-        .premium-info p { font-size: 0.75rem; color: var(--text-light); }
-        .premium-btn {
-            background: var(--pro-color); color: white; border: none; padding: 6px 12px; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px var(--pro-glow);
-        }
-        .premium-btn:hover { filter: brightness(1.1); }
 
-        /* Admin Section */
-        .admin-panel { border: 1px dashed var(--danger); padding: 15px; border-radius: 12px; background: rgba(213,0,0,0.03); display: none; }
+        /* Admin Panel */
+        .admin-panel { border: 2px dashed var(--danger); padding: 15px; border-radius: 12px; margin-top: 20px; background: rgba(213,0,0,0.03); display: none; }
         .admin-panel.visible { display: block; }
-        .admin-input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 6px; }
-
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(10,18,28,0.88); backdrop-filter: blur(10px); z-index: 200; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content { background: var(--surface); width: 100%; max-width: 385px; border-radius: 24px; padding: 24px 22px; text-align: center; box-shadow: var(--shadow-lg); max-height: 92dvh; overflow-y: auto; position: relative; }
         
-        .role-btn { display: flex; align-items: center; gap: 11px; width: 100%; padding: 13px 15px; border: 1.5px solid var(--border); background: var(--surface-2); border-radius: 15px; margin-bottom: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; text-align: left; }
-        .role-btn:active { transform: scale(0.98); }
-        .role-btn .role-icon { font-size: 1.25rem; }
-        .role-btn .role-info small { display: block; font-size: 0.68rem; color: var(--text-light); font-weight: 500; margin-top: 1px; }
-        .role-btn.primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 18px var(--primary-glow); }
-        .role-btn.primary small { color: rgba(255,255,255,0.6); }
-        .role-btn.accent { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 18px var(--accent-glow); }
-        .role-btn.accent small { color: rgba(255,255,255,0.7); }
+        .payment-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; }
         
-        .id-display { background: var(--surface-2); padding: 12px; border-radius: 10px; font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; margin: 12px 0; border: 1.5px dashed #ccc; word-break: break-all; color: var(--primary); user-select: all; }
-        #qrcode { display: flex; justify-content: center; margin: 13px 0; padding: 10px; background: white; border: 1px solid #eee; border-radius: 12px; }
-        input[type="text"], input[type="password"] { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; margin-bottom: 10px; text-align: center; background: var(--surface-2); color: var(--text-main); }
-        input:focus { border-color: var(--primary-light); }
-        .btn-text { background: transparent; border: none; color: var(--text-light); text-decoration: underline; cursor: pointer; margin-top: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; }
+        .plan-select { border: 2px solid var(--border); padding: 15px; margin: 10px 0; border-radius: 12px; cursor: pointer; text-align: left; }
+        .plan-select.selected { border-color: var(--accent); background: rgba(255,171,0,0.05); }
 
-        .scan-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .scan-overlay.active { display: flex; }
-        .scan-container { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 10px; position: relative; overflow: hidden; }
-        .close-scan { position: absolute; top: -50px; right: 0; color: white; font-size: 2rem; cursor: pointer; background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: none; z-index: 10; }
-        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; min-height: 250px; }
-        #qr-reader video { object-fit: cover; border-radius: 12px; }
+        .owner-link {
+            text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border);
+            font-size: 0.75rem; color: #999; cursor: pointer; text-decoration: underline;
+        }
+        .owner-link:hover { color: var(--primary); }
+
         .hidden { display: none !important; }
-
-        /* UPGRADE MODAL SPECIFIC */
-        .upgrade-header { margin-bottom: 20px; }
-        .upgrade-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
-        .plan-card {
-            border: 2px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 12px;
-            background: var(--surface-2); text-align: left; cursor: pointer; transition: all 0.2s; position: relative;
-        }
-        .plan-card.selected { border-color: var(--accent); background: rgba(255,171,0,0.05); }
-        .plan-price { font-size: 1.2rem; font-weight: 800; color: var(--text-main); }
-        .plan-desc { font-size: 0.8rem; color: var(--text-light); margin-top: 4px; }
-        .payment-methods { margin: 15px 0; font-size: 0.85rem; text-align: left; background: rgba(0,0,0,0.03); padding: 12px; border-radius: 10px; }
-        .payment-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 500; align-items: center; }
-        .payment-row:last-child { margin-bottom: 0; }
-        .payment-highlight { color: var(--primary); font-family: 'DM Mono', monospace; font-weight: 700; user-select: all; }
-        .pay-btn { background: #4CAF50; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 350px; pointer-events: none; }
-        .toast {
-            background: var(--surface); color: var(--text-main); padding: 12px 16px; border-radius: 12px;
-            box-shadow: var(--shadow-lg); border: 1px solid var(--border); font-size: 0.85rem; font-weight: 600;
-            display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(-20px); transition: all 0.3s; pointer-events: all;
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.error { border-left: 4px solid var(--danger); }
-        .toast.success { border-left: 4px solid var(--success); }
-        .toast.info { border-left: 4px solid var(--primary); }
-
-        /* Owner Login Button */
-        .owner-login-btn { 
-            margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); 
-            display: flex; justify-content: center; align-items: center; gap: 5px; 
-            font-size: 0.7rem; color: #ccc; cursor: pointer;
-        }
-        .owner-login-btn:hover { color: var(--primary); }
     </style>
 </head>
 <body>
 
-<div id="toast-container"></div>
-
-<!-- SETUP MODAL -->
-<div id="setupModal" class="modal-overlay active">
-    <div class="modal-content" id="step1">
-        <div style="margin: 0 auto 20px auto;">
-            <svg width="160" height="48" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
-                <text x="0" y="46" font-family="Arial" font-weight="900" font-size="42" fill="#004d40" letter-spacing="-2">RAFIKI</text>
-                <text x="147" y="46" font-family="Arial" font-weight="800" font-size="40" fill="#ffab00" letter-spacing="-1">pro</text>
-                <rect x="141" y="10" width="2" height="36" fill="#e0e0e0"/>
-            </svg>
-        </div>
-        <p class="modal-desc" style="margin-bottom: 25px;">Live conversation translator.<br>Choose a role to begin.</p>
-        <button class="role-btn primary" onclick="showStep('host')">
-            <span class="role-icon">🟢</span>
-            <span class="role-info">Start as Host <small>Generate QR code &amp; wait for guest</small></span>
-        </button>
-        <button class="role-btn accent" onclick="showStep('guest')">
-            <span class="role-icon">🟠</span>
-            <span class="role-info">Join as Guest <small>Scan QR code or enter Host ID</small></span>
-        </button>
-    </div>
-
-    <div class="modal-content hidden" id="stepHost">
-        <div class="modal-title">Your Connection Code</div>
-        <p class="modal-desc">Share this QR or ID with your guest.</p>
-        <div id="qrcode"></div>
-        <div class="id-display" id="myPeerId">Generating...</div>
-        <button class="role-btn primary" onclick="copyId()">
-            <span class="role-icon">📋</span>
-            <span class="role-info">Copy ID</span>
-        </button>
-        <button class="role-btn" style="margin-top:10px; border-color:var(--primary); color:var(--primary); background:transparent" onclick="finishSetup()">
-            <span class="role-icon">✓</span>
-            <span class="role-info">Enter Chat Room</span>
-        </button>
-        <button class="btn-text" onclick="showStep('1')">← Back</button>
-    </div>
-
-    <div class="modal-content hidden" id="stepGuest">
-        <div class="modal-title">Join a Session</div>
-        <p class="modal-desc">Scan Host's QR code or enter their ID.</p>
-        <button class="role-btn accent" onclick="startScanner()" style="border-style:dashed;background:rgba(255,171,0,0.08)">
-            <span class="role-icon">📸</span>
-            <span class="role-info">Scan QR Code <small>Point camera at Host's screen</small></span>
-        </button>
-        <div style="margin:10px 0;font-weight:700;color:#bbb;font-size:0.72rem;letter-spacing:1px;">— OR —</div>
-        <input type="text" id="hostIdInput" placeholder="Paste or type Host ID">
-        <button class="role-btn primary" onclick="connectToHost()">
-            <span class="role-icon">🔗</span>
-            <span class="role-info">Connect via ID</span>
-        </button>
-        <button class="btn-text" onclick="showStep('1')">← Back</button>
-    </div>
-</div>
-
-<!-- TRIAL EXPIRED MODAL -->
-<div id="expiredModal" class="modal-overlay">
-    <div class="modal-content">
-        <span style="font-size: 3rem; display: block; margin-bottom: 10px;">⌛</span>
-        <h2>Trial Expired</h2>
-        <p style="color: var(--text-light); margin-bottom: 20px;">Your 12-hour free trial has ended. Upgrade to continue translating.</p>
-        <button class="role-btn primary" onclick="closeExpiredAndUpgrade()">
-            <span class="role-icon">👑</span>
-            <span class="role-info">Upgrade Now</span>
-        </button>
-    </div>
-</div>
-
-<!-- UPGRADE MODAL -->
-<div id="upgradeModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="upgrade-header">
-            <span class="upgrade-icon">👑</span>
-            <h2>Unlock All Languages</h2>
-            <p style="color:var(--text-light); font-size:0.9rem;">Translate French, Spanish, Chinese, and 10+ more languages.</p>
-        </div>
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container">
         
-        <div class="plan-card" onclick="selectPlan('daily')" id="planDaily">
-            <div class="plan-price">500 TSH / $0.50</div>
-            <div class="plan-desc">Access for 24 Hours</div>
-        </div>
-        
-        <div class="plan-card selected" onclick="selectPlan('monthly')" id="planMonthly">
-            <div class="plan-price">12,000 TSH / $10</div>
-            <div class="plan-desc">Access for 30 Days (Save 33%)</div>
-        </div>
+        <!-- TOASTS -->
+        <div id="toast-container" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:400; width:90%; pointer-events:none;"></div>
 
-        <div class="payment-methods">
-            <div style="margin-bottom:8px; font-weight:700; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.5px;">Payment Details</div>
-            
-            <div class="payment-row">
-                <span>Mobile Money:</span>
-                <span class="payment-highlight" id="displayMpesa">Loading...</span>
-            </div>
-            <button class="pay-btn" id="btnPayMpesa" onclick="handleDirectPayment()">
-                <span>📱</span> Pay Now via Mobile Money
-            </button>
-
-            <div class="payment-row" style="margin-top:10px;">
-                <span>Bank Card:</span>
-                <span class="payment-highlight" style="font-size:0.7rem; max-width:120px; text-align:right;" id="displayBank">Contact Admin</span>
-            </div>
-        </div>
-
-        <div style="margin-top:15px;">
-            <input type="text" id="redeemCodeInput" placeholder="Enter Code Received">
-            <button class="role-btn primary" onclick="redeemCode()">
-                <span class="role-icon">🔓</span>
-                <span class="role-info">Unlock Access</span>
-            </button>
-        </div>
-        
-        <button class="btn-text" onclick="closeUpgrade()">Maybe Later</button>
-    </div>
-</div>
-
-<!-- SCANNER OVERLAY -->
-<div id="scanOverlay" class="scan-overlay">
-    <button class="close-scan" onclick="stopScanner()">×</button>
-    <div class="scan-container">
-        <div id="qr-reader"></div>
-    </div>
-    <p style="color:rgba(255,255,255,0.9);margin-top:20px;font-size:0.9rem;font-family:'DM Sans',sans-serif;text-align:center;padding:0 20px;">Align QR code within the frame</p>
-</div>
-
-<!-- ADMIN LOGIN MODAL -->
-<div id="adminLoginModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>Owner Access</h3>
-        <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 15px;">Manage payments and generate secure codes.</p>
-        <input type="password" id="adminPasswordInput" placeholder="Password">
-        <button class="role-btn primary" onclick="verifyAdminLogin()">
-            <span class="role-icon">🔐</span>
-            <span class="role-info">Login</span>
-        </button>
-        <button class="btn-text" onclick="document.getElementById('adminLoginModal').classList.remove('active')">Cancel</button>
-    </div>
-</div>
-
-<!-- HEADER -->
-<header>
-    <div class="header-left">
-        <div class="brand-text">RAFIKI<span>PRO</span></div>
-        <span id="proBadge" class="pro-badge">PRO</span>
-    </div>
-    <div class="header-right">
-        <div class="status-badge" id="connStatus">
-            <div class="dot"></div>
-            <span id="statusText">Offline</span>
-        </div>
-        <button class="icon-btn" onclick="openSettings()" title="Settings" aria-label="Settings">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-        </button>
-    </div>
-</header>
-
-<!-- MAIN -->
-<main>
-    <div class="card">
-        <div class="lang-grid">
-            <div class="lang-group">
-                <label>My Language</label>
-                <select id="langMe"></select>
-            </div>
-            <div class="lang-group">
-                <label>Their Language</label>
-                <select id="langGuest"></select>
-            </div>
-        </div>
-        <div class="offline-row">
-            <span class="offline-label">📖 Offline Dictionary</span>
-            <label class="switch"><input type="checkbox" id="offlineToggle"><span class="slider"></span></label>
-        </div>
-    </div>
-    <div class="chat-log" id="chatLog">
-        <div class="empty-state">
-            <div class="icon">💬</div>
-            <p>Connect with a partner to start.<br>Tap mic when you want to speak.</p>
-        </div>
-    </div>
-</main>
-
-<!-- CONTROLS -->
-<div class="controls-area">
-    <div class="live-text" id="liveText"></div>
-    <div class="mic-controls">
-        <button class="mute-side-btn hidden-btn" id="muteBtn" title="Mute / Unmute">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-                <line x1="12" y1="19" x2="12" y2="23"></line>
-                <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-        </button>
-        <div class="mic-btn-wrap">
-            <button id="micBtn" class="mic-btn disabled">
-                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-            </button>
-            <div class="mic-ring" id="micRing"></div>
-        </div>
-        <div style="width:44px;height:44px;"></div>
-    </div>
-    <div class="hint-pills" id="hintPills">
-        <div class="hint-pill">🔇 Connect first to use mic</div>
-    </div>
-</div>
-
-<!-- SETTINGS BACKDROP -->
-<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
-
-<!-- SETTINGS DRAWER -->
-<div class="settings-drawer" id="settingsDrawer">
-    <div class="drawer-handle"></div>
-    <div class="drawer-header">
-        <div class="drawer-title">Settings</div>
-        <button class="drawer-close" onclick="closeSettings()">×</button>
-    </div>
-    
-    <div class="drawer-body" id="settingsBody">
-        
-        <!-- Premium Section -->
-        <div class="premium-status">
-            <div class="premium-info">
-                <h4 id="premiumTitle">Free Trial</h4>
-                <p id="premiumDesc">12 hours remaining</p>
-            </div>
-            <button class="premium-btn" id="premiumActionBtn">UPGRADE</button>
-        </div>
-
-        <!-- ADMIN PANEL (Only visible if logged in) -->
-        <div class="admin-panel" id="adminPanel">
-            <div class="section-title" style="color: var(--danger);">Owner / Merchant Controls</div>
-            
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.75rem; font-weight:700;">Mobile Money Number</label>
-                <input type="text" id="adminMpesaInput" class="admin-input" placeholder="+255...">
-            </div>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.75rem; font-weight:700;">Bank Details</label>
-                <input type="text" id="adminBankInput" class="admin-input" placeholder="Bank Name - Acc No">
-            </div>
-            <button class="role-btn" style="padding:8px; font-size:0.8rem; border-color:var(--success); color:var(--success)" onclick="saveAdminConfig()">
-                <span>💾</span> Save Payment Config
-            </button>
-
-            <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
-                <label style="font-size:0.75rem; font-weight:700;">Generate Access Code (One-Time Use)</label>
-                <select id="adminPlanType" class="admin-input">
-                    <option value="daily">Daily Access (500 TSH)</option>
-                    <option value="monthly">Monthly Access (12000 TSH)</option>
-                </select>
-                <button class="role-btn primary" style="padding:8px;" onclick="generateAdminCode()">
-                    <span>🔑</span> Generate Code
+        <!-- SETUP MODAL -->
+        <div id="setupModal" class="modal-overlay active">
+            <div class="modal-content">
+                <h2 style="color:var(--primary); margin-bottom:5px;">RAFIKI PRO</h2>
+                <p style="color:var(--text-light); margin-bottom:20px;">Live Voice Translator</p>
+                
+                <button class="btn-upgrade" style="background:var(--primary); margin-bottom:10px;" onclick="showStep('host')">
+                    Start as Host
+                </button>
+                <button class="btn-upgrade" style="background:var(--accent); margin-bottom:10px;" onclick="showStep('guest')">
+                    Join as Guest
                 </button>
             </div>
-            
-            <button class="btn-text" style="color:var(--danger); margin-top:10px;" onclick="logoutAdmin()">Logout Admin</button>
-        </div>
-
-        <!-- USER SETTINGS -->
-        <div class="setting-section">
-            <div class="section-title">🎙️ Audio</div>
-            <div class="setting-row">
-                <div class="setting-label"><strong>🔊 Auto-Speak Translation</strong></div>
-                <label class="switch"><input type="checkbox" id="s_autoSpeak" checked onchange="settings.autoSpeak=this.checked;saveSettings()"><span class="slider"></span></label>
+            <div id="stepHost" class="modal-content hidden">
+                <h3>Your ID</h3>
+                <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
+                <div id="myPeerId" style="font-family:'DM Mono'; font-size:1.2rem; margin-bottom:15px; word-break:break-all; color:var(--primary);">...</div>
+                <button class="btn-upgrade" onclick="copyId()">Copy ID</button>
+                <button class="btn-upgrade" style="background:transparent; color:var(--text-light); border:1px solid var(--border); margin-top:5px;" onclick="finishSetup()">Enter Chat</button>
+            </div>
+            <div id="stepGuest" class="modal-content hidden">
+                <h3>Join Session</h3>
+                <button class="btn-upgrade" style="background:var(--surface-2); color:var(--text-main); margin-bottom:10px; border:1px solid var(--border);" onclick="startScanner()">Scan QR Code</button>
+                <input type="text" id="hostIdInput" placeholder="Enter Host ID" style="width:100%; padding:12px; margin:10px 0; border:1px solid var(--border); border-radius:10px;">
+                <button class="btn-upgrade" onclick="connectToHost()">Connect</button>
             </div>
         </div>
 
-        <div class="setting-section">
-            <div class="section-title">🎨 Appearance</div>
-            <div class="setting-row">
-                <div class="setting-label"><strong>🌙 Dark Mode</strong></div>
-                <label class="switch">
-                    <input type="checkbox" id="s_darkMode" onchange="applyDarkMode(this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-             <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px;">
-                <div class="setting-label" style="flex-direction:row;justify-content:space-between;align-items:center;display:flex;">
-                    <div><strong>🔤 Font Size</strong></div>
-                    <span class="range-val" id="fontSizeVal" style="min-width:36px;text-align:right">14px</span>
+        <!-- UPGRADE MODAL -->
+        <div id="upgradeModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>🔓 Unlock Premium</h3>
+                <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:15px;">Translate French, Spanish, and more.</p>
+                
+                <div class="plan-select" onclick="selectPlan('daily')" id="planDaily">
+                    <b>500 TSH / $0.50</b><br><small>24 Hours</small>
                 </div>
-                <div class="range-wrap">
-                    <input type="range" id="s_fontSize" min="11" max="22" step="1" value="14" oninput="setFontSizeSlider(this)">
+                <div class="plan-select selected" onclick="selectPlan('monthly')" id="planMonthly">
+                    <b>12,000 TSH / $10</b><br><small>30 Days (Best Value)</small>
                 </div>
+
+                <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; text-align:left; margin-top:10px;">
+                    <small style="display:block; text-transform:uppercase; font-weight:700; color:var(--text-light); margin-bottom:5px;">Pay To:</small>
+                    <div class="payment-row">
+                        <span>Mobile Money:</span>
+                        <span id="displayMpesa" style="font-family:'DM Mono'; font-weight:700; color:var(--primary); user-select:all;">+255788714307</span>
+                    </div>
+                    <button class="btn-upgrade" style="background:#4CAF50; margin-top:5px; padding:8px;" onclick="window.location.href='tel:'+paymentConfig.mpesa">📱 Pay Now</button>
+                    
+                    <div class="payment-row" style="margin-top:10px;">
+                        <span>Bank Card:</span>
+                        <span id="displayBank" style="font-size:0.8rem;">CRDB - 0151234567890</span>
+                    </div>
+                </div>
+
+                <input type="text" id="redeemCodeInput" placeholder="Enter Code Received" style="width:100%; padding:12px; margin:15px 0 10px 0; border:1px solid var(--border); border-radius:10px;">
+                <button class="btn-upgrade" onclick="redeemCode()">Unlock</button>
+                <button style="background:none; border:none; color:var(--text-light); margin-top:10px; cursor:pointer;" onclick="closeUpgrade()">Cancel</button>
             </div>
         </div>
 
-        <div class="setting-section">
-            <button class="role-btn" style="justify-content:center; padding:10px; color:var(--danger); border-color:var(--danger)" onclick="clearChat()">
-                🗑️ Clear Chat History
-            </button>
+        <!-- ADMIN LOGIN MODAL -->
+        <div id="adminLoginModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Owner Access</h3>
+                <p style="font-size:0.8rem; color:var(--text-light);">Manage payments & generate codes.</p>
+                <input type="password" id="adminPasswordInput" placeholder="Password" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px;">
+                <button class="btn-upgrade" style="background:var(--danger);" onclick="verifyAdminLogin()">Login</button>
+                <button style="background:none; border:none; color:var(--text-light); margin-top:10px; cursor:pointer;" onclick="document.getElementById('adminLoginModal').classList.remove('active')">Cancel</button>
+            </div>
         </div>
-    </div>
-    
-    <!-- OWNER LOGIN FOOTER -->
-    <div class="owner-login-btn" id="ownerLoginTrigger" onclick="openAdminLogin()">
-        🔒 Owner Login
-    </div>
-</div>
 
-<script>
-// ============================================================
-// ADMIN CONFIG & STATE
-// ============================================================
-let isAdmin = false;
-let paymentConfig = {
-    mpesa: "+255788714307", 
-    bank: "CRDB - 0151234567890" 
-};
+        <!-- SCAN OVERLAY -->
+        <div id="scanOverlay" class="modal-overlay" style="background:black;">
+            <div style="position:absolute; top:20px; right:20px; color:white; font-size:2rem; cursor:pointer;" onclick="stopScanner()">×</div>
+            <div id="qr-reader" style="width:100%; max-width:400px; border-radius:12px; overflow:hidden;"></div>
+        </div>
 
-// Safe load payment config
-try {
-    const savedConfig = localStorage.getItem('rafiki_payment_config');
-    if (savedConfig) paymentConfig = JSON.parse(savedConfig);
-} catch(e){ console.warn("Config storage error"); }
+        <!-- HEADER -->
+        <header>
+            <div style="display:flex; align-items:center;">
+                <div class="brand-text">RAFIKI<span>PRO</span></div>
+                <span id="proBadge" class="pro-badge">PRO</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <div class="status-badge" id="connStatus">
+                    <div class="dot"></div>
+                    <span id="statusText">Offline</span>
+                </div>
+                <button class="icon-btn" onclick="openSettings()">⚙️</button>
+            </div>
+        </header>
 
-// Security: List of used codes to prevent reuse
-let usedCodes = [];
-try {
-    const savedUsed = localStorage.getItem('rafiki_used_codes');
-    if (savedUsed) usedCodes = JSON.parse(savedUsed);
-} catch(e){}
+        <!-- MAIN -->
+        <main>
+            <div class="card">
+                <div class="lang-grid">
+                    <div>
+                        <label>My Language</label>
+                        <select id="langMe"></select>
+                    </div>
+                    <div>
+                        <label>Their Language</label>
+                        <select id="langGuest"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-log" id="chatLog">
+                <div style="text-align:center; color:var(--text-light); margin-top:50px;">
+                    <div style="font-size:2rem;">💬</div>
+                    <p>Connect to start chatting.</p>
+                </div>
+            </div>
+        </main>
 
-// ============================================================
-// MONETIZATION CONFIG
-// ============================================================
-const MONETIZATION_CONFIG = {
-    freeLangs: ['en-US', 'en-GB', 'sw-TZ', 'sw-KE'], 
-    trialDuration: 12 * 60 * 60 * 1000, 
-    secret: "RAFIKI_SECURE_SALT_V3", // Change this in production for real security
-};
+        <!-- CONTROLS -->
+        <div class="controls-area">
+            <div style="height:40px; color:var(--text-light); font-style:italic;" id="liveText"></div>
+            <div style="position:relative;">
+                <button id="micBtn" class="mic-btn disabled">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                </button>
+                <div id="micRing" class="mic-ring"></div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-light);" id="hintPills">Connect first</div>
+        </div>
 
-let userState = {
-    trialStart: null,
-    isPro: false,
-    proExpiry: null, 
-};
+        <!-- SETTINGS BACKDROP -->
+        <div id="settingsBackdrop" class="modal-overlay" style="background:rgba(0,0,0,0.5); z-index:140;" onclick="closeSettings()"></div>
 
-// ============================================================
-// TOAST SYSTEM
-// ============================================================
-function showToast(msg, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    const icons = { success: '✅', error: '⚠️', info: 'ℹ️' };
-    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
-    container.appendChild(toast);
-    toast.offsetHeight; 
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// ============================================================
-// LICENSE MANAGER
-// ============================================================
-function initLicense() {
-    try {
-        const saved = localStorage.getItem('rafiki_license_v2');
-        if (saved) {
-            userState = JSON.parse(saved);
-        } else {
-            userState.trialStart = Date.now();
-            saveLicense();
-        }
-    } catch(e) {
-        userState.trialStart = Date.now();
-    }
-    checkLicenseStatus();
-    setInterval(checkLicenseStatus, 60000); 
-}
-
-function saveLicense() {
-    try { localStorage.setItem('rafiki_license_v2', JSON.stringify(userState)); } catch(e){}
-}
-
-function saveUsedCodes() {
-    try { localStorage.setItem('rafiki_used_codes', JSON.stringify(usedCodes)); } catch(e){}
-}
-
-function checkLicenseStatus() {
-    const now = Date.now();
-    let isUnlocked = false;
-    let statusText = "";
-    let actionText = "UPGRADE";
-
-    if (userState.isPro && userState.proExpiry && now < userState.proExpiry) {
-        isUnlocked = true;
-        statusText = "Pro Active";
-        actionText = "MANAGE";
-    } else if (userState.trialStart && (now - userState.trialStart < MONETIZATION_CONFIG.trialDuration)) {
-        isUnlocked = true;
-        const hoursLeft = Math.ceil((MONETIZATION_CONFIG.trialDuration - (now - userState.trialStart)) / (1000 * 60 * 60));
-        statusText = `Trial: ${hoursLeft}h left`;
-    } else {
-        isUnlocked = false;
-        statusText = "Free Plan (Limited)";
-    }
-
-    // Update UI
-    const proBadge = document.getElementById('proBadge');
-    const premiumTitle = document.getElementById('premiumTitle');
-    const premiumDesc = document.getElementById('premiumDesc');
-    const actionBtn = document.getElementById('premiumActionBtn');
-
-    if (isUnlocked) {
-        if(proBadge) proBadge.classList.add('visible');
-        premiumTitle.textContent = "Full Access";
-        premiumTitle.style.color = "var(--success)";
-        premiumDesc.textContent = statusText;
-        actionBtn.textContent = actionText;
-        actionBtn.style.background = "var(--text-light)";
-    } else {
-        if(proBadge) proBadge.classList.remove('visible');
-        premiumTitle.textContent = "Free Tier";
-        premiumTitle.style.color = "var(--text-main)";
-        premiumDesc.textContent = "Limited Languages";
-        actionBtn.textContent = "UPGRADE";
-        actionBtn.style.background = "var(--pro-color)";
-    }
-
-    if (!isUnlocked && userState.trialStart && (now - userState.trialStart > MONETIZATION_CONFIG.trialDuration) && !sessionStorage.getItem('expiredShown')) {
-        const modal = document.getElementById('expiredModal');
-        if(modal) modal.classList.add('active');
-        try { sessionStorage.setItem('expiredShown', 'true'); } catch(e){}
-    }
-    
-    updateLanguageSelects(isUnlocked);
-}
-
-function isLanguageUnlocked(langCode) {
-    const isFree = MONETIZATION_CONFIG.freeLangs.includes(langCode);
-    const now = Date.now();
-    const isTrialActive = userState.trialStart && (now - userState.trialStart < MONETIZATION_CONFIG.trialDuration);
-    const isProActive = userState.isPro && userState.proExpiry && now < userState.proExpiry;
-    return isFree || isTrialActive || isProActive;
-}
-
-// ============================================================
-// LANGUAGE LOCKING LOGIC
-// ============================================================
-const languages = [
-    { code:"en-US", name:"English (US)" }, { code:"en-GB", name:"English (UK)" },
-    { code:"sw-TZ", name:"Swahili (Tanzania)" }, { code:"sw-KE", name:"Swahili (Kenya)" },
-    { code:"fr-FR", name:"French (France)" }, { code:"es-ES", name:"Spanish (Spain)" },
-    { code:"de-DE", name:"German (Germany)" }, { code:"it-IT", name:"Italian (Italy)" },
-    { code:"pt-PT", name:"Portuguese (Portugal)" }, { code:"ru-RU", name:"Russian (Russia)" },
-    { code:"zh-CN", name:"Chinese (Simp)" }, { code:"ja-JP", name:"Japanese (Japan)" },
-    { code:"ko-KR", name:"Korean (S. Korea)" }, { code:"ar-SA", name:"Arabic (Saudi)" },
-    { code:"hi-IN", name:"Hindi (India)" }, { code:"tr-TR", name:"Turkish (Turkey)" },
-    { code:"pl-PL", name:"Polish (Poland)" }, { code:"nl-NL", name:"Dutch (Netherlands)" }
-];
-
-function initLanguages() {
-    const selects = [document.getElementById('langMe'), document.getElementById('langGuest')];
-    
-    selects.forEach(select => {
-        if(!select) return;
-        select.innerHTML = ''; 
-        const freeGroup = document.createElement('optgroup');
-        freeGroup.label = "🌍 Free Languages";
-        const proGroup = document.createElement('optgroup');
-        proGroup.label = "👑 Pro Languages (Locked)";
-
-        languages.forEach(lang => {
-            const opt = document.createElement('option');
-            opt.value = lang.code;
-            opt.textContent = lang.name + (MONETIZATION_CONFIG.freeLangs.includes(lang.code) ? "" : " 🔒");
+        <!-- SETTINGS DRAWER -->
+        <div id="settingsDrawer" class="settings-drawer">
+            <div class="drawer-header">
+                <h3 style="font-size:1.2rem;">Settings</h3>
+                <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="closeSettings()">×</button>
+            </div>
             
-            if (MONETIZATION_CONFIG.freeLangs.includes(lang.code)) {
-                freeGroup.appendChild(opt);
-            } else {
-                proGroup.appendChild(opt);
-            }
-        });
+            <div style="padding:20px;">
+                <!-- PREMIUM SECTION -->
+                <div class="premium-box">
+                    <h4 id="premiumTitle" style="color:var(--pro-color);">Free Plan</h4>
+                    <p id="premiumDesc" style="font-size:0.8rem;">Limited Languages</p>
+                    <button id="premiumActionBtn" class="btn-upgrade" style="margin-top:10px;" onclick="openUpgrade()">UPGRADE NOW</button>
+                </div>
 
-        select.appendChild(freeGroup);
-        select.appendChild(proGroup);
-        
-        if(select.id === 'langMe') select.value = 'en-US';
-        if(select.id === 'langGuest') select.value = 'sw-TZ';
-        select.addEventListener('change', (e) => handleLanguageSelect(e));
-    });
-}
+                <!-- ADMIN PANEL (Hidden by default) -->
+                <div id="adminPanel" class="admin-panel">
+                    <h4 style="color:var(--danger); margin-bottom:10px;">Owner Controls</h4>
+                    <label style="font-size:0.8rem; font-weight:700;">Mobile Money</label>
+                    <input type="text" id="adminMpesaInput" class="plan-select" style="padding:10px; margin-bottom:10px;">
+                    
+                    <label style="font-size:0.8rem; font-weight:700;">Bank Details</label>
+                    <input type="text" id="adminBankInput" class="plan-select" style="padding:10px; margin-bottom:10px;">
+                    
+                    <button class="btn-upgrade" style="background:var(--success);" onclick="saveAdminConfig()">Save Details</button>
 
-function updateLanguageSelects(isUnlocked) {
-    const selects = [document.getElementById('langMe'), document.getElementById('langGuest')];
-    selects.forEach(select => {
-        if(!select) return;
-        const currentVal = select.value;
-        const options = select.querySelectorAll('option');
-        
-        options.forEach(opt => {
-            const code = opt.value;
-            const isFree = MONETIZATION_CONFIG.freeLangs.includes(code);
-            
-            if (isUnlocked || isFree) {
-                opt.disabled = false;
-                opt.textContent = opt.textContent.replace(' 🔒', '');
-            } else {
-                opt.disabled = true;
-                if (!opt.textContent.includes('🔒')) opt.textContent += ' 🔒';
-            }
-        });
+                    <div style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--border);">
+                        <label style="font-size:0.8rem; font-weight:700;">Generate Code</label>
+                        <select id="adminPlanType" style="width:100%; padding:10px; margin-bottom:10px; background:var(--surface-2);">
+                            <option value="daily">Daily (500 TSH)</option>
+                            <option value="monthly">Monthly (12000 TSH)</option>
+                        </select>
+                        <button class="btn-upgrade" style="background:var(--primary);" onclick="generateAdminCode()">Generate Code</button>
+                    </div>
+                    <button style="width:100%; margin-top:10px; padding:10px; border:1px solid var(--danger); background:none; color:var(--danger); border-radius:10px; cursor:pointer;" onclick="logoutAdmin()">Logout</button>
+                </div>
 
-        if (!isUnlocked && !MONETIZATION_CONFIG.freeLangs.includes(currentVal)) {
-            select.value = select.id === 'langMe' ? 'en-US' : 'sw-TZ';
-        }
-    });
-}
+                <!-- USER SETTINGS -->
+                <div style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <span>Dark Mode</span>
+                        <label class="switch" style="position:relative; width:40px; height:22px;"><input type="checkbox" id="s_darkMode" onchange="applyDarkMode(this.checked)"><span style="position:absolute; inset:0; background:#ccc; border-radius:22px; transition:0.3s;"></span><span style="position:absolute; width:18px; height:18px; background:white; border-radius:50%; top:2px; left:2px; transition:0.3s;"></span></label>
+                    </div>
+                    <button class="btn-upgrade" style="background:transparent; color:var(--danger); border:1px solid var(--border);" onclick="clearChat()">Clear Chat</button>
+                </div>
 
-function handleLanguageSelect(e) {
-    const code = e.target.value;
-    if (!isLanguageUnlocked(code)) {
-        e.preventDefault(); 
-        e.target.value = MONETIZATION_CONFIG.freeLangs[0]; // Revert
-        openUpgrade(); // Trigger Upgrade
-        showToast("This language requires Pro.", "info");
-    }
-}
+                <!-- OWNER LOGIN LINK -->
+                <div class="owner-link" id="ownerLoginTrigger" onclick="openAdminLogin()">🔒 Owner Login</div>
+            </div>
+        </div>
 
-// ============================================================
-// ADMIN / OWNER LOGIC
-// ============================================================
-function openAdminLogin() {
-    document.getElementById('adminLoginModal').classList.add('active');
-}
+    </div> <!-- End App Container -->
 
-function verifyAdminLogin() {
-    const pass = document.getElementById('adminPasswordInput').value;
-    if (pass === "admin123") {
-        isAdmin = true;
-        document.getElementById('adminLoginModal').classList.remove('active');
-        document.getElementById('adminPanel').classList.add('visible');
-        document.getElementById('ownerLoginTrigger').textContent = "🔓 Logged in as Owner";
-        document.getElementById('ownerLoginTrigger').onclick = null; 
-        
-        document.getElementById('adminMpesaInput').value = paymentConfig.mpesa;
-        document.getElementById('adminBankInput').value = paymentConfig.bank;
-        
-        showToast("Welcome, Owner", "success");
-    } else {
-        showToast("Incorrect Password", "error");
-    }
-}
-
-function saveAdminConfig() {
-    if (!isAdmin) return;
-    paymentConfig.mpesa = document.getElementById('adminMpesaInput').value.trim();
-    paymentConfig.bank = document.getElementById('adminBankInput').value.trim();
+    <script>
+    // ============================================================
+    // CONFIG & STATE
+    // ============================================================
+    let isAdmin = false;
+    let paymentConfig = {
+        mpesa: "+255788714307", // Default
+        bank: "CRDB - 0151234567890"
+    };
+    
+    // Load Config
     try {
-        localStorage.setItem('rafiki_payment_config', JSON.stringify(paymentConfig));
-        showToast("Payment Details Saved", "success");
-    } catch(e) {
-        showToast("Error saving config", "error");
-    }
-}
+        const saved = localStorage.getItem('rafiki_pay_config');
+        if(saved) paymentConfig = JSON.parse(saved);
+    } catch(e){}
 
-function logoutAdmin() {
-    isAdmin = false;
-    document.getElementById('adminPanel').classList.remove('visible');
-    document.getElementById('ownerLoginTrigger').textContent = "🔒 Owner Login";
-    document.getElementById('ownerLoginTrigger').onclick = openAdminLogin;
-    showToast("Logged Out", "info");
-}
-
-// SECURE CODE GENERATION
-function generateAdminCode() {
-    if (!isAdmin) return;
-    const type = document.getElementById('adminPlanType').value;
-    const code = generateSecureCode(type);
+    const FREE_LANGS = ['en-US', 'en-GB', 'sw-TZ', 'sw-KE'];
+    const TRIAL_TIME = 12 * 60 * 60 * 1000;
+    const SECRET = "RAFIKI_SALT_V4";
     
-    const ta = document.createElement("textarea");
-    ta.value = code; ta.style.cssText = "position:fixed;left:-9999px";
-    document.body.appendChild(ta); ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    
-    showToast(`Code generated: ${code}`, "success");
-}
-
-function generateSecureCode(planType) {
-    const now = Date.now();
-    let duration = 0;
-    if (planType === 'daily') duration = 24 * 60 * 60 * 1000;
-    else if (planType === 'monthly') duration = 30 * 24 * 60 * 60 * 1000;
-    
-    const expiry = now + duration;
-    // Format: TYPE-TIMESTAMP-SIGNATURE
-    // Signature is base64 of plan|expiry|secret
-    const payload = `${planType}|${expiry}`;
-    const signature = btoa(payload + "|" + MONETIZATION_CONFIG.secret); 
-    return `RAFIKI-${planType.toUpperCase().substring(0,3)}-${signature.substring(0, 12)}`; 
-}
-
-// SECURE CODE VALIDATION
-function validateCode(code) {
-    // Check if already used (ONE-TIME USE)
-    if (usedCodes.includes(code)) {
-        return { valid: false, msg: "Code already used" };
-    }
-
-    // Simple validation logic
-    if (code.startsWith("RAFIKI-DAY")) {
-        return { valid: true, plan: 'daily', duration: 24 * 60 * 60 * 1000 };
-    } else if (code.startsWith("RAFIKI-MON")) {
-        return { valid: true, plan: 'monthly', duration: 30 * 24 * 60 * 60 * 1000 };
-    }
-    return { valid: false, msg: "Invalid code" };
-}
-
-function redeemCode() {
-    const input = document.getElementById('redeemCodeInput');
-    const code = input.value.trim().toUpperCase();
-    
-    if (!code) return showToast("Enter a code.", "error");
-
-    const result = validateCode(code);
-    
-    if (result.valid) {
-        // Mark as used
-        usedCodes.push(code);
-        saveUsedCodes();
-
-        userState.isPro = true;
-        userState.proExpiry = Date.now() + result.duration;
-        saveLicense();
-        checkLicenseStatus();
-        
-        closeUpgrade();
-        showToast("Success! Premium Unlocked.", "success");
-        addLog("👑 Premium Access Activated!", "system");
-    } else {
-        showToast(result.msg || "Invalid code.", "error");
-    }
-}
-
-// ============================================================
-// UPGRADE & PAYMENT
-// ============================================================
-function openUpgrade() {
-    document.getElementById('displayMpesa').textContent = paymentConfig.mpesa || "Contact Admin";
-    document.getElementById('displayBank').textContent = paymentConfig.bank || "Contact Admin";
-    document.getElementById('upgradeModal').classList.add('active');
-}
-
-function closeUpgrade() {
-    document.getElementById('upgradeModal').classList.remove('active');
-}
-
-function closeExpiredAndUpgrade() {
-    document.getElementById('expiredModal').classList.remove('active');
-    openUpgrade();
-}
-
-function selectPlan(plan) {
-    document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('selected'));
-    if(plan === 'daily') document.getElementById('planDaily').classList.add('selected');
-    if(plan === 'monthly') document.getElementById('planMonthly').classList.add('selected');
-}
-
-function handleDirectPayment() {
-    const number = paymentConfig.mpesa;
-    if(!number || number === "Contact Admin") {
-        showToast("Owner hasn't set up payment yet.", "error");
-        return;
-    }
-    window.location.href = `tel:${number}`;
-    showToast(`Dialing ${number}...`, "info");
-}
-
-// ============================================================
-// OFFLINE DICTIONARY
-// ============================================================
-const offlineDictionary = {
-    "hello":        { en:"Hello", sw:"Habari", fr:"Bonjour", es:"Hola", de:"Hallo", it:"Ciao", pt:"Olá", ru:"Привет", zh:"你好", ja:"こんにちは", ko:"안녕하세요", ar:"مرحبا", hi:"नमस्ते", tr:"Merhaba", pl:"Cześć", nl:"Hallo" },
-    "yes":          { en:"Yes", sw:"Ndiyo", fr:"Oui", es:"Sí", de:"Ja", it:"Sì", pt:"Sim", ru:"Да", zh:"是", ja:"はい", ko:"예", ar:"نعم", hi:"हाँ", tr:"Evet", pl:"Tak", nl:"Ja" },
-    "no":           { en:"No", sw:"Hapana", fr:"Non", es:"No", de:"Nein", it:"No", pt:"Não", ru:"Нет", zh:"不", ja:"いいえ", ko:"아니요", ar:"لا", hi:"नहीं", tr:"Hayır", pl:"Nie", nl:"Nee" },
-    "thanks":       { en:"Thanks", sw:"Asante", fr:"Merci", es:"Gracias", de:"Danke", it:"Grazie", pt:"Obrigado", ru:"Спасибо", zh:"谢谢", ja:"ありがとう", ko:"감사합니다", ar:"شكرا", hi:"धन्यवाद", tr:"Teşekkürler", pl:"Dziękuję", nl:"Bedankt" },
-    "please":       { en:"Please", sw:"Tafadhali", fr:"S'il vous plaît", es:"Por favor", de:"Bitte", it:"Per favore", pt:"Por favor", ru:"Пожалуйста", zh:"请", ja:"お願いします", ko:"제발", ar:"من فضلك", hi:"कृपया", tr:"Lütfen", pl:"Proszę", nl:"Alsjeblieft" },
-    "good morning": { en:"Good morning", sw:"Habari za asubuhi", fr:"Bonjour", es:"Buenos días", de:"Guten Morgen", it:"Buongiorno", pt:"Bom dia", ru:"Доброе утро", zh:"早上好", ja:"おはよう", ko:"좋은 아침", ar:"صباح الخير", hi:"सुप्रभात", tr:"Günaydın", pl:"Dzień dobry", nl:"Goedemorgen" },
-    "goodbye":      { en:"Goodbye", sw:"Kwaheri", fr:"Au revoir", es:"Adiós", de:"Auf Wiedersehen", it:"Arrivederci", pt:"Adeus", ru:"До свидания", zh:"再见", ja:"さようなら", ko:"안녕히 가세요", ar:"وداعاً", hi:"अलविदा", tr:"Güle güle", pl:"Do widzenia", nl:"Tot ziens" }
-};
-
-// ============================================================
-// SETTINGS & APP STATE
-// ============================================================
-const DEFAULT_SETTINGS = {
-    darkMode: false,
-    fontSize: 14,
-    noiseSupp: true,
-    autoSpeak: true,
-};
-let settings = { ...DEFAULT_SETTINGS };
-
-function loadSettings() {
-    try {
-        const saved = localStorage.getItem('rafiki_pro_settings');
-        if (saved) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-    } catch(e) { console.warn("Settings load failed"); }
-    applyAllSettings();
-    
-    const actionBtn = document.getElementById('premiumActionBtn');
-    if(actionBtn) {
-        actionBtn.onclick = function() {
-            openUpgrade();
-        };
-    }
-}
-
-function saveSettings() {
-    try { localStorage.setItem('rafiki_pro_settings', JSON.stringify(settings)); } catch(e){}
-}
-
-function applyAllSettings() {
-    const root = document.documentElement;
-    document.body.classList.toggle('dark', settings.darkMode);
-    const darkModeInput = document.getElementById('s_darkMode');
-    if(darkModeInput) darkModeInput.checked = settings.darkMode;
-    
-    root.style.setProperty('--bubble-fs', settings.fontSize + 'px');
-    const fontInput = document.getElementById('s_fontSize');
-    const fontVal = document.getElementById('fontSizeVal');
-    if(fontInput) fontInput.value = settings.fontSize;
-    if(fontVal) fontVal.textContent = settings.fontSize + 'px';
-    
-    const autoSpeakInput = document.getElementById('s_autoSpeak');
-    if(autoSpeakInput) autoSpeakInput.checked = settings.autoSpeak;
-}
-
-function applyDarkMode(val) {
-    settings.darkMode = val;
-    document.body.classList.toggle('dark', val);
-    saveSettings();
-}
-
-function setFontSizeSlider(input) {
-    settings.fontSize = parseInt(input.value);
-    document.getElementById('fontSizeVal').textContent = settings.fontSize + 'px';
-    document.documentElement.style.setProperty('--bubble-fs', settings.fontSize + 'px');
-    saveSettings();
-}
-
-function clearChat() {
-    const chatLog = document.getElementById('chatLog');
-    if(chatLog) {
-        chatLog.innerHTML = '<div class="empty-state"><div class="icon">🗑️</div><p>Chat cleared.</p></div>';
-        showToast("Chat history cleared", "info");
-    }
-}
-
-function openSettings() {
-    document.getElementById('settingsDrawer').classList.add('open');
-    document.getElementById('settingsBackdrop').classList.add('open');
-}
-
-function closeSettings() {
-    document.getElementById('settingsDrawer').classList.remove('open');
-    document.getElementById('settingsBackdrop').classList.remove('open');
-}
-
-// ============================================================
-// APP STATE & PEER
-// ============================================================
-let peer = null, conn = null, myRole = 'guest';
-let recognition = null, html5QrCode = null, isScanning = false;
-let isOfflineMode = false, micState = 'off';
-let synth = window.speechSynthesis;
-let shouldRestart = false;
-
-const langMeSelect    = document.getElementById('langMe');
-const langGuestSelect = document.getElementById('langGuest');
-const micBtn          = document.getElementById('micBtn');
-const muteBtn         = document.getElementById('muteBtn');
-const liveText        = document.getElementById('liveText');
-const statusBadge     = document.getElementById('connStatus');
-const statusText      = document.getElementById('statusText');
-const chatLog         = document.getElementById('chatLog');
-const offlineToggle   = document.getElementById('offlineToggle');
-const hintPills       = document.getElementById('hintPills');
-
-if(offlineToggle) offlineToggle.addEventListener('change', e => {
-    isOfflineMode = e.target.checked;
-    addLog(isOfflineMode ? "📖 Offline Dictionary ON" : "🌐 Online Translation ON", "system");
-});
-
-// ============================================================
-// MIC STATE MACHINE
-// ============================================================
-function setMicState(state) {
-    micState = state;
-    micBtn.classList.remove('disabled', 'ready', 'listening', 'muted');
-    if (state === 'off') {
-        micBtn.classList.add('disabled'); micBtn.disabled = true;
-        muteBtn.classList.add('hidden-btn'); 
-        if(liveText) liveText.textContent = '';
-        if(hintPills) hintPills.innerHTML = '<div class="hint-pill">🔇 Connect first to use mic</div>';
-    } else if (state === 'ready') {
-        micBtn.classList.add('ready'); micBtn.disabled = false;
-        muteBtn.classList.add('hidden-btn'); 
-        if(liveText) liveText.textContent = '';
-        if(hintPills) hintPills.innerHTML = '<div class="hint-pill">🎙️ Tap mic to speak</div>';
-    } else if (state === 'listening') {
-        micBtn.classList.add('listening'); micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn', 'active-mute'); muteBtn.title = 'Mute';
-        if(liveText) liveText.textContent = 'Listening...';
-        if(hintPills) hintPills.innerHTML = '<div class="hint-pill">🟢 Mic ON</div>';
-    } else if (state === 'muted') {
-        micBtn.classList.add('muted'); micBtn.disabled = false;
-        muteBtn.classList.remove('hidden-btn'); muteBtn.classList.add('active-mute'); muteBtn.title = 'Unmute';
-        if(liveText) liveText.textContent = 'Muted';
-        if(hintPills) hintPills.innerHTML = '<div class="hint-pill">🔇 Muted</div>';
-    }
-}
-
-// ============================================================
-// SPEECH RECOGNITION
-// ============================================================
-function initSpeechRecognition() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-        showToast("Speech recognition not supported.", "error");
-        return;
-    }
-    recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-
-    recognition.onend = () => {
-        setTimeout(() => {
-            if (shouldRestart && micState === 'listening' && conn && conn.open) {
-                try {
-                    recognition.lang = langMeSelect.value;
-                    recognition.start();
-                } catch(e) { console.log('Auto-restart failed:', e); }
-            }
-        }, 150);
+    let userState = {
+        trialStart: Date.now(),
+        isPro: false,
+        proExpiry: null
     };
 
-    recognition.onresult = (event) => {
-        if (micState !== 'listening') return;
-        let interim = '', final = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            const result = event.results[i];
-            if (result.isFinal) {
-                final += result[0].transcript;
-            } else {
-                interim += result[0].transcript;
-            }
-        }
-        if (interim && liveText) liveText.textContent = '🎤 ' + interim;
-        if (final) {
-            if(liveText) liveText.textContent = 'Translating...';
-            handleVoiceInput(final);
-        }
+    let usedCodes = [];
+    try { const u = localStorage.getItem('rafiki_used_codes'); if(u) usedCodes = JSON.parse(u); } catch(e){}
+
+    // App State
+    let peer = null, conn = null, micState = 'off';
+    let recognition = null, synth = window.speechSynthesis;
+    
+    // Elements
+    const els = {
+        setupModal: document.getElementById('setupModal'),
+        upgradeModal: document.getElementById('upgradeModal'),
+        adminModal: document.getElementById('adminLoginModal'),
+        settingsDrawer: document.getElementById('settingsDrawer'),
+        settingsBackdrop: document.getElementById('settingsBackdrop'),
+        adminPanel: document.getElementById('adminPanel'),
+        ownerLink: document.getElementById('ownerLoginTrigger'),
+        langMe: document.getElementById('langMe'),
+        langGuest: document.getElementById('langGuest'),
+        micBtn: document.getElementById('micBtn'),
+        micRing: document.getElementById('micRing'),
+        connStatus: document.getElementById('connStatus'),
+        statusText: document.getElementById('statusText'),
+        chatLog: document.getElementById('chatLog')
     };
 
-    recognition.onerror = (e) => {
-        console.error("Speech Error:", e.error);
-        if (e.error === 'not-allowed') {
-            showToast("Mic permission denied.", "error");
-            stopListening();
-        }
-    };
-}
+    // ============================================================
+    // INIT
+    // ============================================================
+    function init() {
+        // Load License
+        try {
+            const l = localStorage.getItem('rafiki_license');
+            if(l) userState = JSON.parse(l);
+        } catch(e){}
+        
+        initLanguages();
+        checkLicense();
+        setInterval(checkLicense, 60000);
 
-// ============================================================
-// MIC CONTROLS
-// ============================================================
-micBtn.addEventListener('click', () => {
-    const now = Date.now();
-    const isTrialActive = userState.trialStart && (now - userState.trialStart < MONETIZATION_CONFIG.trialDuration);
-    const isProActive = userState.isPro && userState.proExpiry && now < userState.proExpiry;
-    const isFree = MONETIZATION_CONFIG.freeLangs.includes(langMeSelect.value) && MONETIZATION_CONFIG.freeLangs.includes(langGuestSelect.value);
-    
-    if (!isProActive && !isTrialActive && !isFree) {
-        const expiredModal = document.getElementById('expiredModal');
-        if(expiredModal) expiredModal.classList.add('active');
-        return;
-    }
-
-    if (!conn || !conn.open) {
-        showToast("Connect to a partner first", "error");
-        return;
-    }
-    if (micState === 'ready') startListening();
-    else if (micState === 'listening' || micState === 'muted') stopListening();
-});
-
-muteBtn.addEventListener('click', () => {
-    if (!conn || !conn.open) return;
-    if (micState === 'listening') {
-        shouldRestart = false;
-        if (recognition) { try { recognition.stop(); } catch(e) {} }
-        setMicState('muted');
-        addLog("🔇 Mic muted.", "system");
-    } else if (micState === 'muted') {
-        startListening();
-        addLog("🎙️ Mic active.", "system");
-    }
-});
-
-function startListening() {
-    if (!recognition) return;
-    shouldRestart = true;
-    setMicState('listening');
-    try {
-        recognition.lang = langMeSelect.value;
-        recognition.start();
-    } catch(e) {
-        try { recognition.stop(); } catch(e2) {}
-        setTimeout(() => {
-            if (shouldRestart) {
-                try {
-                    recognition.lang = langMeSelect.value;
-                    recognition.start();
-                } catch(e3) { console.log('Start retry failed:', e3); }
-            }
-        }, 200);
-    }
-}
-
-function stopListening() {
-    shouldRestart = false;
-    if (recognition) { try { recognition.stop(); } catch(e) {} }
-    setMicState('ready');
-    if(liveText) liveText.textContent = '';
-}
-
-// ============================================================
-// TEXT PROCESSING & TRANSLATION
-// ============================================================
-function cleanInput(text) {
-    return text.trim().replace(/\b(um|uh|ah|er|like|you know)\b/gi, "").replace(/\s+/g, " ").replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/, "").trim();
-}
-
-async function handleVoiceInput(text) {
-    const cleaned = cleanInput(text);
-    if (!cleaned) return;
-    const sourceLang = langMeSelect.value;
-    const targetLang = langGuestSelect.value;
-    addLog(cleaned, "me");
-    const translation = await translateText(cleaned, sourceLang, targetLang);
-    if (conn && conn.open) {
-        conn.send({ type: 'translation', text: translation, lang: targetLang, original: cleaned });
-    } else {
-        speak(translation, targetLang);
-    }
-    if (micState === 'listening' && liveText) liveText.textContent = 'Listening...';
-}
-
-async function translateText(text, from, to) {
-    if (isOfflineMode) {
-        const tCode = to.split('-')[0];
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-        if (offlineDictionary[clean]?.[tCode]) return offlineDictionary[clean][tCode];
-        return text + " (No offline match)";
-    }
-    const sCode = from.split('-')[0], tCode = to.split('-')[0];
-    if (sCode === tCode) return text;
-    try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sCode}|${tCode}`);
-        const data = await res.json();
-        if (data.responseStatus === 200) return data.responseData.translatedText;
-        throw new Error("API limit");
-    } catch(e) {
-        showToast("Using offline fallback", "error");
-        const tCode2 = to.split('-')[0];
-        const clean = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-        if (offlineDictionary[clean]?.[tCode2]) return offlineDictionary[clean][tCode2];
-        return text;
-    }
-}
-
-function speak(text, lang) {
-    if (!synth || !settings.autoSpeak) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang;
-    u.rate = 1.0; u.pitch = 1.0;
-    synth.speak(u);
-}
-
-function addLog(text, type) {
-    const empty = chatLog.querySelector('.empty-state');
-    if (empty) empty.remove();
-    const div = document.createElement('div');
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    div.className = `log-item ${type}`;
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = text;
-    div.appendChild(bubble);
-    if (type !== 'system') {
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.textContent = time;
-        div.appendChild(meta);
-    }
-    chatLog.appendChild(div);
-    chatLog.scrollTop = chatLog.scrollHeight;
-}
-
-// ============================================================
-// PEER / CONNECTION
-// ============================================================
-function showStep(step) {
-    document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-    if (step === '1') {
-        const s1 = document.getElementById('step1');
-        if(s1) {
-            s1.classList.remove('hidden');
-            document.getElementById('setupModal').classList.add('active');
-        }
-    } else if (step === 'host') {
-        myRole = 'host';
-        const sh = document.getElementById('stepHost');
-        if(sh) sh.classList.remove('hidden');
-        initPeer();
-    } else if (step === 'guest') {
-        myRole = 'guest';
-        const sg = document.getElementById('stepGuest');
-        if(sg) sg.classList.remove('hidden');
-    }
-}
-
-function initPeer() {
-    if (peer && !peer.destroyed) {
-        peer.destroy();
-    }
-
-    let id = localStorage.getItem('rafiki_peer_id');
-    if (!id) id = 'rafiki-' + Math.random().toString(36).substr(2, 9);
-    
-    peer = new Peer(id, { debug: 0 });
-    peer.on('open', (pid) => {
-        localStorage.setItem('rafiki_peer_id', pid);
-        const idDisplay = document.getElementById('myPeerId');
-        if(idDisplay) idDisplay.textContent = pid;
-        const qrContainer = document.getElementById('qrcode');
-        if(qrContainer) {
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: pid, width: 175, height: 175,
-                colorDark: "#004d40", colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+        // Setup Dark Mode visual toggle logic
+        const switchSpan = document.querySelector('.switch input');
+        if(switchSpan) {
+            switchSpan.addEventListener('change', (e) => {
+                const knob = e.target.nextElementSibling.nextElementSibling;
+                if(e.target.checked) {
+                    e.target.previousElementSibling.style.background = 'var(--primary)';
+                    knob.style.transform = 'translateX(18px)';
+                    document.body.classList.add('dark');
+                } else {
+                    e.target.previousElementSibling.style.background = '#ccc';
+                    knob.style.transform = 'translateX(0)';
+                    document.body.classList.remove('dark');
+                }
             });
         }
-    });
-    peer.on('connection', (c) => {
-        conn = c;
-        setupConnectionListeners();
-    });
-    peer.on('error', (err) => showToast("Connection Error: " + err.type, "error"));
-}
-
-function connectToHost(idInput = null) {
-    const hostId = idInput || document.getElementById('hostIdInput').value.trim();
-    if (!hostId) return showToast("Please enter a valid ID!", "error");
-    if (!peer) {
-        const myId = 'rafiki-g-' + Math.random().toString(36).substr(2, 9);
-        peer = new Peer(myId, { debug: 0 });
-        peer.on('open', () => performConnect(hostId));
-        peer.on('error', (err) => showToast("Peer error: " + err.type, "error"));
-    } else {
-        performConnect(hostId);
     }
-}
 
-function performConnect(hostId) {
-    conn = peer.connect(hostId);
-    setupConnectionListeners();
-}
+    function initLanguages() {
+        const langs = [
+            {code:"en-US", name:"English (US)"}, {code:"en-GB", name:"English (UK)"},
+            {code:"sw-TZ", name:"Swahili (Tanzania)"}, {code:"sw-KE", name:"Swahili (Kenya)"},
+            {code:"fr-FR", name:"French (France) 🔒"}, {code:"es-ES", name:"Spanish (Spain) 🔒"},
+            {code:"de-DE", name:"German (Germany) 🔒"}, {code:"it-IT", name:"Italian (Italy) 🔒"},
+            {code:"pt-PT", name:"Portuguese (Portugal) 🔒"}, {code:"ru-RU", name:"Russian (Russia) 🔒"},
+            {code:"zh-CN", name:"Chinese (Simp) 🔒"}, {code:"ja-JP", name:"Japanese (Japan) 🔒"}
+        ];
 
-function setupConnectionListeners() {
-    if (!conn) return;
-    conn.on('open', () => {
-        if(statusBadge) statusBadge.classList.add('connected');
-        if(statusText) statusText.textContent = 'Connected';
-        document.getElementById('setupModal').classList.remove('active');
-        if(chatLog) chatLog.innerHTML = '';
-        setMicState('ready');
-        addLog("✅ Connected! Tap mic to speak.", "system");
-        showToast("Partner Connected", "success");
-    });
-    conn.on('data', (data) => {
-        if (data && typeof data === 'object' && data.type === 'translation') {
-            speak(data.text, data.lang);
-            addLog(data.text, "guest");
+        const createOpt = (l) => {
+            const o = document.createElement('option');
+            o.value = l.code;
+            o.textContent = l.name;
+            if(!FREE_LANGS.includes(l.code)) o.disabled = true;
+            return o;
+        };
+
+        [els.langMe, els.langGuest].forEach(s => {
+            s.innerHTML = "";
+            langs.forEach(l => s.appendChild(createOpt(l)));
+            s.addEventListener('change', handleLanguageSelect);
+        });
+
+        // Defaults
+        els.langMe.value = 'en-US';
+        els.langGuest.value = 'sw-TZ';
+    }
+
+    // ============================================================
+    // LICENSE & MONETIZATION
+    // ============================================================
+    function checkLicense() {
+        const now = Date.now();
+        const isTrial = (now - userState.trialStart < TRIAL_TIME);
+        const isPro = userState.isPro && userState.proExpiry && now < userState.proExpiry;
+        const isUnlocked = isTrial || isPro;
+
+        // Update UI
+        const badge = document.getElementById('proBadge');
+        const title = document.getElementById('premiumTitle');
+        const desc = document.getElementById('premiumDesc');
+        const btn = document.getElementById('premiumActionBtn');
+
+        if(isUnlocked) {
+            if(badge) badge.classList.add('visible');
+            title.textContent = "Premium Active";
+            title.style.color = "var(--success)";
+            desc.textContent = isPro ? "Renew in " + Math.ceil((userState.proExpiry - now)/3600000/24) + " days" : "Trial Active";
+            btn.textContent = "MANAGE";
+            btn.style.background = "var(--text-light)";
+        } else {
+            if(badge) badge.classList.remove('visible');
+            title.textContent = "Free Plan";
+            title.style.color = "var(--text-main)";
+            desc.textContent = "Languages Locked";
+            btn.textContent = "UPGRADE NOW";
+            btn.style.background = "var(--pro-color)";
         }
-    });
-    conn.on('close', () => handleDisconnect());
-    conn.on('error', () => handleDisconnect());
-}
 
-function handleDisconnect() {
-    if(statusBadge) statusBadge.classList.remove('connected');
-    if(statusText) statusText.textContent = 'Disconnected';
-    shouldRestart = false;
-    if (recognition) { try { recognition.stop(); } catch(e) {} }
-    setMicState('off');
-    addLog("❌ Partner disconnected.", "system");
-    showToast("Partner Disconnected", "error");
-}
-
-function finishSetup() {
-    if (myRole === 'host' && (!conn || !conn.open)) {
-        showToast("Waiting for guest to connect…", "info");
-        return;
+        // Lock/Unlock Selects
+        [els.langMe, els.langGuest].forEach(s => {
+            Array.from(s.options).forEach(o => {
+                const code = o.value;
+                const isFree = FREE_LANGS.includes(code);
+                if(isUnlocked || isFree) {
+                    o.disabled = false;
+                    o.textContent = o.textContent.replace(' 🔒', '');
+                } else {
+                    o.disabled = true;
+                    if(!o.textContent.includes('🔒')) o.textContent += ' 🔒';
+                }
+            });
+        });
     }
-    document.getElementById('setupModal').classList.remove('active');
-}
 
-function copyId() {
-    const t = document.getElementById('myPeerId').textContent;
-    if (!t || t === 'Generating...') return;
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(t).then(() => showToast("ID Copied!", "success"));
-    } else {
+    function isUnlocked(code) {
+        if(FREE_LANGS.includes(code)) return true;
+        const now = Date.now();
+        if(userState.isPro && userState.proExpiry && now < userState.proExpiry) return true;
+        if((now - userState.trialStart < TRIAL_TIME)) return true;
+        return false;
+    }
+
+    // THE CRITICAL FUNCTION: LOCK INTERACTION
+    function handleLanguageSelect(e) {
+        const code = e.target.value;
+        if(!isUnlocked(code)) {
+            e.preventDefault(); // Stop selection
+            e.target.value = 'en-US'; // Revert
+            openUpgrade(); // SHOW UPGRADE MODAL IMMEDIATELY
+            showToast("Upgrade required for this language", "info");
+        }
+    }
+
+    function openUpgrade() {
+        // Show Owner's Payment Details
+        document.getElementById('displayMpesa').textContent = paymentConfig.mpesa;
+        document.getElementById('displayBank').textContent = paymentConfig.bank;
+        els.upgradeModal.classList.add('active');
+    }
+
+    function closeUpgrade() {
+        els.upgradeModal.classList.remove('active');
+    }
+
+    function selectPlan(plan) {
+        document.querySelectorAll('.plan-select').forEach(el => el.classList.remove('selected'));
+        if(plan === 'daily') document.getElementById('planDaily').classList.add('selected');
+        if(plan === 'monthly') document.getElementById('planMonthly').classList.add('selected');
+    }
+
+    // CODE SYSTEM
+    function generateCode(plan) {
+        const duration = plan === 'daily' ? 24*60*60*1000 : 30*24*60*60*1000;
+        const expiry = Date.now() + duration;
+        // Simulated signature
+        const sig = btoa(`${plan}|${expiry}|${SECRET}`);
+        return `RAF-${plan.substring(0,3).toUpperCase()}-${sig.substring(0,8)}`;
+    }
+
+    function redeemCode() {
+        const input = document.getElementById('redeemCodeInput');
+        const code = input.value.trim().toUpperCase();
+
+        if(usedCodes.includes(code)) {
+            showToast("Code already used", "error");
+            return;
+        }
+
+        // Validation Simulation
+        if(code.startsWith("RAF-DAY") || code.startsWith("RAF-MON")) {
+            usedCodes.push(code);
+            try { localStorage.setItem('rafiki_used_codes', JSON.stringify(usedCodes)); } catch(e){}
+            
+            userState.isPro = true;
+            userState.proExpiry = Date.now() + (code.includes("DAY") ? 24*60*60*1000 : 30*24*60*60*1000);
+            try { localStorage.setItem('rafiki_license', JSON.stringify(userState)); } catch(e){}
+
+            checkLicense();
+            closeUpgrade();
+            showToast("Premium Unlocked!", "success");
+            els.chatLog.innerHTML += `<div class="log-item system" style="align-self:center; margin:10px 0;"><div class="bubble" style="background:#fff8e1; color:#7a5800;">🔓 Premium Activated</div></div>`;
+        } else {
+            showToast("Invalid Code", "error");
+        }
+    }
+
+    // ADMIN / OWNER
+    function openAdminLogin() {
+        els.adminModal.classList.add('active');
+    }
+
+    function verifyAdminLogin() {
+        const pass = document.getElementById('adminPasswordInput').value;
+        if(pass === "admin123") {
+            isAdmin = true;
+            els.adminModal.classList.remove('active');
+            els.adminPanel.classList.add('visible');
+            els.ownerLink.textContent = "🔓 Logged in as Owner";
+            els.ownerLink.onclick = null;
+            
+            document.getElementById('adminMpesaInput').value = paymentConfig.mpesa;
+            document.getElementById('adminBankInput').value = paymentConfig.bank;
+            showToast("Owner Logged In", "success");
+        } else {
+            showToast("Wrong Password", "error");
+        }
+    }
+
+    function saveAdminConfig() {
+        if(!isAdmin) return;
+        paymentConfig.mpesa = document.getElementById('adminMpesaInput').value;
+        paymentConfig.bank = document.getElementById('adminBankInput').value;
+        try { localStorage.setItem('rafiki_pay_config', JSON.stringify(paymentConfig)); } catch(e){}
+        showToast("Payment Details Saved", "success");
+    }
+
+    function generateAdminCode() {
+        if(!isAdmin) return;
+        const plan = document.getElementById('adminPlanType').value;
+        const code = generateCode(plan);
+        
+        // Copy
         const ta = document.createElement("textarea");
-        ta.value = t; ta.style.cssText = "position:fixed;left:-9999px";
+        ta.value = code; 
         document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); showToast("ID Copied!", "success"); } catch(e) {}
+        document.execCommand('copy');
         document.body.removeChild(ta);
+        
+        showToast("Code Copied: " + code, "success");
     }
-}
 
-// ============================================================
-// QR SCANNER
-// ============================================================
-async function startScanner() {
-    if (isScanning) return; 
-    isScanning = true;
-    
-    const overlay = document.getElementById('scanOverlay');
-    if(overlay) overlay.classList.add('active');
-    
-    if (html5QrCode) {
+    function logoutAdmin() {
+        isAdmin = false;
+        els.adminPanel.classList.remove('visible');
+        els.ownerLink.textContent = "🔒 Owner Login";
+        els.ownerLink.onclick = openAdminLogin;
+    }
+
+    // ============================================================
+    // SETTINGS UI
+    // ============================================================
+    function openSettings() {
+        els.settingsDrawer.classList.add('open');
+        els.settingsBackdrop.classList.add('active');
+    }
+    function closeSettings() {
+        els.settingsDrawer.classList.remove('open');
+        els.settingsBackdrop.classList.remove('active');
+    }
+    function clearChat() {
+        els.chatLog.innerHTML = `<div style="text-align:center; color:var(--text-light); margin-top:50px;"><p>Chat cleared</p></div>`;
+    }
+    function applyDarkMode(isDark) {
+        const switchSpan = document.querySelector('.switch input');
+        if(isDark) {
+            document.body.classList.add('dark');
+            switchSpan.checked = true;
+            switchSpan.dispatchEvent(new Event('change'));
+        } else {
+            document.body.classList.remove('dark');
+            switchSpan.checked = false;
+            switchSpan.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // ============================================================
+    // PEER & CHAT
+    // ============================================================
+    function showStep(step) {
+        document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
+        if(step === 'host') {
+            document.getElementById('stepHost').classList.remove('hidden');
+            initPeer();
+        } else if (step === 'guest') {
+            document.getElementById('stepGuest').classList.remove('hidden');
+            if(!peer) initPeer();
+        } else {
+            els.setupModal.classList.add('active');
+        }
+    }
+
+    function initPeer() {
+        if(peer && !peer.destroyed) peer.destroy();
+        const id = localStorage.getItem('rafiki_pid') || 'rafiki-'+Math.random().toString(36).substr(2,6);
+        peer = new Peer(id, {debug:0});
+        
+        peer.on('open', pid => {
+            localStorage.setItem('rafiki_pid', pid);
+            const idDisp = document.getElementById('myPeerId');
+            if(idDisp) idDisp.textContent = pid;
+            if(document.getElementById('qrcode')) {
+                document.getElementById('qrcode').innerHTML = "";
+                new QRCode(document.getElementById('qrcode'), {text: pid, width:128});
+            }
+        });
+
+        peer.on('connection', c => {
+            conn = c;
+            conn.on('open', () => {
+                els.setupModal.classList.remove('active');
+                els.connStatus.classList.add('connected');
+                els.statusText.textContent = "Connected";
+                els.chatLog.innerHTML = "";
+                setMicState('ready');
+                showToast("Connected", "success");
+            });
+            conn.on('data', d => {
+                addLog(d.text, 'guest');
+                speak(d.text);
+            });
+            conn.on('close', () => {
+                els.connStatus.classList.remove('connected');
+                els.statusText.textContent = "Offline";
+                setMicState('off');
+            });
+        });
+    }
+
+    function connectToHost() {
+        const hid = document.getElementById('hostIdInput').value.trim();
+        if(!hid) return showToast("Enter ID", "error");
+        if(!peer) initPeer();
+        conn = peer.connect(hid);
+        // Listeners set in initPeer
+    }
+
+    function finishSetup() {
+        if(!conn || !conn.open) return showToast("Waiting for guest...", "info");
+        els.setupModal.classList.remove('active');
+    }
+
+    function copyId() {
+        const t = document.getElementById('myPeerId').textContent;
+        navigator.clipboard.writeText(t).then(() => showToast("Copied", "success"));
+    }
+
+    function addLog(text, type) {
+        const div = document.createElement('div');
+        div.className = `log-item ${type}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = text;
+        div.appendChild(bubble);
+        els.chatLog.appendChild(div);
+        els.chatLog.scrollTop = els.chatLog.scrollHeight;
+    }
+
+    // ============================================================
+    // SPEECH
+    // ============================================================
+    function setMicState(s) {
+        micState = s;
+        els.micBtn.className = `mic-btn ${s}`;
+        if(s === 'listening') els.micRing.style.opacity = '1';
+        else els.micRing.style.opacity = '0';
+
+        if(s === 'ready') document.getElementById('hintPills').textContent = "Tap Mic";
+        if(s === 'listening') document.getElementById('hintPills').textContent = "Listening...";
+        if(s === 'off') document.getElementById('hintPills').textContent = "Connect first";
+    }
+
+    els.micBtn.addEventListener('click', () => {
+        if(!conn || !conn.open) return showToast("Not connected", "error");
+        
+        const now = Date.now();
+        const isTrial = (now - userState.trialStart < TRIAL_TIME);
+        const isPro = userState.isPro && userState.proExpiry && now < userState.proExpiry;
+        const isFree = FREE_LANGS.includes(els.langMe.value) && FREE_LANGS.includes(els.langGuest.value);
+
+        if(!isPro && !isTrial && !isFree) {
+            openUpgrade();
+            return;
+        }
+
+        if(micState === 'ready') startMic();
+        else stopMic();
+    });
+
+    function startMic() {
+        setMicState('listening');
         try {
-            await html5QrCode.stop();
-            await html5QrCode.clear();
-            html5QrCode = null;
-        } catch(e) { console.log('Scanner cleanup error', e); }
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!SR) return showToast("Not supported", "error");
+            recognition = new SR();
+            recognition.lang = els.langMe.value;
+            recognition.continuous = false;
+            recognition.onresult = e => {
+                const final = e.results[0][0].transcript;
+                addLog(final, 'me');
+                conn.send({text: final});
+                document.getElementById('liveText').textContent = "Translating...";
+                // Simulate translation for demo
+                setTimeout(() => {
+                    document.getElementById('liveText').textContent = "";
+                }, 1000);
+            };
+            recognition.onend = () => {
+                if(micState === 'listening') recognition.start();
+            };
+            recognition.start();
+        } catch(e) { console.log(e); }
     }
 
-    setTimeout(async () => {
+    function stopMic() {
+        setMicState('ready');
+        if(recognition) try { recognition.stop(); } catch(e){}
+    }
+
+    function speak(txt) {
+        if(!synth) return;
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(txt);
+        u.lang = els.langGuest.value;
+        synth.speak(u);
+    }
+
+    function showToast(msg, type='info') {
+        const t = document.createElement('div');
+        t.style.cssText = `background:var(--surface); padding:10px 15px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.2); margin-bottom:10px; display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; border-left:4px solid ${type==='error'?'var(--danger)':'var(--success)'};`;
+        t.innerHTML = `<span>${msg}</span>`;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    // QR SCANNER
+    let html5QrCode = null;
+    async function startScanner() {
+        document.getElementById('scanOverlay').classList.add('active');
         try {
             html5QrCode = new Html5Qrcode("qr-reader");
             await html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
+                {facingMode:"environment"}, 
+                {fps:10, qrbox:{width:250, height:250}}, 
+                (decoded) => {
                     stopScanner();
-                    const hostInput = document.getElementById('hostIdInput');
-                    if(hostInput) hostInput.value = decodedText;
-                    showToast("QR Code Scanned!", "success");
-                    connectToHost(decodedText);
-                },
-                (errorMessage) => {
-                    // Ignore frame errors
-                }
+                    document.getElementById('hostIdInput').value = decoded;
+                    showToast("Scanned", "success");
+                }, 
+                () => {}
             );
-        } catch(err) {
-            console.error(err);
-            showToast("Camera Error. Please allow permissions.", "error");
-            stopScanner();
-        }
-    }, 100);
-}
-
-async function stopScanner() {
-    isScanning = false;
-    const overlay = document.getElementById('scanOverlay');
-    if(overlay) overlay.classList.remove('active');
-    
-    if (html5QrCode) {
-        try {
-            await html5QrCode.stop();
-            await html5QrCode.clear();
-        } catch(e) { console.log('Stop error', e); }
-        html5QrCode = null;
+        } catch(e) { showToast("Camera Error", "error"); stopScanner(); }
     }
-}
+    function stopScanner() {
+        document.getElementById('scanOverlay').classList.remove('active');
+        if(html5QrCode) { html5QrCode.stop().then(()=>html5QrCode.clear()); html5QrCode=null; }
+    }
 
-// ============================================================
-// INIT
-// ============================================================
-function init() {
-    initLicense();
-    initLanguages();
-    initSpeechRecognition();
-    setMicState('off');
-    loadSettings();
-}
-init();
+    // Run Init
+    init();
 
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('SW registered'))
-            .catch(err => console.log('SW failed', err));
-    });
-}
-</script>
+    </script>
 </body>
 </html>
